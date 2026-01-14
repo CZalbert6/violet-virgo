@@ -1,4 +1,4 @@
-// server.js - Versión CORREGIDA para PostgreSQL en Railway
+// server.js - VERSIÓN COMPATIBLE con tu frontend Astro
 import express from 'express';
 import pkg from 'pg';
 const { Pool } = pkg;
@@ -6,26 +6,56 @@ import cors from 'cors';
 
 const app = express();
 
-// Middlewares
-app.use(cors());
+// Middlewares - IMPORTANTE: Habilita CORS para GitHub Pages
+app.use(cors({
+  origin: [
+    'https://czalbert6.github.io',
+    'https://violet-virgo-production.up.railway.app',
+    'http://localhost:4321'
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 app.use(express.json());
 
-// ✅ CONEXIÓN POSTGRESQL CORREGIDA
+// Conexión PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:bcZeAuTIzUPGDvgULDfbiOLvJqfOuztE@mainline.proxy.rlwy.net:51542/railway',
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
-// ✅ VERIFICAR CONEXIÓN AL INICIAR
-const verificarConexion = async () => {
+// Crear tabla si no existe
+const initDB = async () => {
   try {
-    const client = await pool.connect();
-    console.log('✅ PostgreSQL CONECTADO');
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS mensajescaptcha (
+        id SERIAL PRIMARY KEY,
+        texto TEXT NOT NULL,
+        token_captcha VARCHAR(500),
+        ip_address VARCHAR(50),
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    console.log('✅ Tabla mensajescaptcha lista');
+  } catch (error) {
+    console.error('❌ Error inicializando DB:', error);
+  }
+};
+initDB();
+
+// ✅ RUTA HEALTH - COMPATIBLE con tu frontend
+app.get('/health', async (req, res) => {
+  try {
+    // 1. Verificar conexión DB
+    const dbResult = await pool.query('SELECT NOW()');
     
-    // Verificar si la tabla existe
-    const checkTable = await client.query(`
+    // 2. Contar mensajes (tu frontend espera 'total_mensajes')
+    const countResult = await pool.query('SELECT COUNT(*) as total FROM mensajescaptcha');
+    const total_mensajes = parseInt(countResult.rows[0].total);
+    
+    // 3. Verificar tabla existe
+    const tableResult = await pool.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
         WHERE table_schema = 'public' 
@@ -33,74 +63,37 @@ const verificarConexion = async () => {
       )
     `);
     
-    if (!checkTable.rows[0].exists) {
-      console.log('⚠️  Tabla no existe, creándola...');
-      await client.query(`
-        CREATE TABLE mensajescaptcha (
-          id SERIAL PRIMARY KEY,
-          texto TEXT NOT NULL,
-          token_captcha VARCHAR(500),
-          ip_address VARCHAR(50),
-          user_agent TEXT,
-          created_at TIMESTAMP DEFAULT NOW()
-        )
-      `);
-      console.log('✅ Tabla creada');
-    }
-    
-    client.release();
-  } catch (error) {
-    console.error('❌ Error PostgreSQL:', error.message);
-  }
-};
-
-// Ejecutar verificación
-verificarConexion();
-
-// ✅ RUTA HEALTH MEJORADA
-app.get('/health', async (req, res) => {
-  try {
-    // 1. Verificar conexión a DB
-    const dbResult = await pool.query('SELECT NOW() as time, version() as version');
-    
-    // 2. Verificar tabla
-    const tableResult = await pool.query(`
-      SELECT COUNT(*) as count FROM mensajescaptcha
-    `);
-    
     res.json({
       status: '✅ OK',
-      database: {
-        connected: true,
-        time: dbResult.rows[0].time,
-        version: dbResult.rows[0].version.split(' ')[1]
-      },
-      tabla: {
-        exists: true,
-        registros: parseInt(tableResult.rows[0].count)
-      },
-      servicio: 'Express + PostgreSQL',
-      url: 'https://violet-virgo-production.up.railway.app'
+      database: '✅ Conectado',
+      tabla: tableResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
+      total_mensajes: total_mensajes, // ← Esto es lo que tu frontend necesita
+      fecha_servidor: dbResult.rows[0].now,
+      servicio: 'Express + PostgreSQL en Railway',
+      endpoints: {
+        guardar: 'POST /api/guardar',
+        mensajes: 'GET /api/mensajes'
+      }
     });
     
   } catch (error) {
-    console.error('Error en /health:', error);
+    console.error('Error /health:', error);
     res.status(500).json({
       status: '❌ ERROR',
       error: error.message,
-      ayuda: 'Verifica que la tabla mensajescaptcha exista en PostgreSQL'
+      ayuda: 'Revisa la conexión a PostgreSQL'
     });
   }
 });
 
-// ✅ RUTA PARA GUARDAR (POSTGRESQL)
+// ✅ RUTA GUARDAR - COMPATIBLE con tu frontend
 app.post('/api/guardar', async (req, res) => {
-  console.log('📨 Recibiendo POST a /api/guardar');
+  console.log('📨 POST /api/guardar recibido');
   console.log('Body:', req.body);
   
   const { texto, hcaptcha } = req.body;
 
-  // Validación
+  // Validación como espera tu frontend
   if (!texto || texto.trim() === "") {
     return res.status(400).json({ 
       success: false, 
@@ -112,7 +105,7 @@ app.post('/api/guardar', async (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.ip || '0.0.0.0';
     const userAgent = req.headers['user-agent'] || 'desconocido';
 
-    // ✅ QUERY CORREGIDA PARA POSTGRESQL
+    // Query PostgreSQL
     const query = `
       INSERT INTO mensajescaptcha 
       (texto, token_captcha, ip_address, user_agent) 
@@ -123,44 +116,40 @@ app.post('/api/guardar', async (req, res) => {
     const values = [
       texto.trim(), 
       hcaptcha || null, 
-      ip.substring(0, 50),  // PostgreSQL VARCHAR(50)
-      userAgent.substring(0, 500) // Evitar textos muy largos
+      ip.substring(0, 50),
+      userAgent.substring(0, 500)
     ];
-    
-    console.log('📝 Ejecutando query con valores:', values);
     
     const result = await pool.query(query, values);
     
-    console.log('✅ Insert exitoso. ID:', result.rows[0].id);
-    
+    // Respuesta que espera tu frontend
     res.json({
       success: true,
       id: result.rows[0].id,
       fecha: result.rows[0].created_at,
-      mensaje: 'Guardado en PostgreSQL'
+      message: 'Guardado en PostgreSQL Railway',
+      texto: texto.trim() // ← Añadido para mostrar en frontend
     });
     
   } catch (error) {
-    console.error('❌ Error en INSERT PostgreSQL:', error);
-    console.error('Detalles:', error.stack);
-    
+    console.error('❌ Error /api/guardar:', error);
     res.status(500).json({ 
       success: false, 
+      message: 'Error al guardar en PostgreSQL',
       error: error.message,
-      detalle: error.detail || 'Error al guardar en PostgreSQL',
       code: error.code
     });
   }
 });
 
-// ✅ RUTA PARA OBTENER MENSAJES
+// ✅ RUTA MENSAJES - COMPATIBLE
 app.get('/api/mensajes', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT id, texto, created_at, ip_address 
+      SELECT id, texto, created_at 
       FROM mensajescaptcha 
       ORDER BY id DESC 
-      LIMIT 50
+      LIMIT 100
     `);
     
     res.json({ 
@@ -169,7 +158,7 @@ app.get('/api/mensajes', async (req, res) => {
       mensajes: result.rows 
     });
   } catch (error) {
-    console.error('Error en GET /api/mensajes:', error);
+    console.error('Error /api/mensajes:', error);
     res.status(500).json({ 
       success: false, 
       error: error.message 
@@ -177,76 +166,76 @@ app.get('/api/mensajes', async (req, res) => {
   }
 });
 
-// ✅ RUTA RAIZ SIMPLE
+// ✅ RUTA RAIZ con información
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>PostgreSQL en Railway</title>
-      <meta charset="UTF-8">
+      <title>Backend PostgreSQL - Railway</title>
       <style>
-        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+        body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
         h1 { color: #333; }
-        .status { 
-          background: #f0f9ff; 
-          padding: 20px; 
-          border-radius: 10px; 
-          margin: 20px auto; 
-          max-width: 600px;
-        }
-        a { 
-          display: inline-block; 
-          margin: 10px; 
-          padding: 10px 20px; 
-          background: #3b82f6; 
-          color: white; 
-          text-decoration: none; 
-          border-radius: 5px;
-        }
-        code { background: #f1f5f9; padding: 2px 5px; border-radius: 3px; }
+        .card { background: #f8fafc; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .endpoint { background: #e2e8f0; padding: 10px; border-radius: 5px; margin: 5px 0; }
+        .success { color: #10b981; }
+        .info { color: #3b82f6; }
       </style>
     </head>
     <body>
-      <h1>🚀 PostgreSQL + Express en Railway</h1>
+      <h1>🚀 Backend PostgreSQL en Railway</h1>
+      <p class="info">Servidor Express conectado a PostgreSQL</p>
       
-      <div class="status">
-        <h3>Endpoints disponibles:</h3>
-        <p><a href="/health">/health</a> - Estado del sistema</p>
-        <p><a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</p>
-        <p><code>POST /api/guardar</code> - Guardar mensaje</p>
-        
-        <h3>Base de datos:</h3>
-        <p><strong>Tabla:</strong> mensajescaptcha</p>
-        <p><strong>URL:</strong> ${process.env.DATABASE_URL ? '✅ Configurada' : '❌ No configurada'}</p>
+      <div class="card">
+        <h3>📡 Endpoints disponibles:</h3>
+        <div class="endpoint"><strong>GET</strong> <a href="/health">/health</a> - Estado del sistema</div>
+        <div class="endpoint"><strong>POST</strong> /api/guardar - Guardar mensajes</div>
+        <div class="endpoint"><strong>GET</strong> <a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</div>
+      </div>
+      
+      <div class="card">
+        <h3>🔗 Frontend conectado:</h3>
+        <p><a href="https://czalbert6.github.io/violet-virgo" target="_blank">https://czalbert6.github.io/violet-virgo</a></p>
       </div>
       
       <script>
-        // Verificar salud automáticamente
+        // Verificar estado automáticamente
         fetch('/health')
           .then(r => r.json())
           .then(data => {
-            const statusDiv = document.querySelector('.status');
-            statusDiv.innerHTML += \`
-              <h3>Estado actual:</h3>
-              <p>Database: \${data.database?.connected ? '✅ Conectado' : '❌ Error'}</p>
-              <p>Tabla: \${data.tabla?.exists ? '✅ Existe' : '❌ No existe'}</p>
-              <p>Registros: \${data.tabla?.registros || 0}</p>
+            document.body.innerHTML += \`
+              <div class="card">
+                <h3>✅ Estado actual:</h3>
+                <p><strong>Base de datos:</strong> \${data.database || 'Conectado'}</p>
+                <p><strong>Tabla:</strong> \${data.tabla || 'Existe'}</p>
+                <p><strong>Mensajes guardados:</strong> \${data.total_mensajes || 0}</p>
+                <p><strong>Servidor:</strong> Railway PostgreSQL</p>
+              </div>
             \`;
           })
-          .catch(e => console.error(e));
+          .catch(e => {
+            document.body.innerHTML += \`
+              <div class="card" style="background: #fee2e2;">
+                <h3>❌ Error de conexión</h3>
+                <p>\${e.message}</p>
+              </div>
+            \`;
+          });
       </script>
     </body>
     </html>
   `);
 });
 
-// ✅ INICIAR SERVIDOR
+// Iniciar servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`
-  🚀 Servidor iniciado en puerto ${PORT}
-  📡 URL: https://violet-virgo-production.up.railway.app
-  🗄️  PostgreSQL: ${process.env.DATABASE_URL ? 'Configurada' : 'Usando string hardcodeado'}
+  ============================================
+  🚀  Backend Express iniciado en puerto ${PORT}
+  📡  URL: https://violet-virgo-production.up.railway.app
+  🗄️   PostgreSQL: Conectado
+  🌐  Frontend: https://czalbert6.github.io/violet-virgo
+  ============================================
   `);
 });
