@@ -1,186 +1,158 @@
----
 // src/pages/index.astro
 import Layout from '../layout/Layout.astro';
 ---
 
 <Layout>
-  <div style="
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  ">
+  <div style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
+      🎯 Astro + Railway (PostgreSQL)
+    </h1>
+    <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px;">
+      Los datos se guardan en: <code>mensajescaptcha</code>
+    </p>
     
     <div style="
-      max-width: 450px;
-      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
       background: white;
-      padding: 40px;
-      border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-      text-align: center;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     ">
       
-      <div style="margin-bottom: 30px;">
-        <h1 style="font-size: 2.2rem; color: #2d3748; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-          Hola Astro <span style="color: #7c3aed;">💜</span>
-        </h1>
-        <p style="color: #718096; font-size: 1rem;">
-          Escribe un mensaje para enviarlo a <br><strong>PostgreSQL en Railway</strong>
-        </p>
-      </div>
-
-      <div style="text-align: left; margin-bottom: 25px;">
-        <label for="miCampoUnico" style="display: block; font-weight: 600; color: #4a5568; margin-bottom: 8px; margin-left: 4px;">
-          📝 Tu mensaje personal
+      <div style="margin-bottom: 25px;">
+        <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
+          📝 Tu mensaje:
         </label>
         <input 
           type="text" 
           id="miCampoUnico"
-          placeholder="¿Qué tienes en mente?..."
-          style="
-            width: 100%;
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            outline: none;
-          "
+          placeholder="Escribe algo para PostgreSQL..."
+          style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
         >
       </div>
-
-      <div style="margin-bottom: 25px; display: flex; justify-content: center; flex-direction: column; align-items: center;">
+      
+      <div style="margin: 25px 0;">
         <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
-        <small style="color: #a0aec0; margin-top: 8px;">🛡️ Verificación de seguridad</small>
       </div>
-
+      
       <button 
         id="botonEnviar"
-        style="
-          width: 100%;
-          background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-          color: white;
-          padding: 18px;
-          border: none;
-          border-radius: 14px;
-          font-size: 1.1rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-          box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-        "
+        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%;"
       >
-        🚀 Enviar Mensaje
+        💾 Guardar en PostgreSQL
       </button>
-
-      <div id="resultado" style="
-        margin-top: 25px;
-        padding: 15px;
-        border-radius: 12px;
-        display: none;
-        font-size: 0.95rem;
-        line-height: 1.5;
-      "></div>
-
-      <div style="
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #edf2f7;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.8rem;
-        color: #718096;
-      ">
-        <span id="estadoTexto">⏳ Verificando conexión...</span>
-        <a href="https://violet-virgo-production.up.railway.app/api/mensajes" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 600;">Ver historial →</a>
+      
+      <div id="resultado" style="margin-top: 25px; padding: 20px; border-radius: 10px; display: none; text-align: left;"></div>
+      
+      <div id="estadoSistema" style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #666;">
+        <div>🔍 <strong>Estado:</strong> <span id="estadoTexto">Verificando...</span></div>
+        <div style="margin-top: 5px;">🌐 <small id="backendURL">...</small></div>
       </div>
-
     </div>
   </div>
 
   <script>
+    // ✅ CORRECCIÓN 1: Usa la URL de tu backend Express en Railway
     const BACKEND_URL = 'https://violet-virgo-production.up.railway.app';
     
-    // Cargar hCaptcha
+    // 1. Cargar hCaptcha dinámicamente
     const script = document.createElement('script');
     script.src = 'https://js.hcaptcha.com/1/api.js';
     script.async = true;
     document.head.appendChild(script);
     
-    // Verificar Conexión
-    async function verificarConexion() {
-      const statusSpan = document.getElementById('estadoTexto');
+    // 2. Verificar Salud del Sistema al cargar
+    async function verificarSalud() {
+      const estadoTexto = document.getElementById('estadoTexto');
+      const backendURL = document.getElementById('backendURL');
+      backendURL.textContent = BACKEND_URL;
+      
       try {
         const res = await fetch(`${BACKEND_URL}/health`);
         const data = await res.json();
+        
         if (data.status === '✅ OK') {
-          statusSpan.innerHTML = '🟢 Sistema Online';
-          statusSpan.style.color = '#10b981';
+          let html = `<span style="color: #10b981;">✅ Backend Activo</span>`;
+          if (data.tabla && data.tabla.exists) {
+            html += ` | <span style="color: #10b981;">${data.tabla.registros || 0} registros</span>`;
+          } else {
+            html += ` | <span style="color: #ef4444;">Tabla no encontrada</span>`;
+          }
+          estadoTexto.innerHTML = html;
+        } else {
+          throw new Error(data.error || 'Error desconocido');
         }
       } catch (e) {
-        statusSpan.innerHTML = '🔴 Sistema Offline';
-        statusSpan.style.color = '#ef4444';
+        console.error('Error conexión backend:', e);
+        estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Backend Offline</span>';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', verificarConexion);
+    document.addEventListener('DOMContentLoaded', verificarSalud);
 
-    // Animación de input
-    const input = document.getElementById('miCampoUnico');
-    input.addEventListener('focus', () => input.style.borderColor = '#6366f1');
-    input.addEventListener('blur', () => input.style.borderColor = '#e2e8f0');
-
-    // Lógica de Envío
+    // 3. Lógica de Envío
     document.getElementById('botonEnviar').addEventListener('click', async function() {
-      const resDiv = document.getElementById('resultado');
-      const texto = input.value.trim();
-      const token = document.querySelector('[name="h-captcha-response"]')?.value;
+      const campo = document.getElementById('miCampoUnico');
+      const resultado = document.getElementById('resultado');
+      const texto = campo.value.trim();
+      
+      // ✅ CORRECCIÓN 2: Obtener token de hCaptcha correctamente
+      let tokenCaptcha;
+      if (window.hcaptcha) {
+        tokenCaptcha = hcaptcha.getResponse();
+      } else {
+        tokenCaptcha = document.querySelector('[name="h-captcha-response"]')?.value;
+      }
 
-      if (!texto || !token) {
-        alert("¡No olvides escribir tu mensaje y completar el captcha!");
+      if (!texto || !tokenCaptcha) {
+        alert("Por favor escribe un mensaje y completa el captcha");
         return;
       }
 
-      // Estilo de carga
       this.disabled = true;
-      this.style.opacity = '0.7';
-      this.textContent = 'Guardando...';
+      this.textContent = 'Enviando...';
 
       try {
         const response = await fetch(`${BACKEND_URL}/api/guardar`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texto, hcaptcha: token })
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            texto: texto, 
+            hcaptcha: tokenCaptcha 
+          })
         });
 
         const data = await response.json();
+        console.log('Respuesta backend:', data);
 
-        resDiv.style.display = 'block';
         if (data.success) {
-          resDiv.style.background = '#f0fff4';
-          resDiv.style.color = '#22543d';
-          resDiv.style.border = '1px solid #c6f6d5';
-          resDiv.innerHTML = `<strong>✨ ¡Logrado!</strong><br>Mensaje guardado con ID #${data.id}`;
-          input.value = '';
-          if (window.hcaptcha) window.hcaptcha.reset();
+          resultado.style.display = 'block';
+          resultado.style.background = '#d1fae5';
+          resultado.innerHTML = `
+            <strong>✅ Éxito!</strong><br>
+            ID: ${data.id}<br>
+            Fecha: ${new Date(data.fecha).toLocaleString()}
+          `;
+          campo.value = '';
+          // Resetear captcha
+          if (window.hcaptcha) {
+            hcaptcha.reset();
+          }
         } else {
-          throw new Error(data.message || 'Error al guardar');
+          throw new Error(data.error || data.detalle || 'Error desconocido');
         }
       } catch (err) {
-        resDiv.style.display = 'block';
-        resDiv.style.background = '#fff5f5';
-        resDiv.style.color = '#c53030';
-        resDiv.style.border = '1px solid #fed7d7';
-        resDiv.innerHTML = `<strong>❌ Error:</strong> ${err.message}`;
+        console.error('Error envío:', err);
+        resultado.style.display = 'block';
+        resultado.style.background = '#fee2e2';
+        resultado.innerHTML = `<strong>❌ Error:</strong><br>${err.message}`;
       } finally {
         this.disabled = false;
-        this.style.opacity = '1';
-        this.textContent = '🚀 Enviar Mensaje';
+        this.textContent = '💾 Guardar en PostgreSQL';
       }
     });
   </script>
