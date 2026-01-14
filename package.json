@@ -6,9 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "start": "node server.js"
   },
   "dependencies": {
-    "astro": "^5.16.7"
+    "astro": "^5.16.7",
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "pg": "^8.16.3"
   }
 }

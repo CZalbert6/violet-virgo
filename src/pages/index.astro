@@ -6,10 +6,10 @@ import Layout from '../layout/Layout.astro';
 <Layout>
   <div style="text-align: center; padding: 40px 20px;">
     <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
-      🎯 Hola Astro 💜
+      🎯 Hola Astro 💜 + Railway
     </h1>
     <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px;">
-      Escribe lo que quieras y verifícalo
+      Escribe lo que quieras y se guardará en PostgreSQL
     </p>
     
     <!-- SOLO UN CAMPO -->
@@ -49,7 +49,10 @@ import Layout from '../layout/Layout.astro';
       
       <!-- hCaptcha -->
       <div style="margin: 25px 0;">
-        <div class="h-captcha" data-sitekey="24229ad4-9504-44d6-a960-4e5687de737a"></div>
+        <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+        <small style="color: #666; display: block; margin-top: 10px;">
+          🔧 Usando hCaptcha de prueba (siempre válido)
+        </small>
       </div>
       
       <!-- Botón -->
@@ -67,7 +70,7 @@ import Layout from '../layout/Layout.astro';
           width: 100%;
         "
       >
-        Enviar
+        💾 Guardar en PostgreSQL
       </button>
       
       <!-- Resultado -->
@@ -78,10 +81,23 @@ import Layout from '../layout/Layout.astro';
         display: none;
         text-align: left;
       "></div>
+      
+      <!-- Estado del sistema -->
+      <div id="estadoSistema" style="
+        margin-top: 20px;
+        padding: 15px;
+        background: #f8fafc;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #666;
+      ">
+        <div>🔍 <strong>Estado:</strong> <span id="estadoTexto">Verificando conexión...</span></div>
+        <div>🌐 <strong>Backend:</strong> <span id="backendURL">Railway PostgreSQL</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- JavaScript SIMPLE - SIN API -->
+  <!-- JavaScript ACTUALIZADO para Railway -->
   <script>
     // 1. Cargar hCaptcha
     const script = document.createElement('script');
@@ -89,11 +105,44 @@ import Layout from '../layout/Layout.astro';
     script.async = true;
     document.head.appendChild(script);
     
-    // 2. Cuando haga clic en el botón
-    document.getElementById('botonEnviar').addEventListener('click', function() {
+    // 2. URL de TU backend en Railway (¡YA CORREGIDA!)
+    const BACKEND_URL = 'https://violet-virgo-production.up.railway.app';
+    
+    // 3. Verificar conexión al backend cuando cargue la página
+    document.addEventListener('DOMContentLoaded', async function() {
+      const estadoTexto = document.getElementById('estadoTexto');
+      const backendURL = document.getElementById('backendURL');
+      
+      backendURL.textContent = BACKEND_URL;
+      
+      try {
+        const respuesta = await fetch(`${BACKEND_URL}/health`);
+        const datos = await respuesta.json();
+        
+        if (datos.status === '✅ OK') {
+          estadoTexto.innerHTML = '<span style="color: #10b981;">✅ Conectado a Railway</span>';
+          if (datos.tabla === '✅ Existe') {
+            estadoTexto.innerHTML += '<br><span style="color: #10b981;">✅ Tabla lista</span>';
+          }
+          
+          // Mostrar cuántos mensajes hay
+          if (datos.total_mensajes >= 0) {
+            estadoTexto.innerHTML += `<br><span style="color: #3b82f6;">📊 ${datos.total_mensajes} mensajes guardados</span>`;
+          }
+        } else {
+          estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Error en backend</span>';
+        }
+      } catch (error) {
+        estadoTexto.innerHTML = `<span style="color: #f59e0b;">⚠️ Backend no disponible</span><br><small>${error.message}</small>`;
+      }
+    });
+    
+    // 4. Cuando haga clic en el botón
+    document.getElementById('botonEnviar').addEventListener('click', async function() {
       const campo = document.getElementById('miCampoUnico');
       const resultado = document.getElementById('resultado');
       const boton = this;
+      const estadoTexto = document.getElementById('estadoTexto');
       
       // Obtener lo que escribió
       const texto = campo.value.trim();
@@ -114,54 +163,95 @@ import Layout from '../layout/Layout.astro';
       }
       
       // Cambiar botón
-      boton.textContent = 'Enviando...';
+      const textoOriginal = boton.textContent;
+      boton.textContent = '💾 Guardando en PostgreSQL...';
       boton.disabled = true;
+      estadoTexto.innerHTML = '<span style="color: #f59e0b;">⏳ Enviando a Railway...</span>';
       
-      // SIMULACIÓN (sin API) - ¡ESTO ES LO QUE CAMBIÉ!
-      setTimeout(() => {
-        // Mostrar resultado simulado
+      try {
+        // ENVIAR AL BACKEND REAL en Railway
+        const respuesta = await fetch(`${BACKEND_URL}/api/guardar`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            texto: texto,
+            hcaptcha: tokenCaptcha
+          })
+        });
+        
+        const datos = await respuesta.json();
+        
+        if (datos.success) {
+          // ÉXITO: Mostrar información del guardado
+          resultado.innerHTML = `
+            <div style="color: #065f46; background: #d1fae5; padding: 20px; border-radius: 8px; border-left: 5px solid #10b981;">
+              <strong>✅ ¡Guardado en PostgreSQL!</strong><br><br>
+              <strong>Texto:</strong> "${texto}"<br>
+              <strong>ID en BD:</strong> ${datos.id}<br>
+              <strong>Fecha:</strong> ${datos.fecha ? datos.fecha : new Date().toLocaleDateString()}<br>
+              <strong>Servidor:</strong> Railway PostgreSQL<br><br>
+              <small>📊 <a href="${BACKEND_URL}/api/mensajes" target="_blank" style="color: #065f46; text-decoration: underline;">Ver todos los mensajes</a></small>
+            </div>
+          `;
+          estadoTexto.innerHTML = '<span style="color: #10b981;">✅ Guardado exitosamente</span>';
+          
+          // Limpiar campo
+          campo.value = '';
+          
+          // Resetear hCaptcha
+          if (window.hcaptcha) {
+            window.hcaptcha.reset();
+          }
+          
+          // Actualizar contador después de 2 segundos
+          setTimeout(async () => {
+            try {
+              const healthResp = await fetch(`${BACKEND_URL}/health`);
+              const healthData = await healthResp.json();
+              if (healthData.total_mensajes >= 0) {
+                estadoTexto.innerHTML = `<span style="color: #10b981;">✅ ${healthData.total_mensajes} mensajes guardados</span>`;
+              }
+            } catch (e) {
+              // Ignorar error de actualización
+            }
+          }, 2000);
+          
+        } else {
+          // ERROR del backend
+          resultado.innerHTML = `
+            <div style="color: #991b1b; background: #fee2e2; padding: 15px; border-radius: 8px;">
+              ❌ Error: ${datos.message}<br>
+              <small>${datos.error || ''}</small>
+            </div>
+          `;
+          estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Error al guardar</span>';
+        }
+        
+        resultado.style.display = 'block';
+        
+      } catch (error) {
+        // Error de conexión
+        console.error('Error de conexión:', error);
         resultado.innerHTML = `
-          <div style="color: #065f46; background: #d1fae5; padding: 20px; border-radius: 8px; border-left: 5px solid #10b981;">
-            <strong>✅ ¡Enviado correctamente!</strong><br><br>
-            <strong>Texto:</strong> "${texto}"<br>
-            <strong>Longitud:</strong> ${texto.length} caracteres<br>
-            <strong>Token hCaptcha:</strong> ${tokenCaptcha.substring(0, 20)}...<br>
-            <strong>Fecha:</strong> ${new Date().toLocaleString()}<br><br>
-            <small>📝 Modo simulación (sin backend)</small>
+          <div style="color: #991b1b; background: #fee2e2; padding: 15px; border-radius: 8px;">
+            ❌ Error de conexión con Railway<br>
+            <small>${error.message}</small><br><br>
+            <strong>URL backend:</strong> ${BACKEND_URL}<br>
+            <strong>Ayuda:</strong> Verifica que Railway está desplegado y que /health responde
           </div>
         `;
         resultado.style.display = 'block';
-        
-        // Limpiar campo
-        campo.value = '';
-        
-        // Resetear hCaptcha si existe
-        if (window.hcaptcha) {
-          window.hcaptcha.reset();
-        }
-        
+        estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Error de conexión</span>';
+      } finally {
         // Restaurar botón
-        boton.textContent = 'Enviar';
+        boton.textContent = textoOriginal;
         boton.disabled = false;
-      }, 1500); // Simular tiempo de espera
-      
-      // ELIMINÉ TODO ESTO:
-      // try {
-      //   const formData = new FormData();
-      //   formData.append('texto', texto);
-      //   formData.append('h-captcha-response', tokenCaptcha);
-      //   
-      //   const respuesta = await fetch('/api/contact', {  // ← ¡ESTA LÍNEA CAUSABA EL ERROR!
-      //     method: 'POST',
-      //     body: formData
-      //   });
-      //   
-      //   const datos = await respuesta.json();
-      //   ...
-      // }
+      }
     });
     
-    // 3. Permitir enviar con Enter
+    // 5. Permitir enviar con Enter
     document.getElementById('miCampoUnico').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -169,7 +259,7 @@ import Layout from '../layout/Layout.astro';
       }
     });
     
-    // 4. Efectos visuales adicionales (opcional)
+    // 6. Efectos visuales
     document.getElementById('miCampoUnico').addEventListener('focus', function() {
       this.style.borderColor = '#667eea';
       this.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
@@ -188,6 +278,28 @@ import Layout from '../layout/Layout.astro';
     document.getElementById('botonEnviar').addEventListener('mouseleave', function() {
       this.style.transform = 'translateY(0)';
       this.style.boxShadow = 'none';
+    });
+    
+    // 7. Botón para ver mensajes
+    document.addEventListener('DOMContentLoaded', function() {
+      const estadoDiv = document.getElementById('estadoSistema');
+      const verMensajesBtn = document.createElement('button');
+      verMensajesBtn.innerHTML = '📊 Ver mensajes guardados';
+      verMensajesBtn.style = `
+        margin-top: 10px;
+        padding: 8px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        width: 100%;
+      `;
+      verMensajesBtn.onclick = function() {
+        window.open(`${BACKEND_URL}/api/mensajes`, '_blank');
+      };
+      estadoDiv.appendChild(verMensajesBtn);
     });
   </script>
 </Layout>
