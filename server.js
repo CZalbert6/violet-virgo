@@ -1,4 +1,4 @@
-// server.js - Versión 100% Estable para Railway
+// server.js - Versión FINAL para Railway (Puerto 8080)
 import express from 'express';
 import pkg from 'pg';
 const { Pool } = pkg;
@@ -46,7 +46,6 @@ app.get('/health', async (req, res) => {
 app.post('/api/guardar', async (req, res) => {
   const { texto, hcaptcha } = req.body;
 
-  // Validaciones básicas
   if (!texto || texto.trim() === "") {
     return res.status(400).json({ success: false, message: 'El texto es obligatorio' });
   }
@@ -90,8 +89,9 @@ app.get('/', (req, res) => {
   res.send('<h1>Backend Violet Virgo funcionando 🚀</h1>');
 });
 
-// PUERTO (Railway usa process.env.PORT)
-const PORT = process.env.PORT || 3000;
+// --- CAMBIO CLAVE AQUÍ ---
+// Escuchamos en el puerto 8080 que es el que Railway espera
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor activo en puerto ${PORT}`);
+  console.log(`✅ Servidor activo y escuchando en el puerto ${PORT}`);
 });
