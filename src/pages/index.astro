@@ -1,0 +1,193 @@
+---
+// src/pages/index.astro
+import Layout from '../layout/Layout.astro';
+---
+
+<Layout>
+  <div style="text-align: center; padding: 40px 20px;">
+    <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
+      🎯 Hola Astro 💜
+    </h1>
+    <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px;">
+      Escribe lo que quieras y verifícalo
+    </p>
+    
+    <!-- SOLO UN CAMPO -->
+    <div style="
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    ">
+      
+      <!-- ÚNICO CAMPO DE TEXTO -->
+      <div style="margin-bottom: 25px;">
+        <label style="
+          display: block;
+          text-align: left;
+          margin-bottom: 10px;
+          font-weight: 600;
+          color: #555;
+        ">
+          📝 Escribe aquí:
+        </label>
+        <input 
+          type="text" 
+          id="miCampoUnico"
+          placeholder="Escribe cualquier cosa..."
+          style="
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+          "
+        >
+      </div>
+      
+      <!-- hCaptcha -->
+      <div style="margin: 25px 0;">
+        <div class="h-captcha" data-sitekey="24229ad4-9504-44d6-a960-4e5687de737a"></div>
+      </div>
+      
+      <!-- Botón -->
+      <button 
+        id="botonEnviar"
+        style="
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 16px;
+          border: none;
+          border-radius: 10px;
+          font-size: 18px;
+          font-weight: 600;
+          cursor: pointer;
+          width: 100%;
+        "
+      >
+        Enviar
+      </button>
+      
+      <!-- Resultado -->
+      <div id="resultado" style="
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+        text-align: left;
+      "></div>
+    </div>
+  </div>
+
+  <!-- JavaScript SIMPLE - SIN API -->
+  <script>
+    // 1. Cargar hCaptcha
+    const script = document.createElement('script');
+    script.src = 'https://js.hcaptcha.com/1/api.js';
+    script.async = true;
+    document.head.appendChild(script);
+    
+    // 2. Cuando haga clic en el botón
+    document.getElementById('botonEnviar').addEventListener('click', function() {
+      const campo = document.getElementById('miCampoUnico');
+      const resultado = document.getElementById('resultado');
+      const boton = this;
+      
+      // Obtener lo que escribió
+      const texto = campo.value.trim();
+      
+      if (!texto) {
+        resultado.innerHTML = '<div style="color: #92400e; background: #fef3c7; padding: 15px; border-radius: 8px;">⚠️ Escribe algo primero</div>';
+        resultado.style.display = 'block';
+        return;
+      }
+      
+      // Verificar hCaptcha
+      const tokenCaptcha = document.querySelector('[name="h-captcha-response"]')?.value;
+      
+      if (!tokenCaptcha) {
+        resultado.innerHTML = '<div style="color: #92400e; background: #fef3c7; padding: 15px; border-radius: 8px;">🔒 Completa el hCaptcha</div>';
+        resultado.style.display = 'block';
+        return;
+      }
+      
+      // Cambiar botón
+      boton.textContent = 'Enviando...';
+      boton.disabled = true;
+      
+      // SIMULACIÓN (sin API) - ¡ESTO ES LO QUE CAMBIÉ!
+      setTimeout(() => {
+        // Mostrar resultado simulado
+        resultado.innerHTML = `
+          <div style="color: #065f46; background: #d1fae5; padding: 20px; border-radius: 8px; border-left: 5px solid #10b981;">
+            <strong>✅ ¡Enviado correctamente!</strong><br><br>
+            <strong>Texto:</strong> "${texto}"<br>
+            <strong>Longitud:</strong> ${texto.length} caracteres<br>
+            <strong>Token hCaptcha:</strong> ${tokenCaptcha.substring(0, 20)}...<br>
+            <strong>Fecha:</strong> ${new Date().toLocaleString()}<br><br>
+            <small>📝 Modo simulación (sin backend)</small>
+          </div>
+        `;
+        resultado.style.display = 'block';
+        
+        // Limpiar campo
+        campo.value = '';
+        
+        // Resetear hCaptcha si existe
+        if (window.hcaptcha) {
+          window.hcaptcha.reset();
+        }
+        
+        // Restaurar botón
+        boton.textContent = 'Enviar';
+        boton.disabled = false;
+      }, 1500); // Simular tiempo de espera
+      
+      // ELIMINÉ TODO ESTO:
+      // try {
+      //   const formData = new FormData();
+      //   formData.append('texto', texto);
+      //   formData.append('h-captcha-response', tokenCaptcha);
+      //   
+      //   const respuesta = await fetch('/api/contact', {  // ← ¡ESTA LÍNEA CAUSABA EL ERROR!
+      //     method: 'POST',
+      //     body: formData
+      //   });
+      //   
+      //   const datos = await respuesta.json();
+      //   ...
+      // }
+    });
+    
+    // 3. Permitir enviar con Enter
+    document.getElementById('miCampoUnico').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('botonEnviar').click();
+      }
+    });
+    
+    // 4. Efectos visuales adicionales (opcional)
+    document.getElementById('miCampoUnico').addEventListener('focus', function() {
+      this.style.borderColor = '#667eea';
+      this.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.1)';
+    });
+    
+    document.getElementById('miCampoUnico').addEventListener('blur', function() {
+      this.style.borderColor = '#e2e8f0';
+      this.style.boxShadow = 'none';
+    });
+    
+    document.getElementById('botonEnviar').addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+      this.style.boxShadow = '0 10px 20px rgba(102, 126, 234, 0.3)';
+    });
+    
+    document.getElementById('botonEnviar').addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = 'none';
+    });
+  </script>
+</Layout>
