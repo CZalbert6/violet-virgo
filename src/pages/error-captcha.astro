@@ -1,0 +1,396 @@
+---
+// src/pages/error-captcha.astro
+import Layout from '../layout/Layout.astro';
+---
+
+<Layout>
+  <div style="
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  ">
+    <div style="
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      animation: aparecer 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    ">
+      <!-- Decoración -->
+      <div style="
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(45deg, #fbbf24, #f59e0b);
+        border-radius: 50%;
+        opacity: 0.1;
+      "></div>
+      <div style="
+        position: absolute;
+        bottom: -60px;
+        left: -60px;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        border-radius: 50%;
+        opacity: 0.1;
+      "></div>
+      
+      <!-- Icono animado -->
+      <div style="
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 25px;
+        position: relative;
+        animation: latido 2s infinite;
+      ">
+        <div style="
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 48px;
+          color: white;
+          box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+        ">
+          ⚠️
+        </div>
+        <div style="
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          width: 40px;
+          height: 40px;
+          background: #fbbf24;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 20px;
+          box-shadow: 0 5px 15px rgba(251, 191, 36, 0.5);
+          animation: girar 4s linear infinite;
+        ">
+          ❌
+        </div>
+      </div>
+      
+      <!-- Título -->
+      <h1 style="
+        font-size: 2.5rem;
+        color: #1f2937;
+        margin-bottom: 15px;
+        position: relative;
+      ">
+        ¡Captcha Requerido!
+      </h1>
+      
+      <!-- Mensaje -->
+      <p style="
+        color: #6b7280;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        position: relative;
+      ">
+        Para continuar, debes completar el <strong>verificador de seguridad</strong> (Captcha).<br>
+        Esto nos ayuda a proteger el sitio de accesos automatizados.
+      </p>
+      
+      <!-- Detalles -->
+      <div style="
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 5px solid #3b82f6;
+        position: relative;
+      ">
+        <h3 style="color: #1e40af; margin-top: 0;">📋 ¿Qué pasó?</h3>
+        <ul style="
+          color: #475569;
+          text-align: left;
+          padding-left: 20px;
+          margin-bottom: 0;
+        ">
+          <li>No se detectó respuesta del captcha</li>
+          <li>El token de seguridad está vacío o expiró</li>
+          <li>Es posible que hayas omitido este paso</li>
+          <li>El captcha no se completó correctamente</li>
+        </ul>
+      </div>
+      
+      <!-- Solución -->
+      <div style="
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 35px;
+        border: 2px dashed #10b981;
+        position: relative;
+      ">
+        <h3 style="color: #065f46; margin-top: 0;">✅ ¿Cómo solucionarlo?</h3>
+        <ol style="
+          color: #047857;
+          text-align: left;
+          padding-left: 20px;
+          margin-bottom: 0;
+        ">
+          <li><strong>Regresa al formulario</strong></li>
+          <li><strong>Busca el widget de captcha</strong> (generalmente un cuadro con imágenes)</li>
+          <li><strong>Completa la verificación</strong> haciendo clic en las imágenes correctas</li>
+          <li><strong>Vuelve a intentar</strong> enviar el formulario</li>
+        </ol>
+      </div>
+      
+      <!-- Botones -->
+      <div style="display: flex; gap: 15px; justify-content: center; position: relative;">
+        <button 
+          id="btnRegresar"
+          style="
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+          "
+          onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(59, 130, 246, 0.6)';"
+          onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.4)';"
+        >
+          ↩️ Regresar al Formulario
+        </button>
+        
+        <button 
+          id="btnAyuda"
+          style="
+            background: white;
+            color: #6b7280;
+            padding: 15px 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+          "
+          onmouseenter="this.style.background='#f3f4f6'; this.style.transform='translateY(-2px)';"
+          onmouseleave="this.style.background='white'; this.style.transform='translateY(0)';"
+        >
+          ❓ Necesito Ayuda
+        </button>
+      </div>
+      
+      <!-- Contador -->
+      <div style="
+        margin-top: 30px;
+        color: #9ca3af;
+        font-size: 14px;
+        position: relative;
+      ">
+        <div id="contador" style="
+          font-size: 3rem;
+          font-weight: bold;
+          color: #ef4444;
+          margin-bottom: 10px;
+          font-family: monospace;
+        ">10</div>
+        <p>Redirección automática en <span id="segundos">10</span> segundos...</p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes aparecer {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes latido {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes girar {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes brillo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+
+  <script>
+    // Contador regresivo
+    let segundos = 10;
+    const contador = document.getElementById('contador');
+    const textoSegundos = document.getElementById('segundos');
+    
+    const intervalo = setInterval(() => {
+      segundos--;
+      contador.textContent = segundos;
+      textoSegundos.textContent = segundos;
+      
+      if (segundos <= 0) {
+        clearInterval(intervalo);
+        window.location.href = '/'; // Redirige a la página principal
+      }
+    }, 1000);
+    
+    // Botón Regresar
+    document.getElementById('btnRegresar').addEventListener('click', function() {
+      // Intenta regresar a la página anterior
+      if (document.referrer) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    });
+    
+    // Botón Ayuda
+    document.getElementById('btnAyuda').addEventListener('click', function() {
+      // Mostrar ventana de ayuda
+      const ayudaDiv = document.createElement('div');
+      ayudaDiv.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: aparecer 0.3s;
+      `;
+      
+      ayudaDiv.innerHTML = `
+        <div style="
+          background: white;
+          border-radius: 20px;
+          padding: 40px;
+          max-width: 500px;
+          width: 90%;
+          position: relative;
+          animation: aparecer 0.4s;
+        ">
+          <button style="
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+          " onclick="this.parentElement.parentElement.remove()">×</button>
+          
+          <h2 style="color: #1f2937; margin-top: 0;">🆘 Ayuda con Captcha</h2>
+          <div style="color: #4b5563; line-height: 1.6;">
+            <p><strong>¿Qué es un Captcha?</strong><br>
+            Es un sistema de seguridad que diferencia humanos de robots.</p>
+            
+            <p><strong>¿Por qué no aparece?</strong><br>
+            • Bloqueadores de anuncios<br>
+            • Problemas de JavaScript<br>
+            • Conexión lenta<br>
+            • Scripts bloqueados</p>
+            
+            <p><strong>Solución rápida:</strong><br>
+            1. Recarga la página (F5)<br>
+            2. Desactiva bloqueadores temporalmente<br>
+            3. Verifica tu conexión a internet<br>
+            4. Habilita JavaScript en tu navegador</p>
+            
+            <p style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 10px;">
+              <strong>💡 Tip:</strong> Si el problema persiste, intenta usar otro navegador como Chrome o Firefox.
+            </p>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(ayudaDiv);
+    });
+    
+    // Efecto de tecleo en el contador
+    contador.style.animation = 'brillo 1s infinite';
+    
+    // Sonido opcional (sin sonido real, solo estructura)
+    const reproducirSonido = () => {
+      // Para un sonido real, necesitarías un archivo de audio
+      console.log('🔊 Sonido de error reproducido (simulado)');
+    };
+    
+    // Reproducir sonido al cargar
+    setTimeout(reproducirSonido, 500);
+    
+    // Efectos de partículas (simplificado)
+    setTimeout(() => {
+      const particulas = document.createElement('div');
+      particulas.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      `;
+      
+      for (let i = 0; i < 20; i++) {
+        const particula = document.createElement('div');
+        particula.style.cssText = `
+          position: absolute;
+          width: 5px;
+          height: 5px;
+          background: ${i % 2 === 0 ? '#ef4444' : '#fbbf24'};
+          border-radius: 50%;
+          animation: caer ${1 + Math.random() * 2}s linear infinite;
+          top: -10px;
+          left: ${Math.random() * 100}%;
+          opacity: 0.5;
+        `;
+        particulas.appendChild(particula);
+      }
+      
+      document.querySelector('.astro-A9VJQT').appendChild(particulas);
+      
+      // Agregar estilo para la animación de caída
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes caer {
+          0% { transform: translateY(0) rotate(0deg); opacity: 0.5; }
+          100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+      `;
+      document.head.appendChild(style);
+    }, 1000);
+  </script>
+</Layout>

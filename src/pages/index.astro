@@ -50,6 +50,63 @@ import Layout from '../layout/Layout.astro';
         <div style="margin-top: 5px;">🌐 <small id="backendURL">...</small></div>
       </div>
     </div>
+
+    <!-- ==================== -->
+    <!-- ENLACES NUEVOS AGREGADOS AQUÍ -->
+    <!-- ==================== -->
+    <div style="
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: 40px auto;
+    ">
+      <h3 style="color: #333; margin-bottom: 15px;">🌐 Otras páginas de prueba</h3>
+      <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">
+        Estas páginas funcionan localmente sin conexión a la base de datos
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+        <a 
+          href="/violet-virgo/formulario-validacion" 
+          style="
+            padding: 12px 25px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+          "
+          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+        >
+          📝 Formulario de Validación
+        </a>
+        <a 
+          href="/violet-virgo/error-captcha" 
+          style="
+            padding: 12px 25px;
+            background: #ef4444;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+          "
+          onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)';"
+        >
+          ⚠️ Error Captcha (Demo)
+        </a>
+      </div>
+    </div>
+    <!-- ==================== -->
+    <!-- FIN ENLACES NUEVOS -->
+    <!-- ==================== -->
   </div>
 
   <script>

@@ -1,0 +1,438 @@
+---
+// src/pages/formulario-validacion.astro
+import Layout from '../layout/Layout.astro';
+---
+
+<Layout>
+  <div style="
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  ">
+    <h1 style="color: #333; text-align: center; margin-bottom: 10px;">
+      📝 Formulario de Validación
+    </h1>
+    <p style="color: #666; text-align: center; margin-bottom: 30px;">
+      Solo validación local - No se envía a servidor
+    </p>
+    
+    <form id="formularioValidacion">
+      <!-- NOMBRE (solo letras, max 50 caracteres) -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">
+          👤 Nombre Completo *
+        </label>
+        <input 
+          type="text" 
+          id="nombre"
+          placeholder="Solo letras (máx. 50 caracteres)"
+          style="
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+          "
+          maxlength="50"
+        >
+        <div id="errorNombre" style="
+          color: #ef4444;
+          font-size: 14px;
+          margin-top: 5px;
+          display: none;
+        "></div>
+        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+          ✅ Solo letras y espacios
+        </div>
+      </div>
+      
+      <!-- FECHA DE NACIMIENTO (calendario) -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">
+          🎂 Fecha de Nacimiento *
+        </label>
+        <input 
+          type="date" 
+          id="fechaNacimiento"
+          style="
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+          "
+        >
+        <div id="errorFecha" style="
+          color: #ef4444;
+          font-size: 14px;
+          margin-top: 5px;
+          display: none;
+        "></div>
+        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+          📅 Click para ver calendario
+        </div>
+      </div>
+      
+      <!-- TELÉFONO (solo números, exactamente 10 dígitos) -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">
+          📱 Teléfono *
+        </label>
+        <input 
+          type="tel" 
+          id="telefono"
+          placeholder="10 dígitos (ej: 5512345678)"
+          style="
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+          "
+          maxlength="10"
+        >
+        <div id="errorTelefono" style="
+          color: #ef4444;
+          font-size: 14px;
+          margin-top: 5px;
+          display: none;
+        "></div>
+        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+          🔢 Solo números (10 dígitos)
+        </div>
+      </div>
+      
+      <!-- EMAIL (validación básica) -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">
+          📧 Correo Electrónico
+        </label>
+        <input 
+          type="email" 
+          id="email"
+          placeholder="ejemplo@correo.com"
+          style="
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+          "
+        >
+        <div id="errorEmail" style="
+          color: #ef4444;
+          font-size: 14px;
+          margin-top: 5px;
+          display: none;
+        "></div>
+      </div>
+      
+      <!-- BOTONES -->
+      <div style="display: flex; gap: 15px; margin-top: 30px;">
+        <button 
+          type="button"
+          id="btnValidar"
+          style="
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+          "
+          onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(102, 126, 234, 0.4)';"
+          onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+        >
+          ✅ Validar Formulario
+        </button>
+        
+        <button 
+          type="button"
+          id="btnLimpiar"
+          style="
+            flex: 1;
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+          "
+          onmouseenter="this.style.background='#e2e8f0';"
+          onmouseleave="this.style.background='#f1f5f9';"
+        >
+          🗑️ Limpiar
+        </button>
+      </div>
+      
+      <!-- RESULTADO DE VALIDACIÓN -->
+      <div id="resultadoValidacion" style="
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+        text-align: center;
+        font-size: 16px;
+      "></div>
+      
+      <!-- INFORMACIÓN DE LOS CAMPOS -->
+      <div style="
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border-left: 4px solid #3b82f6;
+      ">
+        <h3 style="color: #1e40af; margin-top: 0;">📋 Reglas de validación:</h3>
+        <ul style="color: #475569; padding-left: 20px; margin-bottom: 0;">
+          <li><strong>Nombre:</strong> Solo letras y espacios (máx. 50)</li>
+          <li><strong>Fecha Nacimiento:</strong> Debes ser mayor de 18 años</li>
+          <li><strong>Teléfono:</strong> Exactamente 10 dígitos numéricos</li>
+          <li><strong>Email:</strong> Formato válido (opcional)</li>
+        </ul>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Función para validar solo letras y espacios
+    function validarSoloLetras(texto) {
+      return /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(texto);
+    }
+    
+    // Función para validar teléfono (10 dígitos)
+    function validarTelefono(telefono) {
+      return /^\d{10}$/.test(telefono);
+    }
+    
+    // Función para validar email
+    function validarEmail(email) {
+      if (!email) return true; // Opcional
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+    
+    // Función para calcular edad desde fecha
+    function calcularEdad(fechaNacimiento) {
+      const hoy = new Date();
+      const nacimiento = new Date(fechaNacimiento);
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();
+      const mes = hoy.getMonth() - nacimiento.getMonth();
+      
+      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+      }
+      return edad;
+    }
+    
+    // Mostrar/ocultar errores
+    function mostrarError(elementoId, mensaje) {
+      const errorElemento = document.getElementById(`error${elementoId}`);
+      const inputElemento = document.getElementById(elementoId.toLowerCase());
+      
+      errorElemento.textContent = mensaje;
+      errorElemento.style.display = 'block';
+      inputElemento.style.borderColor = '#ef4444';
+      inputElemento.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+    }
+    
+    function limpiarError(elementoId) {
+      const errorElemento = document.getElementById(`error${elementoId}`);
+      const inputElemento = document.getElementById(elementoId.toLowerCase());
+      
+      errorElemento.style.display = 'none';
+      inputElemento.style.borderColor = '#10b981';
+      inputElemento.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    }
+    
+    // Evento para validar nombre en tiempo real
+    document.getElementById('nombre').addEventListener('input', function(e) {
+      const valor = e.target.value.trim();
+      
+      if (!valor) {
+        limpiarError('Nombre');
+        e.target.style.borderColor = '#e2e8f0';
+        e.target.style.boxShadow = 'none';
+        return;
+      }
+      
+      if (!validarSoloLetras(valor)) {
+        mostrarError('Nombre', 'Solo se permiten letras y espacios');
+      } else if (valor.length > 50) {
+        mostrarError('Nombre', 'Máximo 50 caracteres');
+      } else {
+        limpiarError('Nombre');
+      }
+    });
+    
+    // Evento para validar teléfono en tiempo real
+    document.getElementById('telefono').addEventListener('input', function(e) {
+      const valor = e.target.value.replace(/\D/g, ''); // Solo números
+      e.target.value = valor; // Forzar solo números
+      
+      if (!valor) {
+        limpiarError('Telefono');
+        e.target.style.borderColor = '#e2e8f0';
+        return;
+      }
+      
+      if (!validarTelefono(valor)) {
+        mostrarError('Telefono', 'Deben ser exactamente 10 dígitos');
+      } else {
+        limpiarError('Telefono');
+      }
+    });
+    
+    // Evento para validar email en tiempo real
+    document.getElementById('email').addEventListener('blur', function(e) {
+      const valor = e.target.value.trim();
+      
+      if (valor && !validarEmail(valor)) {
+        mostrarError('Email', 'Formato de email inválido');
+      } else {
+        limpiarError('Email');
+      }
+    });
+    
+    // Botón Validar
+    document.getElementById('btnValidar').addEventListener('click', function() {
+      const nombre = document.getElementById('nombre').value.trim();
+      const fecha = document.getElementById('fechaNacimiento').value;
+      const telefono = document.getElementById('telefono').value;
+      const email = document.getElementById('email').value.trim();
+      const resultado = document.getElementById('resultadoValidacion');
+      
+      let errores = [];
+      
+      // Validar nombre
+      if (!nombre) {
+        errores.push('El nombre es obligatorio');
+        mostrarError('Nombre', 'El nombre es obligatorio');
+      } else if (!validarSoloLetras(nombre)) {
+        errores.push('Nombre: Solo letras y espacios');
+        mostrarError('Nombre', 'Solo se permiten letras y espacios');
+      } else if (nombre.length > 50) {
+        errores.push('Nombre: Máximo 50 caracteres');
+        mostrarError('Nombre', 'Máximo 50 caracteres');
+      }
+      
+      // Validar fecha
+      if (!fecha) {
+        errores.push('La fecha de nacimiento es obligatoria');
+        mostrarError('Fecha', 'La fecha de nacimiento es obligatoria');
+      } else {
+        const edad = calcularEdad(fecha);
+        if (edad < 18) {
+          errores.push('Debes ser mayor de 18 años');
+          mostrarError('Fecha', 'Debes ser mayor de 18 años');
+        } else if (edad > 120) {
+          errores.push('Fecha de nacimiento inválida');
+          mostrarError('Fecha', 'Fecha de nacimiento inválida');
+        }
+      }
+      
+      // Validar teléfono
+      if (!telefono) {
+        errores.push('El teléfono es obligatorio');
+        mostrarError('Telefono', 'El teléfono es obligatorio');
+      } else if (!validarTelefono(telefono)) {
+        errores.push('Teléfono: 10 dígitos numéricos');
+        mostrarError('Telefono', 'Deben ser exactamente 10 dígitos');
+      }
+      
+      // Validar email (opcional)
+      if (email && !validarEmail(email)) {
+        errores.push('Email: Formato inválido');
+        mostrarError('Email', 'Formato de email inválido');
+      }
+      
+      // Mostrar resultado
+      resultado.style.display = 'block';
+      
+      if (errores.length === 0) {
+        const edad = calcularEdad(fecha);
+        resultado.style.background = '#d1fae5';
+        resultado.style.border = '2px solid #10b981';
+        resultado.innerHTML = `
+          <div style="color: #065f46;">
+            <h3 style="margin-top: 0;">✅ ¡Formulario Válido!</h3>
+            <p><strong>Nombre:</strong> ${nombre}</p>
+            <p><strong>Edad:</strong> ${edad} años</p>
+            <p><strong>Teléfono:</strong> ${telefono}</p>
+            ${email ? `<p><strong>Email:</strong> ${email}</p>` : ''}
+            <p><em>⚠️ Nota: Estos datos NO se guardan en servidor</em></p>
+          </div>
+        `;
+      } else {
+        resultado.style.background = '#fee2e2';
+        resultado.style.border = '2px solid #ef4444';
+        resultado.innerHTML = `
+          <div style="color: #991b1b;">
+            <h3 style="margin-top: 0;">❌ Errores encontrados:</h3>
+            <ul style="text-align: left;">
+              ${errores.map(error => `<li>${error}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      }
+      
+      resultado.scrollIntoView({ behavior: 'smooth' });
+    });
+    
+    // Botón Limpiar
+    document.getElementById('btnLimpiar').addEventListener('click', function() {
+      document.getElementById('formularioValidacion').reset();
+      document.getElementById('resultadoValidacion').style.display = 'none';
+      
+      // Limpiar todos los errores visuales
+      ['Nombre', 'Fecha', 'Telefono', 'Email'].forEach(id => {
+        const errorElemento = document.getElementById(`error${id}`);
+        const inputElemento = document.getElementById(id.toLowerCase());
+        
+        if (errorElemento) errorElemento.style.display = 'none';
+        if (inputElemento) {
+          inputElemento.style.borderColor = '#e2e8f0';
+          inputElemento.style.boxShadow = 'none';
+        }
+      });
+    });
+    
+    // Configurar fecha máxima (hoy) y mínima (120 años atrás)
+    const fechaInput = document.getElementById('fechaNacimiento');
+    const hoy = new Date().toISOString().split('T')[0];
+    const maxFecha = new Date();
+    maxFecha.setFullYear(maxFecha.getFullYear() - 18);
+    const minFecha = new Date();
+    minFecha.setFullYear(minFecha.getFullYear() - 120);
+    
+    fechaInput.max = maxFecha.toISOString().split('T')[0];
+    fechaInput.min = minFecha.toISOString().split('T')[0];
+    
+    // Efectos visuales para inputs
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', function() {
+        this.style.borderColor = '#3b82f6';
+        this.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+      });
+      
+      input.addEventListener('blur', function() {
+        if (!this.style.borderColor.includes('#ef4444') && !this.style.borderColor.includes('#10b981')) {
+          this.style.borderColor = '#e2e8f0';
+          this.style.boxShadow = 'none';
+        }
+      });
+    });
+  </script>
+</Layout>
