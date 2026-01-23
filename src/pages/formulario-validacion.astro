@@ -12,6 +12,24 @@ import Layout from '../layout/Layout.astro';
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   ">
+    <!-- Breadcrumbs -->
+    <nav style="margin-bottom: 30px;">
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #666;
+      ">
+        <a href="/violet-virgo" style="color: #3b82f6; text-decoration: none;">
+          <span style="color: #3b82f6;">🏠</span>
+          <span style="color: #3b82f6;">Inicio</span>
+        </a>
+        <span style="color: #94a3b8;">›</span>
+        <span style="color: #64748b;">Formulario de Validación</span>
+      </div>
+    </nav>
+    
     <h1 style="color: #333; text-align: center; margin-bottom: 10px;">
       📝 Formulario de Validación
     </h1>
@@ -50,10 +68,16 @@ import Layout from '../layout/Layout.astro';
         </div>
       </div>
       
-      <!-- FECHA DE NACIMIENTO (calendario) -->
+      <!-- FECHA DE NACIMIENTO (calendario con límites mejorados) -->
       <div style="margin-bottom: 20px;">
         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">
           🎂 Fecha de Nacimiento *
+          <span id="edadCalculada" style="
+            font-size: 12px;
+            font-weight: normal;
+            color: #3b82f6;
+            margin-left: 10px;
+          "></span>
         </label>
         <input 
           type="date" 
@@ -74,7 +98,7 @@ import Layout from '../layout/Layout.astro';
           display: none;
         "></div>
         <div style="font-size: 12px; color: #666; margin-top: 5px;">
-          📅 Click para ver calendario
+          📅 Edad válida: 18-80 años
         </div>
       </div>
       
@@ -188,26 +212,70 @@ import Layout from '../layout/Layout.astro';
         font-size: 16px;
       "></div>
       
-      <!-- INFORMACIÓN DE LOS CAMPOS -->
-      <div style="
-        margin-top: 30px;
-        padding: 20px;
-        background: #f8fafc;
-        border-radius: 10px;
-        border-left: 4px solid #3b82f6;
-      ">
-        <h3 style="color: #1e40af; margin-top: 0;">📋 Reglas de validación:</h3>
-        <ul style="color: #475569; padding-left: 20px; margin-bottom: 0;">
-          <li><strong>Nombre:</strong> Solo letras y espacios (máx. 50)</li>
-          <li><strong>Fecha Nacimiento:</strong> Debes ser mayor de 18 años</li>
-          <li><strong>Teléfono:</strong> Exactamente 10 dígitos numéricos</li>
-          <li><strong>Email:</strong> Formato válido (opcional)</li>
-        </ul>
+      <!-- ENLACE PARA VOLVER -->
+      <div style="text-align: center; margin-top: 30px;">
+        <a 
+          href="/violet-virgo" 
+          style="
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
+          ↩️ Volver al formulario principal
+        </a>
       </div>
     </form>
   </div>
 
   <script>
+    // Configurar límites de fecha automáticamente
+    const configurarFechaLimites = () => {
+      const fechaInput = document.getElementById('fechaNacimiento');
+      const hoy = new Date();
+      
+      // Máximo: 18 años atrás (edad mínima 18)
+      const maxFecha = new Date();
+      maxFecha.setFullYear(maxFecha.getFullYear() - 18);
+      
+      // Mínimo: 80 años atrás (edad máxima 80)
+      const minFecha = new Date();
+      minFecha.setFullYear(minFecha.getFullYear() - 80);
+      
+      // Formatear a YYYY-MM-DD
+      fechaInput.max = maxFecha.toISOString().split('T')[0];
+      fechaInput.min = minFecha.toISOString().split('T')[0];
+      
+      console.log('📅 Límites de fecha configurados:');
+      console.log('Mínimo (80 años):', fechaInput.min);
+      console.log('Máximo (18 años):', fechaInput.max);
+    };
+    
+    // Función para calcular edad con validación mejorada
+    function calcularEdad(fechaNacimiento) {
+      if (!fechaNacimiento) return null;
+      
+      const hoy = new Date();
+      const nacimiento = new Date(fechaNacimiento);
+      
+      // Validar que la fecha sea válida
+      if (isNaN(nacimiento.getTime())) {
+        return null;
+      }
+      
+      let edad = hoy.getFullYear() - nacimiento.getFullYear();
+      const mes = hoy.getMonth() - nacimiento.getMonth();
+      
+      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+      }
+      
+      return edad;
+    }
+    
     // Función para validar solo letras y espacios
     function validarSoloLetras(texto) {
       return /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/.test(texto);
@@ -224,37 +292,52 @@ import Layout from '../layout/Layout.astro';
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
     
-    // Función para calcular edad desde fecha
-    function calcularEdad(fechaNacimiento) {
-      const hoy = new Date();
-      const nacimiento = new Date(fechaNacimiento);
-      let edad = hoy.getFullYear() - nacimiento.getFullYear();
-      const mes = hoy.getMonth() - nacimiento.getMonth();
-      
-      if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-        edad--;
-      }
-      return edad;
-    }
-    
     // Mostrar/ocultar errores
     function mostrarError(elementoId, mensaje) {
       const errorElemento = document.getElementById(`error${elementoId}`);
       const inputElemento = document.getElementById(elementoId.toLowerCase());
       
-      errorElemento.textContent = mensaje;
-      errorElemento.style.display = 'block';
-      inputElemento.style.borderColor = '#ef4444';
-      inputElemento.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+      if (errorElemento && inputElemento) {
+        errorElemento.textContent = mensaje;
+        errorElemento.style.display = 'block';
+        inputElemento.style.borderColor = '#ef4444';
+        inputElemento.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+      }
     }
     
     function limpiarError(elementoId) {
       const errorElemento = document.getElementById(`error${elementoId}`);
       const inputElemento = document.getElementById(elementoId.toLowerCase());
       
-      errorElemento.style.display = 'none';
-      inputElemento.style.borderColor = '#10b981';
-      inputElemento.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+      if (errorElemento) errorElemento.style.display = 'none';
+      if (inputElemento) {
+        inputElemento.style.borderColor = '#10b981';
+        inputElemento.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+      }
+    }
+    
+    // Actualizar edad en tiempo real
+    function actualizarEdadCalculada() {
+      const fechaInput = document.getElementById('fechaNacimiento');
+      const edadSpan = document.getElementById('edadCalculada');
+      
+      if (fechaInput.value) {
+        const edad = calcularEdad(fechaInput.value);
+        if (edad !== null) {
+          edadSpan.textContent = `(${edad} años)`;
+          
+          // Cambiar color según edad
+          if (edad < 18) {
+            edadSpan.style.color = '#ef4444';
+          } else if (edad > 80) {
+            edadSpan.style.color = '#ef4444';
+          } else {
+            edadSpan.style.color = '#10b981';
+          }
+        }
+      } else {
+        edadSpan.textContent = '';
+      }
     }
     
     // Evento para validar nombre en tiempo real
@@ -306,6 +389,28 @@ import Layout from '../layout/Layout.astro';
       }
     });
     
+    // Evento para fecha de nacimiento
+    document.getElementById('fechaNacimiento').addEventListener('change', function(e) {
+      actualizarEdadCalculada();
+      
+      if (e.target.value) {
+        const edad = calcularEdad(e.target.value);
+        
+        if (edad === null) {
+          mostrarError('Fecha', 'Fecha inválida');
+          return;
+        }
+        
+        if (edad < 18) {
+          mostrarError('Fecha', `Debes ser mayor de 18 años (tienes ${edad} años)`);
+        } else if (edad > 80) {
+          mostrarError('Fecha', `La edad máxima es 80 años (tienes ${edad} años)`);
+        } else {
+          limpiarError('Fecha');
+        }
+      }
+    });
+    
     // Botón Validar
     document.getElementById('btnValidar').addEventListener('click', function() {
       const nombre = document.getElementById('nombre').value.trim();
@@ -328,18 +433,21 @@ import Layout from '../layout/Layout.astro';
         mostrarError('Nombre', 'Máximo 50 caracteres');
       }
       
-      // Validar fecha
+      // Validar fecha con límites mejorados
       if (!fecha) {
         errores.push('La fecha de nacimiento es obligatoria');
         mostrarError('Fecha', 'La fecha de nacimiento es obligatoria');
       } else {
         const edad = calcularEdad(fecha);
-        if (edad < 18) {
-          errores.push('Debes ser mayor de 18 años');
-          mostrarError('Fecha', 'Debes ser mayor de 18 años');
-        } else if (edad > 120) {
+        if (edad === null) {
           errores.push('Fecha de nacimiento inválida');
           mostrarError('Fecha', 'Fecha de nacimiento inválida');
+        } else if (edad < 18) {
+          errores.push(`Debes ser mayor de 18 años (tienes ${edad} años)`);
+          mostrarError('Fecha', `Debes ser mayor de 18 años (tienes ${edad} años)`);
+        } else if (edad > 80) {
+          errores.push(`La edad máxima es 80 años (tienes ${edad} años)`);
+          mostrarError('Fecha', `La edad máxima es 80 años (tienes ${edad} años)`);
         }
       }
       
@@ -372,7 +480,9 @@ import Layout from '../layout/Layout.astro';
             <p><strong>Edad:</strong> ${edad} años</p>
             <p><strong>Teléfono:</strong> ${telefono}</p>
             ${email ? `<p><strong>Email:</strong> ${email}</p>` : ''}
-            <p><em>⚠️ Nota: Estos datos NO se guardan en servidor</em></p>
+            <p style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 5px;">
+              <em>⚠️ Nota: Estos datos NO se guardan en servidor</em>
+            </p>
           </div>
         `;
       } else {
@@ -381,9 +491,12 @@ import Layout from '../layout/Layout.astro';
         resultado.innerHTML = `
           <div style="color: #991b1b;">
             <h3 style="margin-top: 0;">❌ Errores encontrados:</h3>
-            <ul style="text-align: left;">
+            <ul style="text-align: left; padding-left: 20px;">
               ${errores.map(error => `<li>${error}</li>`).join('')}
             </ul>
+            <p style="margin-top: 15px; font-size: 14px;">
+              🔧 <strong>Corrige los campos en rojo arriba</strong>
+            </p>
           </div>
         `;
       }
@@ -395,6 +508,7 @@ import Layout from '../layout/Layout.astro';
     document.getElementById('btnLimpiar').addEventListener('click', function() {
       document.getElementById('formularioValidacion').reset();
       document.getElementById('resultadoValidacion').style.display = 'none';
+      document.getElementById('edadCalculada').textContent = '';
       
       // Limpiar todos los errores visuales
       ['Nombre', 'Fecha', 'Telefono', 'Email'].forEach(id => {
@@ -409,17 +523,6 @@ import Layout from '../layout/Layout.astro';
       });
     });
     
-    // Configurar fecha máxima (hoy) y mínima (120 años atrás)
-    const fechaInput = document.getElementById('fechaNacimiento');
-    const hoy = new Date().toISOString().split('T')[0];
-    const maxFecha = new Date();
-    maxFecha.setFullYear(maxFecha.getFullYear() - 18);
-    const minFecha = new Date();
-    minFecha.setFullYear(minFecha.getFullYear() - 120);
-    
-    fechaInput.max = maxFecha.toISOString().split('T')[0];
-    fechaInput.min = minFecha.toISOString().split('T')[0];
-    
     // Efectos visuales para inputs
     document.querySelectorAll('input').forEach(input => {
       input.addEventListener('focus', function() {
@@ -433,6 +536,12 @@ import Layout from '../layout/Layout.astro';
           this.style.boxShadow = 'none';
         }
       });
+    });
+    
+    // Inicializar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', function() {
+      configurarFechaLimites();
+      actualizarEdadCalculada();
     });
   </script>
 </Layout>

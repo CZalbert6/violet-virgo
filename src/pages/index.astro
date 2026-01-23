@@ -4,6 +4,26 @@ import Layout from '../layout/Layout.astro';
 
 <Layout>
   <div style="text-align: center; padding: 40px 20px;">
+    <!-- Breadcrumbs -->
+    <nav style="
+      margin-bottom: 30px;
+      text-align: left;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    ">
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #666;
+      ">
+        <span style="color: #3b82f6;">🏠</span>
+        <span style="color: #3b82f6;">Inicio</span>
+      </div>
+    </nav>
+    
     <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
       🎯 Astro + Railway (PostgreSQL)
     </h1>
@@ -51,9 +71,7 @@ import Layout from '../layout/Layout.astro';
       </div>
     </div>
 
-    <!-- ==================== -->
-    <!-- ENLACES NUEVOS AGREGADOS AQUÍ -->
-    <!-- ==================== -->
+    <!-- Enlaces a otras páginas -->
     <div style="
       text-align: center;
       margin-top: 40px;
@@ -104,9 +122,6 @@ import Layout from '../layout/Layout.astro';
         </a>
       </div>
     </div>
-    <!-- ==================== -->
-    <!-- FIN ENLACES NUEVOS -->
-    <!-- ==================== -->
   </div>
 
   <script>
