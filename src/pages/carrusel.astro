@@ -1,4 +1,3 @@
----
 // src/pages/carrusel.astro
 import Layout from '../layout/Layout.astro';
 ---
@@ -377,11 +376,17 @@ import Layout from '../layout/Layout.astro';
       try {
         console.log('🔄 Cargando imágenes...');
         const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`);
+        
+        // Verificar si la respuesta es OK
+        if (!respuesta.ok) {
+          throw new Error(`HTTP error! status: ${respuesta.status}`);
+        }
+        
         const datos = await respuesta.json();
         
         if (datos.success) {
           imagenes = datos.imagenes || [];
-          console.log(`✅ ${imagenes.length} imágenes cargadas`);
+          console.log(`✅ ${imagenes.length} imágenes cargadas:`, imagenes);
           
           if (imagenes.length > 0) {
             // Para cada imagen, cargar el Base64
@@ -393,11 +398,12 @@ import Layout from '../layout/Layout.astro';
             mostrarCarruselVacio();
           }
         } else {
-          mostrarError('Error al cargar imágenes');
+          console.error('❌ Error del servidor:', datos);
+          mostrarError('Error al cargar imágenes: ' + (datos.error || datos.message));
         }
       } catch (error) {
         console.error('❌ Error:', error);
-        mostrarError('No se pudo conectar al servidor');
+        mostrarError('No se pudo conectar al servidor: ' + error.message);
       }
     }
     
@@ -408,6 +414,12 @@ import Layout from '../layout/Layout.astro';
       for (const imagen of imagenes) {
         try {
           const respuesta = await fetch(`${BACKEND_URL}/api/carrusel/${imagen.id}`);
+          
+          if (!respuesta.ok) {
+            console.warn(`⚠️ Error cargando imagen ${imagen.id}:`, respuesta.status);
+            continue;
+          }
+          
           const datos = await respuesta.json();
           
           if (datos.success && datos.imagen.imagen_base64) {
@@ -730,7 +742,7 @@ import Layout from '../layout/Layout.astro';
       reader.readAsDataURL(archivo);
     }
     
-    // 10. Subir imagen al servidor
+    // 10. Subir imagen al servidor - CORREGIDO
     async function subirImagen() {
       if (!archivoSeleccionado || !imagenBase64) {
         mostrarMensaje('❌ Primero selecciona una imagen', 'error');
@@ -760,7 +772,15 @@ import Layout from '../layout/Layout.astro';
         progreso.style.width = '60%';
         btnSubir.innerHTML = '⏳ Subiendo a PostgreSQL...';
         
-        // Enviar al servidor
+        // DIAGNÓSTICO: Mostrar qué estamos enviando
+        console.log('📤 Enviando datos al servidor:', {
+          nombre: nombre,
+          tieneBase64: !!imagenBase64,
+          tipoMime: tipoMime,
+          longitudBase64: imagenBase64.length
+        });
+        
+        // Enviar al servidor - IMPORTANTE: tipo_mime (con guión bajo)
         const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`, {
           method: 'POST',
           headers: { 
@@ -769,14 +789,21 @@ import Layout from '../layout/Layout.astro';
           },
           body: JSON.stringify({
             nombre: nombre,
-            imagen_base64: imagenBase64,
-            tipo_mime: tipoMime
+            imagen_base64: imagenBase64,  // con guión bajo
+            tipo_mime: tipoMime           // con guión bajo
           })
         });
         
         progreso.style.width = '90%';
         
+        // Verificar si la respuesta es OK
+        if (!respuesta.ok) {
+          const errorText = await respuesta.text();
+          throw new Error(`HTTP ${respuesta.status}: ${errorText}`);
+        }
+        
         const datos = await respuesta.json();
+        console.log('📥 Respuesta del servidor:', datos);
         
         if (datos.success) {
           progreso.style.width = '100%';
@@ -794,11 +821,20 @@ import Layout from '../layout/Layout.astro';
             progreso.style.width = '0%';
           }, 1000);
         } else {
-          mostrarMensaje(`❌ Error: ${datos.message || 'Error al subir'}`, 'error');
+          // Mejor manejo de errores
+          const errorMsg = datos.message || datos.error || 'Error desconocido';
+          mostrarMensaje(`❌ Error: ${errorMsg}`, 'error');
+          
+          // Si es error de columna faltante, dar instrucción específica
+          if (errorMsg.includes('columna') && errorMsg.includes('no existe')) {
+            console.error('⚠️ ERROR DE BASE DE DATOS: Falta columna en PostgreSQL');
+            console.error('🔧 Solución: Ejecuta en PostgreSQL:');
+            console.error('ALTER TABLE carrusel_imagenes ADD COLUMN tipo_mime VARCHAR(100);');
+          }
         }
       } catch (error) {
-        console.error('Error:', error);
-        mostrarMensaje('❌ Error de conexión con el servidor', 'error');
+        console.error('❌ Error en subirImagen:', error);
+        mostrarMensaje(`❌ Error: ${error.message}`, 'error');
       } finally {
         // Restaurar botón
         btnSubir.innerHTML = textoOriginal;
@@ -828,7 +864,7 @@ import Layout from '../layout/Layout.astro';
       
       setTimeout(() => {
         mensajeDiv.style.display = 'none';
-      }, 4000);
+      }, 5000);
     }
     
     function mostrarError(texto) {
@@ -837,6 +873,10 @@ import Layout from '../layout/Layout.astro';
         <div style="text-align: center; color: #991b1b; padding: 60px;">
           <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
           <p>${texto}</p>
+          <p style="font-size: 0.9rem; margin-top: 10px;">
+            Verifica que el servidor esté funcionando en:<br>
+            <code>${BACKEND_URL}/health</code>
+          </p>
         </div>
       `;
     }
@@ -904,6 +944,27 @@ import Layout from '../layout/Layout.astro';
           mostrarCarrusel();
           mostrarMiniaturas();
           mostrarListaImagenes();
+        }
+      });
+      
+      // Permitir navegación con teclado
+      document.addEventListener('keydown', function(e) {
+        if (imagenes.length === 0) return;
+        
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          if (imagenActualIndex > 0) {
+            imagenActualIndex--;
+            mostrarCarrusel();
+            mostrarMiniaturas();
+            mostrarListaImagenes();
+          }
+        } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          if (imagenActualIndex < imagenes.length - 1) {
+            imagenActualIndex++;
+            mostrarCarrusel();
+            mostrarMiniaturas();
+            mostrarListaImagenes();
+          }
         }
       });
       
