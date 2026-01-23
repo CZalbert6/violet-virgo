@@ -38,7 +38,7 @@ import Layout from '../layout/Layout.astro';
       🖼️ Carrusel de Imágenes
     </h1>
     <p style="color: #666; text-align: center; margin-bottom: 40px;">
-      Imágenes almacenadas en PostgreSQL
+      Sube imágenes desde tu dispositivo a PostgreSQL (Base64)
     </p>
 
     <!-- Contenedor principal -->
@@ -47,7 +47,7 @@ import Layout from '../layout/Layout.astro';
       <!-- Sección 1: Carrusel -->
       <div>
         <h2 style="color: #333; margin-bottom: 20px; font-size: 1.5rem;">
-          📸 Vista Previa
+          📸 Vista Previa del Carrusel
         </h2>
         
         <!-- Carrusel -->
@@ -166,10 +166,10 @@ import Layout from '../layout/Layout.astro';
         "></div>
       </div>
 
-      <!-- Sección 2: Subir imágenes -->
+      <!-- Sección 2: Subir imágenes DESDE DISPOSITIVO -->
       <div>
         <h2 style="color: #333; margin-bottom: 20px; font-size: 1.5rem;">
-          📤 Subir Nueva Imagen
+          📤 Subir Imagen desde tu Dispositivo
         </h2>
         
         <div style="
@@ -179,96 +179,149 @@ import Layout from '../layout/Layout.astro';
           box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
           border: 1px solid #e2e8f0;
         ">
-          <form id="formSubir">
-            <!-- Campo 1: Nombre -->
-            <div style="margin-bottom: 20px;">
-              <label style="
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: #555;
-              ">
-                📝 Nombre de la imagen *
-              </label>
+          <!-- Selector de archivos -->
+          <div style="margin-bottom: 25px;">
+            <label style="
+              display: block;
+              margin-bottom: 8px;
+              font-weight: 600;
+              color: #555;
+            ">
+              📁 Selecciona una imagen *
+            </label>
+            
+            <div style="
+              border: 2px dashed #3b82f6;
+              border-radius: 10px;
+              padding: 40px 20px;
+              text-align: center;
+              background: #f0f9ff;
+              cursor: pointer;
+              transition: all 0.3s;
+            "
+            id="dropZone"
+            onmouseenter="this.style.background='#e0f2fe'; this.style.borderColor='#2563eb';"
+            onmouseleave="this.style.background='#f0f9ff'; this.style.borderColor='#3b82f6';">
               <input 
-                type="text" 
-                id="inputNombre"
-                placeholder="Ej: Paisaje de montaña.jpg"
-                style="
-                  width: 100%;
-                  padding: 12px 15px;
-                  border: 2px solid #e2e8f0;
-                  border-radius: 8px;
-                  font-size: 16px;
-                  transition: all 0.3s;
-                "
-                required
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
-                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
+                type="file" 
+                id="inputArchivo"
+                accept="image/*"
+                style="display: none;"
               >
-              <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                Nombre descriptivo para identificar la imagen
+              
+              <div style="font-size: 48px; margin-bottom: 15px; color: #3b82f6;">
+                📤
+              </div>
+              <div style="font-weight: 600; color: #1e40af; margin-bottom: 10px;">
+                Haz clic o arrastra una imagen aquí
+              </div>
+              <div style="color: #475569; font-size: 0.9rem; margin-bottom: 15px;">
+                Formatos aceptados: JPG, PNG, GIF, WebP
+              </div>
+              <div style="color: #64748b; font-size: 0.85rem;">
+                Máximo 2MB por imagen
               </div>
             </div>
             
-            <!-- Campo 2: URL -->
-            <div style="margin-bottom: 25px;">
-              <label style="
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 600;
-                color: #555;
-              ">
-                🔗 URL de la imagen *
-              </label>
-              <input 
-                type="url" 
-                id="inputUrl"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                style="
-                  width: 100%;
-                  padding: 12px 15px;
-                  border: 2px solid #e2e8f0;
-                  border-radius: 8px;
-                  font-size: 16px;
-                  transition: all 0.3s;
-                "
-                required
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
-                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
-              >
-              <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                URL completa de la imagen (jpg, png, gif, webp, svg)
+            <!-- Vista previa de la imagen seleccionada -->
+            <div id="vistaPreviaContainer" style="
+              margin-top: 20px;
+              display: none;
+              text-align: center;
+            ">
+              <div style="font-weight: 600; color: #555; margin-bottom: 10px;">
+                📋 Vista previa:
               </div>
+              <div id="vistaPrevia" style="
+                max-width: 200px;
+                max-height: 200px;
+                margin: 0 auto;
+                border-radius: 8px;
+                overflow: hidden;
+                border: 2px solid #e2e8f0;
+              "></div>
+              <div id="infoArchivo" style="
+                margin-top: 10px;
+                color: #666;
+                font-size: 0.9rem;
+              "></div>
             </div>
-            
-            <!-- Botón de enviar -->
-            <button 
-              type="submit"
-              id="btnSubir"
+          </div>
+          
+          <!-- Campo para nombre -->
+          <div style="margin-bottom: 25px;">
+            <label style="
+              display: block;
+              margin-bottom: 8px;
+              font-weight: 600;
+              color: #555;
+            ">
+              📝 Nombre para la imagen *
+            </label>
+            <input 
+              type="text" 
+              id="inputNombre"
+              placeholder="Ej: Mi foto de vacaciones"
               style="
-                background: linear-gradient(135deg, #10b981, #059669);
-                color: white;
-                padding: 15px 30px;
-                border: none;
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e2e8f0;
                 border-radius: 8px;
                 font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                width: 100%;
                 transition: all 0.3s;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
               "
-              onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(16, 185, 129, 0.4)';"
-              onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+              required
+              onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
+              onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
             >
-              <span>📤</span>
-              <span>Subir al Carrusel</span>
-            </button>
-          </form>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+              Nombre descriptivo para identificar la imagen
+            </div>
+          </div>
+          
+          <!-- Botón de subir -->
+          <button 
+            id="btnSubir"
+            style="
+              background: linear-gradient(135deg, #10b981, #059669);
+              color: white;
+              padding: 15px 30px;
+              border: none;
+              border-radius: 8px;
+              font-size: 16px;
+              font-weight: 600;
+              cursor: pointer;
+              width: 100%;
+              transition: all 0.3s;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+            "
+            onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(16, 185, 129, 0.4)';"
+            onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+            disabled
+          >
+            <span>📤</span>
+            <span>Subir Imagen a PostgreSQL</span>
+          </button>
+          
+          <!-- Barra de progreso -->
+          <div id="barraProgreso" style="
+            margin-top: 20px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+          ">
+            <div id="progreso" style="
+              height: 100%;
+              background: #3b82f6;
+              width: 0%;
+              transition: width 0.3s;
+            "></div>
+          </div>
           
           <!-- Mensaje de resultado -->
           <div id="mensajeResultado" style="
@@ -284,7 +337,7 @@ import Layout from '../layout/Layout.astro';
         <!-- Lista de imágenes existentes -->
         <div style="margin-top: 30px;">
           <h3 style="color: #333; margin-bottom: 15px; font-size: 1.2rem;">
-            🗂️ Imágenes en la base de datos
+            🗂️ Imágenes en la Base de Datos
           </h3>
           <div id="listaImagenes" style="
             background: #f8fafc;
@@ -311,6 +364,9 @@ import Layout from '../layout/Layout.astro';
     const BACKEND_URL = 'https://violet-virgo-production.up.railway.app';
     let imagenes = [];
     let imagenActualIndex = 0;
+    let archivoSeleccionado = null;
+    let imagenBase64 = '';
+    let tipoMime = '';
     
     // ====================
     // FUNCIONES PRINCIPALES
@@ -328,6 +384,8 @@ import Layout from '../layout/Layout.astro';
           console.log(`✅ ${imagenes.length} imágenes cargadas`);
           
           if (imagenes.length > 0) {
+            // Para cada imagen, cargar el Base64
+            await cargarImagenesCompletas();
             mostrarCarrusel();
             mostrarMiniaturas();
             mostrarListaImagenes();
@@ -343,7 +401,29 @@ import Layout from '../layout/Layout.astro';
       }
     }
     
-    // 2. Mostrar carrusel vacío
+    // 2. Cargar imágenes completas con Base64
+    async function cargarImagenesCompletas() {
+      const nuevasImagenes = [];
+      
+      for (const imagen of imagenes) {
+        try {
+          const respuesta = await fetch(`${BACKEND_URL}/api/carrusel/${imagen.id}`);
+          const datos = await respuesta.json();
+          
+          if (datos.success && datos.imagen.imagen_base64) {
+            // Crear URL temporal para la imagen
+            imagen.dataUrl = datos.imagen.imagen_base64;
+            nuevasImagenes.push(imagen);
+          }
+        } catch (error) {
+          console.error(`Error cargando imagen ${imagen.id}:`, error);
+        }
+      }
+      
+      imagenes = nuevasImagenes;
+    }
+    
+    // 3. Mostrar carrusel vacío
     function mostrarCarruselVacio() {
       document.getElementById('sinImagenes').style.display = 'block';
       document.getElementById('imagenActual').style.display = 'none';
@@ -368,7 +448,7 @@ import Layout from '../layout/Layout.astro';
       `;
     }
     
-    // 3. Mostrar imagen en el carrusel
+    // 4. Mostrar imagen en el carrusel
     function mostrarCarrusel() {
       if (imagenes.length === 0) {
         mostrarCarruselVacio();
@@ -381,7 +461,7 @@ import Layout from '../layout/Layout.astro';
       document.getElementById('sinImagenes').style.display = 'none';
       document.getElementById('imagenActual').style.display = 'block';
       
-      // Mostrar imagen
+      // Mostrar imagen desde Base64
       document.getElementById('imagenActual').innerHTML = `
         <div style="
           width: 100%;
@@ -392,7 +472,7 @@ import Layout from '../layout/Layout.astro';
           background: white;
         ">
           <img 
-            src="${imagen.imagen_url}" 
+            src="${imagen.dataUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="50" font-family="Arial" font-size="10" text-anchor="middle" fill="%2394a3b8">Imagen no disponible</text></svg>'}" 
             alt="${imagen.nombre}"
             style="
               max-width: 90%;
@@ -401,7 +481,6 @@ import Layout from '../layout/Layout.astro';
               border-radius: 10px;
               box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             "
-            onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" fill=\"%23f1f5f9\"/><text x=\"50\" y=\"50\" font-family=\"Arial\" font-size=\"10\" text-anchor=\"middle\" fill=\"%2394a3b8\">Error cargando imagen</text></svg>';"
           >
         </div>
         <div style="
@@ -415,7 +494,10 @@ import Layout from '../layout/Layout.astro';
           text-align: center;
         ">
           <div style="font-weight: 600; margin-bottom: 5px;">${imagen.nombre}</div>
-          <div style="font-size: 0.8rem; opacity: 0.8;">Subida el: ${imagen.fecha || 'Fecha no disponible'}</div>
+          <div style="font-size: 0.8rem; opacity: 0.8;">
+            ${imagen.tamano ? `Tamaño: ${(imagen.tamano / 1024).toFixed(2)} KB` : ''}
+            ${imagen.fecha ? ` | Subida: ${imagen.fecha}` : ''}
+          </div>
         </div>
       `;
       
@@ -434,7 +516,7 @@ import Layout from '../layout/Layout.astro';
       btnSiguiente.style.background = btnSiguiente.disabled ? '#cbd5e1' : '#3b82f6';
     }
     
-    // 4. Mostrar miniaturas
+    // 5. Mostrar miniaturas
     function mostrarMiniaturas() {
       const container = document.getElementById('miniaturasContainer');
       container.innerHTML = '';
@@ -456,10 +538,9 @@ import Layout from '../layout/Layout.astro';
         
         miniatura.innerHTML = `
           <img 
-            src="${imagen.imagen_url}" 
+            src="${imagen.dataUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="50" font-family="Arial" font-size="10" text-anchor="middle" fill="%2394a3b8">?</text></svg>'}" 
             alt="Miniatura"
             style="width: 100%; height: 100%; object-fit: cover;"
-            onerror="this.onerror=null; this.style.display='none';"
           >
         `;
         
@@ -487,7 +568,7 @@ import Layout from '../layout/Layout.astro';
       });
     }
     
-    // 5. Mostrar lista de imágenes
+    // 6. Mostrar lista de imágenes
     function mostrarListaImagenes() {
       const container = document.getElementById('listaImagenes');
       
@@ -504,6 +585,8 @@ import Layout from '../layout/Layout.astro';
       let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
       
       imagenes.forEach((imagen, index) => {
+        const tamanoKB = imagen.tamano ? (imagen.tamano / 1024).toFixed(2) : '?';
+        
         html += `
           <div 
             onclick="seleccionarImagen(${index})"
@@ -530,10 +613,9 @@ import Layout from '../layout/Layout.astro';
               background: #f1f5f9;
             ">
               <img 
-                src="${imagen.imagen_url}" 
+                src="${imagen.dataUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="50" font-family="Arial" font-size="10" text-anchor="middle" fill="%2394a3b8">?</text></svg>'}" 
                 alt="Miniatura"
                 style="width: 100%; height: 100%; object-fit: cover;"
-                onerror="this.onerror=null; this.style.display='none';"
               >
             </div>
             <div style="flex: 1; min-width: 0;">
@@ -541,7 +623,8 @@ import Layout from '../layout/Layout.astro';
                 ${imagen.nombre}
               </div>
               <div style="font-size: 0.8rem; color: #666;">
-                ${imagen.fecha ? `Fecha: ${imagen.fecha}` : ''}
+                ${imagen.tipo_mime || 'Imagen'} | ${tamanoKB} KB
+                ${imagen.fecha ? ` | ${imagen.fecha}` : ''}
               </div>
             </div>
             <div style="
@@ -566,7 +649,7 @@ import Layout from '../layout/Layout.astro';
       container.innerHTML = html;
     }
     
-    // 6. Seleccionar imagen desde la lista
+    // 7. Seleccionar imagen desde la lista
     window.seleccionarImagen = function(index) {
       imagenActualIndex = index;
       mostrarCarrusel();
@@ -574,53 +657,142 @@ import Layout from '../layout/Layout.astro';
       mostrarListaImagenes();
     };
     
-    // 7. Subir nueva imagen
-    async function subirImagen(event) {
-      event.preventDefault();
+    // 8. Convertir archivo a Base64
+    function convertirABase64(archivo) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          resolve(e.target.result);
+        };
+        
+        reader.onerror = function(error) {
+          reject(error);
+        };
+        
+        reader.readAsDataURL(archivo);
+      });
+    }
+    
+    // 9. Manejar selección de archivo
+    function manejarSeleccionArchivo(event) {
+      const archivo = event.target.files[0];
+      
+      if (!archivo) return;
+      
+      // Validar tipo de archivo
+      if (!archivo.type.startsWith('image/')) {
+        mostrarMensaje('❌ El archivo debe ser una imagen', 'error');
+        return;
+      }
+      
+      // Validar tamaño (máximo 2MB)
+      const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+      if (archivo.size > MAX_SIZE) {
+        mostrarMensaje(`❌ La imagen es muy grande. Máximo 2MB (tienes: ${(archivo.size / 1024 / 1024).toFixed(2)}MB)`, 'error');
+        return;
+      }
+      
+      archivoSeleccionado = archivo;
+      
+      // Mostrar vista previa
+      const vistaPreviaContainer = document.getElementById('vistaPreviaContainer');
+      const vistaPrevia = document.getElementById('vistaPrevia');
+      const infoArchivo = document.getElementById('infoArchivo');
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        vistaPrevia.innerHTML = `
+          <img src="${e.target.result}" alt="Vista previa" style="width: 100%; height: 100%; object-fit: cover;">
+        `;
+        
+        infoArchivo.innerHTML = `
+          ${archivo.name}<br>
+          ${(archivo.size / 1024).toFixed(2)} KB | ${archivo.type}
+        `;
+        
+        vistaPreviaContainer.style.display = 'block';
+        
+        // Habilitar botón de subir
+        document.getElementById('btnSubir').disabled = false;
+        
+        // Generar nombre automático si el campo está vacío
+        const nombreInput = document.getElementById('inputNombre');
+        if (!nombreInput.value.trim()) {
+          nombreInput.value = archivo.name.replace(/\.[^/.]+$/, ""); // Quitar extensión
+        }
+        
+        // Guardar Base64 para enviar
+        imagenBase64 = e.target.result;
+        tipoMime = archivo.type;
+      };
+      
+      reader.readAsDataURL(archivo);
+    }
+    
+    // 10. Subir imagen al servidor
+    async function subirImagen() {
+      if (!archivoSeleccionado || !imagenBase64) {
+        mostrarMensaje('❌ Primero selecciona una imagen', 'error');
+        return;
+      }
       
       const nombre = document.getElementById('inputNombre').value.trim();
-      const url = document.getElementById('inputUrl').value.trim();
+      if (!nombre) {
+        mostrarMensaje('❌ Ingresa un nombre para la imagen', 'error');
+        return;
+      }
+      
       const btnSubir = document.getElementById('btnSubir');
-      const mensajeDiv = document.getElementById('mensajeResultado');
+      const barraProgreso = document.getElementById('barraProgreso');
+      const progreso = document.getElementById('progreso');
       
-      // Validaciones
-      if (!nombre || !url) {
-        mostrarMensaje('❌ Nombre y URL son obligatorios', 'error');
-        return;
-      }
-      
-      // Validar formato de URL de imagen
-      const formatosValidos = /\.(jpeg|jpg|png|gif|webp|svg)$/i;
-      if (!formatosValidos.test(url)) {
-        mostrarMensaje('❌ URL debe ser una imagen (jpg, png, gif, webp, svg)', 'error');
-        return;
-      }
+      // Configurar progreso
+      barraProgreso.style.display = 'block';
+      progreso.style.width = '30%';
       
       // Deshabilitar botón
       const textoOriginal = btnSubir.innerHTML;
-      btnSubir.innerHTML = '⏳ Subiendo...';
+      btnSubir.innerHTML = '⏳ Convirtiendo a Base64...';
       btnSubir.disabled = true;
       
       try {
+        progreso.style.width = '60%';
+        btnSubir.innerHTML = '⏳ Subiendo a PostgreSQL...';
+        
+        // Enviar al servidor
         const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify({
             nombre: nombre,
-            imagen_url: url
+            imagen_base64: imagenBase64,
+            tipo_mime: tipoMime
           })
         });
+        
+        progreso.style.width = '90%';
         
         const datos = await respuesta.json();
         
         if (datos.success) {
+          progreso.style.width = '100%';
           mostrarMensaje(`✅ Imagen "${datos.imagen.nombre}" subida exitosamente`, 'success');
           
           // Limpiar formulario
-          document.getElementById('formSubir').reset();
+          limpiarFormulario();
           
           // Recargar imágenes
           await cargarImagenes();
+          
+          // Ocultar barra de progreso después de 1 segundo
+          setTimeout(() => {
+            barraProgreso.style.display = 'none';
+            progreso.style.width = '0%';
+          }, 1000);
         } else {
           mostrarMensaje(`❌ Error: ${datos.message || 'Error al subir'}`, 'error');
         }
@@ -634,7 +806,18 @@ import Layout from '../layout/Layout.astro';
       }
     }
     
-    // 8. Mostrar mensajes
+    // 11. Limpiar formulario
+    function limpiarFormulario() {
+      document.getElementById('inputNombre').value = '';
+      document.getElementById('inputArchivo').value = '';
+      document.getElementById('vistaPreviaContainer').style.display = 'none';
+      document.getElementById('btnSubir').disabled = true;
+      archivoSeleccionado = null;
+      imagenBase64 = '';
+      tipoMime = '';
+    }
+    
+    // 12. Mostrar mensajes
     function mostrarMensaje(texto, tipo) {
       const mensajeDiv = document.getElementById('mensajeResultado');
       mensajeDiv.textContent = texto;
@@ -666,8 +849,44 @@ import Layout from '../layout/Layout.astro';
       // Cargar imágenes al inicio
       cargarImagenes();
       
-      // Configurar formulario
-      document.getElementById('formSubir').addEventListener('submit', subirImagen);
+      // Configurar selector de archivos
+      const inputArchivo = document.getElementById('inputArchivo');
+      const dropZone = document.getElementById('dropZone');
+      const btnSubir = document.getElementById('btnSubir');
+      
+      // Click en la zona de drop
+      dropZone.addEventListener('click', () => {
+        inputArchivo.click();
+      });
+      
+      // Cambio en el input de archivo
+      inputArchivo.addEventListener('change', manejarSeleccionArchivo);
+      
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.background = '#dbeafe';
+        dropZone.style.borderColor = '#1d4ed8';
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.style.background = '#f0f9ff';
+        dropZone.style.borderColor = '#3b82f6';
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.background = '#f0f9ff';
+        dropZone.style.borderColor = '#3b82f6';
+        
+        if (e.dataTransfer.files.length) {
+          inputArchivo.files = e.dataTransfer.files;
+          manejarSeleccionArchivo({ target: inputArchivo });
+        }
+      });
+      
+      // Botón de subir
+      btnSubir.addEventListener('click', subirImagen);
       
       // Configurar controles del carrusel
       document.getElementById('btnAnterior').addEventListener('click', function() {
