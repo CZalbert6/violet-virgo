@@ -85,6 +85,12 @@ const initDB = async () => {
       console.log('✅ Columna tamano agregada');
     }
     
+    // CORRECCIÓN: Agregar created_at si falta
+    if (!columns.includes('created_at')) {
+      await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN created_at TIMESTAMP DEFAULT NOW()`);
+      console.log('✅ Columna created_at agregada');
+    }
+    
   } catch (error) {
     console.error('❌ Error inicializando DB:', error);
     
@@ -275,13 +281,14 @@ app.get('/api/mensajes', async (req, res) => {
 // RUTAS NUEVAS PARA EL CARRUSEL CON BASE64
 // ============================================
 
-// 🔄 GET /api/carrusel - Obtener todas las imágenes (solo metadata)
+// 🔄 GET /api/carrusel - Obtener todas las imágenes (solo metadata) - CORREGIDO
 app.get('/api/carrusel', async (req, res) => {
   try {
     console.log('📸 GET /api/carrusel - Solicitando imágenes');
     
+    // CORREGIDO: Consulta sin created_at
     const result = await pool.query(`
-      SELECT id, nombre, tipo_mime, tamano, fecha, created_at 
+      SELECT id, nombre, tipo_mime, tamano, fecha 
       FROM carrusel_imagenes 
       ORDER BY id DESC
     `);
@@ -295,25 +302,51 @@ app.get('/api/carrusel', async (req, res) => {
   } catch (error) {
     console.error('❌ Error /api/carrusel:', error);
     
-    // Si hay error de columna, intentar reparar
+    // Si hay error de columna, intentar consulta alternativa
     if (error.message.includes('column') && error.message.includes('does not exist')) {
-      console.log('🔄 Reparando tabla automáticamente...');
+      console.log('🔄 Intentando consulta alternativa...');
       try {
-        await initDB();
-        // Reintentar la consulta
-        const result = await pool.query(`
-          SELECT id, nombre, tipo_mime, tamano, fecha, created_at 
+        // Intentar con menos columnas
+        const columnNames = ['id', 'nombre', 'fecha']; // Columnas básicas que deberían existir
+        
+        // Construir query dinámica basada en columnas disponibles
+        let availableColumns = [];
+        try {
+          const columnCheck = await pool.query(`
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'carrusel_imagenes'
+          `);
+          availableColumns = columnCheck.rows.map(row => row.column_name);
+          console.log('📋 Columnas disponibles:', availableColumns);
+        } catch (e) {
+          availableColumns = ['id', 'nombre']; // Columnas mínimas
+        }
+        
+        // Filtrar columnas que realmente existen
+        const safeColumns = availableColumns.filter(col => 
+          ['id', 'nombre', 'tipo_mime', 'tamano', 'fecha', 'created_at'].includes(col)
+        );
+        
+        if (safeColumns.length === 0) {
+          safeColumns.push('id', 'nombre'); // Columnas mínimas
+        }
+        
+        const query = `
+          SELECT ${safeColumns.join(', ')} 
           FROM carrusel_imagenes 
           ORDER BY id DESC
-        `);
+        `;
+        
+        const result = await pool.query(query);
         
         return res.json({ 
           success: true, 
           imagenes: result.rows || [],
-          message: 'Tabla reparada automáticamente'
+          message: 'Consulta realizada con columnas disponibles'
         });
-      } catch (repairError) {
-        console.error('❌ Error al reparar:', repairError);
+      } catch (retryError) {
+        console.error('❌ Error al reintentar:', retryError);
       }
     }
     
@@ -427,12 +460,13 @@ app.post('/api/carrusel', async (req, res) => {
   }
 });
 
-// 🖼️ GET /api/carrusel/:id - Obtener imagen completa (con Base64)
+// 🖼️ GET /api/carrusel/:id - Obtener imagen completa (con Base64) - CORREGIDO
 app.get('/api/carrusel/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🖼️ GET /api/carrusel/${id}`);
     
+    // CORREGIDO: Consulta sin created_at
     const result = await pool.query(`
       SELECT id, nombre, imagen_base64, tipo_mime, tamano, fecha 
       FROM carrusel_imagenes 
