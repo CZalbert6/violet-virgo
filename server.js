@@ -91,6 +91,17 @@ const initDB = async () => {
       console.log('✅ Columna created_at agregada');
     }
     
+    // CORRECCIÓN: Intentar quitar NOT NULL constraint de imagen_url si existe
+    try {
+      await pool.query(`
+        ALTER TABLE carrusel_imagenes 
+        ALTER COLUMN imagen_url DROP NOT NULL
+      `);
+      console.log('✅ NOT NULL constraint removido de imagen_url (si existía)');
+    } catch (constraintError) {
+      console.log('ℹ️ No se pudo remover NOT NULL (puede que no exista o ya esté removido):', constraintError.message);
+    }
+    
   } catch (error) {
     console.error('❌ Error inicializando DB:', error);
     
@@ -358,7 +369,7 @@ app.get('/api/carrusel', async (req, res) => {
   }
 });
 
-// 📤 POST /api/carrusel - Subir nueva imagen (BASE64) - ROBUSTO
+// 📤 POST /api/carrusel - Subir nueva imagen (BASE64) - CORREGIDO CON imagen_url
 app.post('/api/carrusel', async (req, res) => {
   console.log('📨 POST /api/carrusel - Subiendo imagen (Base64)');
   
@@ -393,11 +404,11 @@ app.post('/api/carrusel', async (req, res) => {
       });
     }
     
-    // Intentar inserción
+    // Intentar inserción - CORREGIDO: Incluir imagen_url
     try {
       const query = `
-        INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano) 
-        VALUES ($1, $2, $3, $4) 
+        INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
+        VALUES ($1, $2, $3, $4, $5) 
         RETURNING id, nombre, tipo_mime, tamano, fecha
       `;
       
@@ -405,7 +416,8 @@ app.post('/api/carrusel', async (req, res) => {
         nombre.trim(), 
         imagen_base64,
         tipo_mime || 'image/jpeg',
-        tamano
+        tamano,
+        ''  // String vacío para imagen_url (NO NULL)
       ]);
       
       console.log(`✅ Imagen subida: ${result.rows[0].nombre} (${result.rows[0].tamano} bytes)`);
@@ -417,16 +429,86 @@ app.post('/api/carrusel', async (req, res) => {
       });
       
     } catch (dbError) {
-      // Si hay error de columna, reparar tabla y reintentar
+      console.error('❌ Error en INSERT:', dbError.message);
+      
+      // Si hay error de NOT NULL en imagen_url, intentar con initDB primero
+      if (dbError.message.includes('imagen_url') && dbError.message.includes('not-null')) {
+        console.log('🔄 Error NOT NULL en imagen_url, intentando reparar...');
+        
+        try {
+          // Primero intentar quitar el NOT NULL constraint
+          await pool.query(`
+            ALTER TABLE carrusel_imagenes 
+            ALTER COLUMN imagen_url DROP NOT NULL
+          `);
+          console.log('✅ NOT NULL constraint removido, reintentando inserción...');
+          
+          // Reintentar inserción
+          const retryQuery = `
+            INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING id, nombre, tipo_mime, tamano, fecha
+          `;
+          
+          const retryResult = await pool.query(retryQuery, [
+            nombre.trim(), 
+            imagen_base64,
+            tipo_mime || 'image/jpeg',
+            tamano,
+            ''
+          ]);
+          
+          console.log(`✅ Imagen subida (después de quitar NOT NULL): ${retryResult.rows[0].nombre}`);
+          
+          return res.json({
+            success: true,
+            message: 'Imagen agregada al carrusel',
+            imagen: retryResult.rows[0]
+          });
+          
+        } catch (constraintError) {
+          console.error('❌ Error al quitar NOT NULL:', constraintError.message);
+          
+          // Si no se puede quitar NOT NULL, intentar con valor por defecto
+          try {
+            const fallbackQuery = `
+              INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
+              VALUES ($1, $2, $3, $4, $5) 
+              RETURNING id, nombre, tipo_mime, tamano, fecha
+            `;
+            
+            const fallbackResult = await pool.query(fallbackQuery, [
+              nombre.trim(), 
+              imagen_base64,
+              tipo_mime || 'image/jpeg',
+              tamano,
+              'no_url_provided'  // Valor por defecto diferente
+            ]);
+            
+            console.log(`✅ Imagen subida (con valor por defecto): ${fallbackResult.rows[0].nombre}`);
+            
+            return res.json({
+              success: true,
+              message: 'Imagen agregada al carrusel',
+              imagen: fallbackResult.rows[0]
+            });
+            
+          } catch (fallbackError) {
+            console.error('❌ Error en fallback:', fallbackError.message);
+          }
+        }
+      }
+      
+      // Si hay error de columna faltante, reparar tabla
       if (dbError.message.includes('column') && dbError.message.includes('does not exist')) {
         console.log('🔄 Error de columna, reparando tabla...');
         
-        await initDB(); // Esto reparará las columnas faltantes
+        await initDB();
         
-        // Reintentar inserción
+        // Reintentar inserción después de reparar
         const retryQuery = `
-          INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano) 
-          VALUES ($1, $2, $3, $4) 
+          INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
+          VALUES ($1, $2, $3, $4, $5) 
           RETURNING id, nombre, tipo_mime, tamano, fecha
         `;
         
@@ -434,7 +516,8 @@ app.post('/api/carrusel', async (req, res) => {
           nombre.trim(), 
           imagen_base64,
           tipo_mime || 'image/jpeg',
-          tamano
+          tamano,
+          ''
         ]);
         
         console.log(`✅ Imagen subida (después de reparar): ${retryResult.rows[0].nombre}`);
@@ -446,7 +529,7 @@ app.post('/api/carrusel', async (req, res) => {
         });
       }
       
-      // Si no es error de columna, propagar el error
+      // Si no es error conocido, propagar el error
       throw dbError;
     }
     
