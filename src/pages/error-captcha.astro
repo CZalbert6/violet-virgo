@@ -84,19 +84,35 @@ import Layout from '../layout/Layout.astro';
         opacity: 0.1;
       "></div>
       
-      <!-- Animación Lottie 404 -->
-      <div id="lottie-container" style="
-        width: 200px;
+      <!-- Animación Lottie 404 - CON IFRAME CORREGIDO -->
+      <div style="
+        width: 250px;
         height: 200px;
         margin: 0 auto 10px;
-      "></div>
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        background: transparent;
+      ">
+        <iframe 
+          src="https://lottie.host/embed/2997cf11-acbe-4bf2-8205-19c0e960a613/VptfWLwL6Y.lottie"
+          style="
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+          "
+          title="Animación Lottie Error 404"
+        ></iframe>
+      </div>
       
       <!-- Título -->
       <h1 style="
-        font-size: 2.5rem;
+        font-size: 2.2rem;
         color: #1f2937;
         margin-bottom: 10px;
         position: relative;
+        margin-top: 10px;
       ">
         ¡Captcha Requerido!
       </h1>
@@ -106,26 +122,73 @@ import Layout from '../layout/Layout.astro';
         color: #6b7280;
         font-size: 1.1rem;
         line-height: 1.6;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
         position: relative;
       ">
-        Debes completar el verificador de seguridad para continuar.
+        Completa el verificador de seguridad para continuar.
       </p>
       
       <!-- Solución simplificada -->
       <div style="
-        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-        border-radius: 15px;
+        background: #f8fafc;
+        border-radius: 12px;
         padding: 20px;
-        margin-bottom: 30px;
-        border: 2px dashed #10b981;
+        margin-bottom: 25px;
+        border-left: 4px solid #3b82f6;
         position: relative;
       ">
-        <h3 style="color: #065f46; margin-top: 0; margin-bottom: 10px;">¿Qué hacer?</h3>
-        <div style="color: #047857; text-align: center;">
-          1. Regresa al formulario<br>
-          2. Completa el captcha<br>
-          3. Vuelve a intentar
+        <h3 style="color: #1e40af; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
+          📝 Pasos a seguir:
+        </h3>
+        <div style="color: #475569; text-align: left; padding-left: 10px;">
+          <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">1</span>
+            <span>Regresa al formulario principal</span>
+          </div>
+          <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">2</span>
+            <span>Completa el captcha</span>
+          </div>
+          <div style="display: flex; align-items: flex-start;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">3</span>
+            <span>Vuelve a intentar enviar</span>
+          </div>
         </div>
       </div>
       
@@ -136,7 +199,7 @@ import Layout from '../layout/Layout.astro';
           style="
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
-            padding: 15px 30px;
+            padding: 15px 25px;
             border: none;
             border-radius: 50px;
             font-size: 16px;
@@ -147,11 +210,13 @@ import Layout from '../layout/Layout.astro';
             gap: 10px;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            flex: 1;
+            justify-content: center;
           "
           onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(59, 130, 246, 0.6)';"
           onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.4)';"
         >
-          ↩️ Volver al Formulario
+          ↩️ Volver
         </button>
         
         <button 
@@ -169,86 +234,71 @@ import Layout from '../layout/Layout.astro';
             align-items: center;
             gap: 10px;
             transition: all 0.3s;
+            flex: 1;
+            justify-content: center;
           "
           onmouseenter="this.style.background='#3b82f6'; this.style.color='white'; this.style.transform='translateY(-2px)';"
           onmouseleave="this.style.background='white'; this.style.color='#3b82f6'; this.style.transform='translateY(0)';"
         >
-          🏠 Ir al Inicio
+          🏠 Inicio
         </button>
       </div>
       
-      <!-- Contador simplificado -->
+      <!-- Contador -->
       <div style="
         margin-top: 25px;
-        color: #9ca3af;
+        padding: 15px;
+        background: #fef3c7;
+        border-radius: 10px;
+        color: #92400e;
         font-size: 14px;
         position: relative;
+        border: 1px dashed #f59e0b;
       ">
-        <div style="
-          font-size: 2rem;
-          font-weight: bold;
-          color: #ef4444;
-          margin-bottom: 5px;
-          font-family: monospace;
-        ">
-          <span id="contador">10</span>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span style="
+            background: #dc2626;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2rem;
+            animation: latido 1s infinite;
+          " id="contador">10</span>
+          <span>Redirección automática en <span id="segundos" style="font-weight: bold;">10</span> segundos</span>
         </div>
-        <p>Redirección en <span id="segundos">10</span> segundos</p>
       </div>
     </div>
   </div>
 
   <style>
     @keyframes aparecer {
-      0% { transform: scale(0.5); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
+      0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
     }
     
     @keyframes latido {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
     
     @keyframes brillo {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.7; }
     }
+    
+    @keyframes caer {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+      100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
+    }
   </style>
 
   <script>
-    // Cargar Lottie
-    function cargarLottie() {
-      const container = document.getElementById('lottie-container');
-      
-      // Crear script de Lottie si no existe
-      if (!window.loadAnimation) {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js';
-        script.onload = inicializarLottie;
-        document.head.appendChild(script);
-      } else {
-        inicializarLottie();
-      }
-      
-      function inicializarLottie() {
-        if (window.bodymovin || window.lottie) {
-          const animation = lottie.loadAnimation({
-            container: container,
-            renderer: 'svg',
-            loop: true,
-            autoplay: true,
-            path: 'https://lottie.host/2997cf11-acbe-4bf2-8205-19c0e960a613/VptfWLwL6Y.lottie'
-          });
-          
-          // Ajustar tamaño y posición
-          container.style.width = '200px';
-          container.style.height = '200px';
-          container.style.margin = '0 auto 10px';
-        }
-      }
-    }
-    
     // Contador regresivo
     function iniciarContador() {
       let segundos = 10;
@@ -260,9 +310,10 @@ import Layout from '../layout/Layout.astro';
         contador.textContent = segundos;
         textoSegundos.textContent = segundos;
         
+        // Efecto visual para últimos 3 segundos
         if (segundos <= 3) {
-          contador.style.color = '#dc2626';
-          contador.style.animation = 'brillo 0.5s infinite';
+          contador.style.background = '#ef4444';
+          contador.style.animation = 'latido 0.5s infinite';
         }
         
         if (segundos <= 0) {
@@ -274,7 +325,7 @@ import Layout from '../layout/Layout.astro';
     
     // Botón Regresar
     document.getElementById('btnRegresar').addEventListener('click', function() {
-      if (document.referrer) {
+      if (document.referrer && document.referrer.includes('violet-virgo')) {
         window.history.back();
       } else {
         window.location.href = '/violet-virgo';
@@ -286,14 +337,16 @@ import Layout from '../layout/Layout.astro';
       window.location.href = '/violet-virgo';
     });
     
-    // Inicializar todo cuando cargue la página
+    // Inicializar cuando cargue la página
     document.addEventListener('DOMContentLoaded', function() {
-      cargarLottie();
       iniciarContador();
+      
+      // Crear partículas de fondo
+      crearParticulas();
     });
     
-    // Efecto de partículas simplificado
-    setTimeout(() => {
+    // Función para crear partículas
+    function crearParticulas() {
       const particulas = document.createElement('div');
       particulas.style.cssText = `
         position: fixed;
@@ -302,37 +355,41 @@ import Layout from '../layout/Layout.astro';
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 1;
+        z-index: 0;
+        overflow: hidden;
       `;
       
-      for (let i = 0; i < 15; i++) {
+      // Colores para partículas
+      const colores = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+      
+      for (let i = 0; i < 20; i++) {
         const particula = document.createElement('div');
+        const color = colores[Math.floor(Math.random() * colores.length)];
+        const tamaño = 2 + Math.random() * 4;
+        const duracion = 2 + Math.random() * 3;
+        const retraso = Math.random() * 2;
+        
         particula.style.cssText = `
           position: absolute;
-          width: 4px;
-          height: 4px;
-          background: ${Math.random() > 0.5 ? '#ef4444' : '#fbbf24'};
+          width: ${tamaño}px;
+          height: ${tamaño}px;
+          background: ${color};
           border-radius: 50%;
-          animation: caer ${1 + Math.random() * 2}s linear infinite;
-          top: -10px;
+          animation: caer ${duracion}s linear infinite ${retraso}s;
+          top: -20px;
           left: ${Math.random() * 100}%;
-          opacity: 0.4;
-          animation-delay: ${Math.random() * 2}s;
+          opacity: ${0.2 + Math.random() * 0.3};
+          box-shadow: 0 0 5px ${color};
         `;
+        
         particulas.appendChild(particula);
       }
       
-      document.body.appendChild(particulas);
-      
-      // Agregar estilo para la animación de caída
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes caer {
-          0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
-          100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
-        }
-      `;
-      document.head.appendChild(style);
-    }, 1000);
+      // Insertar antes del contenido principal
+      const contenedorPrincipal = document.querySelector('div[style*="min-height: 80vh"]');
+      if (contenedorPrincipal) {
+        contenedorPrincipal.insertBefore(particulas, contenedorPrincipal.firstChild);
+      }
+    }
   </script>
 </Layout>
