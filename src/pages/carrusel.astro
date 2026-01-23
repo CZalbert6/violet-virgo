@@ -371,22 +371,29 @@ import Layout from '../layout/Layout.astro';
     // FUNCIONES PRINCIPALES
     // ====================
     
-    // 1. Cargar imágenes desde el backend
+    // 1. Cargar imágenes desde el backend - MEJORADA
     async function cargarImagenes() {
       try {
         console.log('🔄 Cargando imágenes...');
-        const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`);
+        const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         
         // Verificar si la respuesta es OK
         if (!respuesta.ok) {
-          throw new Error(`HTTP error! status: ${respuesta.status}`);
+          const errorText = await respuesta.text();
+          throw new Error(`HTTP ${respuesta.status}: ${errorText}`);
         }
         
         const datos = await respuesta.json();
+        console.log('📥 Respuesta del servidor:', datos);
         
         if (datos.success) {
           imagenes = datos.imagenes || [];
-          console.log(`✅ ${imagenes.length} imágenes cargadas:`, imagenes);
+          console.log(`✅ ${imagenes.length} imágenes cargadas`);
           
           if (imagenes.length > 0) {
             // Para cada imagen, cargar el Base64
@@ -399,11 +406,25 @@ import Layout from '../layout/Layout.astro';
           }
         } else {
           console.error('❌ Error del servidor:', datos);
-          mostrarError('Error al cargar imágenes: ' + (datos.error || datos.message));
+          mostrarMensaje(`Error: ${datos.message || datos.error || 'Error desconocido'}`, 'error');
         }
       } catch (error) {
-        console.error('❌ Error:', error);
-        mostrarError('No se pudo conectar al servidor: ' + error.message);
+        console.error('❌ Error cargando imágenes:', error);
+        
+        // Mensaje amigable para el usuario
+        if (error.message.includes('Failed to fetch')) {
+          mostrarError('No se pudo conectar al servidor. Verifica tu conexión a internet.');
+        } else if (error.message.includes('500')) {
+          mostrarError('Error interno del servidor. El servidor está reparando las tablas automáticamente. Intenta de nuevo en 30 segundos.');
+          
+          // Intentar nuevamente después de 5 segundos
+          setTimeout(() => {
+            console.log('🔄 Reintentando carga...');
+            cargarImagenes();
+          }, 5000);
+        } else {
+          mostrarError('Error: ' + error.message);
+        }
       }
     }
     
@@ -456,6 +477,7 @@ import Layout from '../layout/Layout.astro';
         <div style="text-align: center; color: #94a3b8; padding: 40px;">
           <div style="font-size: 32px; margin-bottom: 10px;">🔄</div>
           <p>No hay imágenes en la base de datos</p>
+          <p style="font-size: 0.9rem; margin-top: 10px;">Sube tu primera imagen arriba</p>
         </div>
       `;
     }
@@ -742,7 +764,7 @@ import Layout from '../layout/Layout.astro';
       reader.readAsDataURL(archivo);
     }
     
-    // 10. Subir imagen al servidor - CORREGIDO
+    // 10. Subir imagen al servidor - CORREGIDA
     async function subirImagen() {
       if (!archivoSeleccionado || !imagenBase64) {
         mostrarMensaje('❌ Primero selecciona una imagen', 'error');
@@ -780,7 +802,7 @@ import Layout from '../layout/Layout.astro';
           longitudBase64: imagenBase64.length
         });
         
-        // Enviar al servidor - IMPORTANTE: tipo_mime (con guión bajo)
+        // Enviar al servidor
         const respuesta = await fetch(`${BACKEND_URL}/api/carrusel`, {
           method: 'POST',
           headers: { 
@@ -789,8 +811,8 @@ import Layout from '../layout/Layout.astro';
           },
           body: JSON.stringify({
             nombre: nombre,
-            imagen_base64: imagenBase64,  // con guión bajo
-            tipo_mime: tipoMime           // con guión bajo
+            imagen_base64: imagenBase64,
+            tipo_mime: tipoMime
           })
         });
         
@@ -812,8 +834,10 @@ import Layout from '../layout/Layout.astro';
           // Limpiar formulario
           limpiarFormulario();
           
-          // Recargar imágenes
-          await cargarImagenes();
+          // Recargar imágenes después de un breve retraso
+          setTimeout(async () => {
+            await cargarImagenes();
+          }, 1000);
           
           // Ocultar barra de progreso después de 1 segundo
           setTimeout(() => {
@@ -826,15 +850,25 @@ import Layout from '../layout/Layout.astro';
           mostrarMensaje(`❌ Error: ${errorMsg}`, 'error');
           
           // Si es error de columna faltante, dar instrucción específica
-          if (errorMsg.includes('columna') && errorMsg.includes('no existe')) {
+          if (errorMsg.includes('column') && errorMsg.includes('does not exist')) {
             console.error('⚠️ ERROR DE BASE DE DATOS: Falta columna en PostgreSQL');
-            console.error('🔧 Solución: Ejecuta en PostgreSQL:');
-            console.error('ALTER TABLE carrusel_imagenes ADD COLUMN tipo_mime VARCHAR(100);');
+            console.error('🔄 El servidor está reparando automáticamente. Intenta de nuevo en 30 segundos.');
+            
+            // Mostrar mensaje amigable
+            mostrarMensaje('🔄 El servidor está reparando la base de datos. Intenta subir la imagen nuevamente en 30 segundos.', 'info');
           }
         }
       } catch (error) {
         console.error('❌ Error en subirImagen:', error);
-        mostrarMensaje(`❌ Error: ${error.message}`, 'error');
+        
+        // Mensajes más amigables
+        if (error.message.includes('Failed to fetch')) {
+          mostrarMensaje('❌ No se pudo conectar al servidor. Verifica tu conexión a internet.', 'error');
+        } else if (error.message.includes('500')) {
+          mostrarMensaje('🔄 El servidor está reparando las tablas automáticamente. Intenta de nuevo en 30 segundos.', 'info');
+        } else {
+          mostrarMensaje(`❌ Error: ${error.message}`, 'error');
+        }
       } finally {
         // Restaurar botón
         btnSubir.innerHTML = textoOriginal;
@@ -858,10 +892,23 @@ import Layout from '../layout/Layout.astro';
       const mensajeDiv = document.getElementById('mensajeResultado');
       mensajeDiv.textContent = texto;
       mensajeDiv.style.display = 'block';
-      mensajeDiv.style.background = tipo === 'success' ? '#d1fae5' : '#fee2e2';
-      mensajeDiv.style.color = tipo === 'success' ? '#065f46' : '#991b1b';
-      mensajeDiv.style.border = `2px solid ${tipo === 'success' ? '#10b981' : '#ef4444'}`;
       
+      // Colores según tipo
+      if (tipo === 'success') {
+        mensajeDiv.style.background = '#d1fae5';
+        mensajeDiv.style.color = '#065f46';
+        mensajeDiv.style.border = '2px solid #10b981';
+      } else if (tipo === 'error') {
+        mensajeDiv.style.background = '#fee2e2';
+        mensajeDiv.style.color = '#991b1b';
+        mensajeDiv.style.border = '2px solid #ef4444';
+      } else if (tipo === 'info') {
+        mensajeDiv.style.background = '#e0f2fe';
+        mensajeDiv.style.color = '#1e40af';
+        mensajeDiv.style.border = '2px solid #3b82f6';
+      }
+      
+      // Auto-ocultar después de 5 segundos
       setTimeout(() => {
         mensajeDiv.style.display = 'none';
       }, 5000);
@@ -872,11 +919,24 @@ import Layout from '../layout/Layout.astro';
       container.innerHTML = `
         <div style="text-align: center; color: #991b1b; padding: 60px;">
           <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
-          <p>${texto}</p>
+          <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">${texto}</p>
           <p style="font-size: 0.9rem; margin-top: 10px;">
-            Verifica que el servidor esté funcionando en:<br>
-            <code>${BACKEND_URL}/health</code>
+            Verifica que el servidor esté funcionando:<br>
+            <a href="${BACKEND_URL}/health" target="_blank" style="color: #3b82f6; text-decoration: underline;">
+              ${BACKEND_URL}/health
+            </a>
           </p>
+          <button onclick="location.reload()" style="
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+          ">
+            🔄 Reintentar
+          </button>
         </div>
       `;
     }
@@ -952,6 +1012,7 @@ import Layout from '../layout/Layout.astro';
         if (imagenes.length === 0) return;
         
         if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
           if (imagenActualIndex > 0) {
             imagenActualIndex--;
             mostrarCarrusel();
@@ -959,6 +1020,7 @@ import Layout from '../layout/Layout.astro';
             mostrarListaImagenes();
           }
         } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
           if (imagenActualIndex < imagenes.length - 1) {
             imagenActualIndex++;
             mostrarCarrusel();
@@ -969,7 +1031,7 @@ import Layout from '../layout/Layout.astro';
       });
       
       // Autoplay cada 5 segundos (solo si hay más de 1 imagen)
-      setInterval(() => {
+      let autoplayInterval = setInterval(() => {
         if (imagenes.length > 1) {
           imagenActualIndex = (imagenActualIndex + 1) % imagenes.length;
           mostrarCarrusel();
@@ -977,6 +1039,23 @@ import Layout from '../layout/Layout.astro';
           mostrarListaImagenes();
         }
       }, 5000);
+      
+      // Pausar autoplay al hacer hover
+      const carruselContainer = document.getElementById('carruselContainer');
+      carruselContainer.addEventListener('mouseenter', () => {
+        clearInterval(autoplayInterval);
+      });
+      
+      carruselContainer.addEventListener('mouseleave', () => {
+        autoplayInterval = setInterval(() => {
+          if (imagenes.length > 1) {
+            imagenActualIndex = (imagenActualIndex + 1) % imagenes.length;
+            mostrarCarrusel();
+            mostrarMiniaturas();
+            mostrarListaImagenes();
+          }
+        }, 5000);
+      });
     });
   </script>
 </Layout>

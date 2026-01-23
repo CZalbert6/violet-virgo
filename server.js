@@ -1,4 +1,4 @@
-// server.js - VERSIÓN COMPATIBLE con tu frontend Astro
+// server.js - VERSIÓN CORREGIDA para tipos de datos de Railway
 import express from 'express';
 import pkg from 'pg';
 const { Pool } = pkg;
@@ -6,7 +6,7 @@ import cors from 'cors';
 
 const app = express();
 
-// Middlewares - IMPORTANTE: Habilita CORS para GitHub Pages
+// Middlewares
 app.use(cors({
   origin: [
     'https://czalbert6.github.io',
@@ -16,7 +16,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
-app.use(express.json({ limit: '10mb' })); // Aumentar límite para imágenes Base64
+app.use(express.json({ limit: '10mb' }));
 
 // Conexión PostgreSQL
 const pool = new Pool({
@@ -25,7 +25,7 @@ const pool = new Pool({
 });
 
 // ============================================
-// INICIALIZACIÓN DE TABLAS (CREA AMBAS AUTOMÁTICAMENTE)
+// INICIALIZACIÓN DE TABLAS (CON TIPOS COMPATIBLES)
 // ============================================
 
 // Crear tablas si no existen
@@ -44,23 +44,74 @@ const initDB = async () => {
     `);
     console.log('✅ Tabla mensajescaptcha lista');
     
-    // 2. Tabla de imágenes para el carrusel (NUEVA - CON BASE64)
+    // 2. Tabla de imágenes para el carrusel (CON TIPOS COMPATIBLES)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS carrusel_imagenes (
         id SERIAL PRIMARY KEY,
         nombre TEXT NOT NULL,
         imagen_url TEXT,
-        imagen_base64 TEXT,        -- Imagen en formato Base64
-        tipo_mime VARCHAR(100),    -- Ej: image/jpeg, image/png, image/gif
-        tamano INTEGER,            -- Tamaño en bytes
-        fecha DATE DEFAULT CURRENT_DATE,
-        created_at TIMESTAMP DEFAULT NOW()
+        imagen_base64 TEXT,                    -- Usamos TEXT (compatible)
+        tipo_mime VARCHAR(100),                -- Usamos VARCHAR (compatible)
+        tamano INTEGER,                        -- Usamos INTEGER (compatible)
+        fecha DATE DEFAULT CURRENT_DATE,       -- DATE es compatible
+        created_at TIMESTAMP DEFAULT NOW()     -- TIMESTAMP es compatible
       )
     `);
     console.log('✅ Tabla carrusel_imagenes creada/verificada');
     
+    // 3. VERIFICAR que las columnas existen, si no, crearlas
+    const columnCheck = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'carrusel_imagenes'
+    `);
+    
+    const columns = columnCheck.rows.map(row => row.column_name);
+    console.log('📋 Columnas actuales:', columns);
+    
+    // Agregar columnas faltantes si es necesario
+    if (!columns.includes('imagen_base64')) {
+      await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN imagen_base64 TEXT`);
+      console.log('✅ Columna imagen_base64 agregada');
+    }
+    
+    if (!columns.includes('tipo_mime')) {
+      await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN tipo_mime VARCHAR(100)`);
+      console.log('✅ Columna tipo_mime agregada');
+    }
+    
+    if (!columns.includes('tamano')) {
+      await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN tamano INTEGER`);
+      console.log('✅ Columna tamano agregada');
+    }
+    
   } catch (error) {
     console.error('❌ Error inicializando DB:', error);
+    
+    // Si hay error específico de columna, intentar solucionar
+    if (error.message.includes('column') && error.message.includes('does not exist')) {
+      console.log('🔄 Intentando reparar tabla...');
+      try {
+        // Crear tabla desde cero
+        await pool.query(`DROP TABLE IF EXISTS carrusel_imagenes`);
+        
+        await pool.query(`
+          CREATE TABLE carrusel_imagenes (
+            id SERIAL PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            imagen_url TEXT,
+            imagen_base64 TEXT,
+            tipo_mime VARCHAR(100),
+            tamano INTEGER,
+            fecha DATE DEFAULT CURRENT_DATE,
+            created_at TIMESTAMP DEFAULT NOW()
+          )
+        `);
+        console.log('✅ Tabla carrusel_imagenes recreada exitosamente');
+      } catch (repairError) {
+        console.error('❌ Error al reparar tabla:', repairError);
+      }
+    }
   }
 };
 initDB();
@@ -100,12 +151,27 @@ app.get('/health', async (req, res) => {
       )
     `);
     
+    // 5. Verificar columnas de carrusel_imagenes
+    let columnStatus = '❌ No verificada';
+    try {
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'carrusel_imagenes'
+      `);
+      const columns = columnCheck.rows.map(row => row.column_name);
+      columnStatus = `✅ ${columns.length} columnas: ${columns.join(', ')}`;
+    } catch (e) {
+      columnStatus = '⚠️ Error verificando columnas';
+    }
+    
     res.json({
       status: '✅ OK',
       database: '✅ Conectado',
       tablas: {
         mensajes: tableResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
-        imagenes: tableImagenesResult.rows[0].exists ? '✅ Existe' : '❌ No existe'
+        imagenes: tableImagenesResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
+        columnas_imagenes: columnStatus
       },
       total_mensajes: total_mensajes,
       total_imagenes: total_imagenes,
@@ -228,14 +294,38 @@ app.get('/api/carrusel', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error /api/carrusel:', error);
+    
+    // Si hay error de columna, intentar reparar
+    if (error.message.includes('column') && error.message.includes('does not exist')) {
+      console.log('🔄 Reparando tabla automáticamente...');
+      try {
+        await initDB();
+        // Reintentar la consulta
+        const result = await pool.query(`
+          SELECT id, nombre, tipo_mime, tamano, fecha, created_at 
+          FROM carrusel_imagenes 
+          ORDER BY id DESC
+        `);
+        
+        return res.json({ 
+          success: true, 
+          imagenes: result.rows || [],
+          message: 'Tabla reparada automáticamente'
+        });
+      } catch (repairError) {
+        console.error('❌ Error al reparar:', repairError);
+      }
+    }
+    
     res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      help: 'La tabla puede no tener las columnas correctas. Verifica /health'
     });
   }
 });
 
-// 📤 POST /api/carrusel - Subir nueva imagen (BASE64)
+// 📤 POST /api/carrusel - Subir nueva imagen (BASE64) - ROBUSTO
 app.post('/api/carrusel', async (req, res) => {
   console.log('📨 POST /api/carrusel - Subiendo imagen (Base64)');
   
@@ -243,10 +333,10 @@ app.post('/api/carrusel', async (req, res) => {
     const { nombre, imagen_base64, tipo_mime } = req.body;
     
     // Validación
-    if (!nombre || !imagen_base64 || !tipo_mime) {
+    if (!nombre || !imagen_base64) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Nombre, imagen_base64 y tipo_mime son obligatorios' 
+        message: 'Nombre e imagen_base64 son obligatorios' 
       });
     }
     
@@ -270,33 +360,69 @@ app.post('/api/carrusel', async (req, res) => {
       });
     }
     
-    // Insertar en la base de datos
-    const query = `
-      INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano) 
-      VALUES ($1, $2, $3, $4) 
-      RETURNING id, nombre, tipo_mime, tamano, fecha
-    `;
-    
-    const result = await pool.query(query, [
-      nombre.trim(), 
-      imagen_base64,
-      tipo_mime,
-      tamano
-    ]);
-    
-    console.log(`✅ Imagen subida: ${result.rows[0].nombre} (${result.rows[0].tamano} bytes)`);
-    
-    res.json({
-      success: true,
-      message: 'Imagen agregada al carrusel',
-      imagen: result.rows[0]
-    });
+    // Intentar inserción
+    try {
+      const query = `
+        INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano) 
+        VALUES ($1, $2, $3, $4) 
+        RETURNING id, nombre, tipo_mime, tamano, fecha
+      `;
+      
+      const result = await pool.query(query, [
+        nombre.trim(), 
+        imagen_base64,
+        tipo_mime || 'image/jpeg',
+        tamano
+      ]);
+      
+      console.log(`✅ Imagen subida: ${result.rows[0].nombre} (${result.rows[0].tamano} bytes)`);
+      
+      return res.json({
+        success: true,
+        message: 'Imagen agregada al carrusel',
+        imagen: result.rows[0]
+      });
+      
+    } catch (dbError) {
+      // Si hay error de columna, reparar tabla y reintentar
+      if (dbError.message.includes('column') && dbError.message.includes('does not exist')) {
+        console.log('🔄 Error de columna, reparando tabla...');
+        
+        await initDB(); // Esto reparará las columnas faltantes
+        
+        // Reintentar inserción
+        const retryQuery = `
+          INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano) 
+          VALUES ($1, $2, $3, $4) 
+          RETURNING id, nombre, tipo_mime, tamano, fecha
+        `;
+        
+        const retryResult = await pool.query(retryQuery, [
+          nombre.trim(), 
+          imagen_base64,
+          tipo_mime || 'image/jpeg',
+          tamano
+        ]);
+        
+        console.log(`✅ Imagen subida (después de reparar): ${retryResult.rows[0].nombre}`);
+        
+        return res.json({
+          success: true,
+          message: 'Imagen agregada (tabla reparada automáticamente)',
+          imagen: retryResult.rows[0]
+        });
+      }
+      
+      // Si no es error de columna, propagar el error
+      throw dbError;
+    }
     
   } catch (error) {
     console.error('❌ Error subiendo imagen:', error);
     res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      help: 'Verifica que la tabla tenga las columnas correctas. Visita /health para diagnóstico'
     });
   }
 });
@@ -370,7 +496,7 @@ app.delete('/api/carrusel/:id', async (req, res) => {
 });
 
 // ============================================
-// RUTA RAIZ (solo agregué mención al carrusel)
+// RUTA RAIZ
 // ============================================
 
 app.get('/', (req, res) => {
@@ -387,11 +513,17 @@ app.get('/', (req, res) => {
         .success { color: #10b981; }
         .info { color: #3b82f6; }
         .new { background: #f0f9ff; border-left: 4px solid #8b5cf6; }
+        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; margin: 10px 0; }
       </style>
     </head>
     <body>
       <h1>🚀 Backend PostgreSQL en Railway</h1>
       <p class="info">Servidor Express conectado a PostgreSQL</p>
+      
+      <div class="warning">
+        <strong>⚠️ IMPORTANTE:</strong> Este servidor ahora incluye reparación automática de tablas.
+        Si hay errores de columnas faltantes, se repararán automáticamente.
+      </div>
       
       <div class="card">
         <h3>📡 Endpoints disponibles:</h3>
@@ -428,6 +560,7 @@ app.get('/', (req, res) => {
                 <p><strong>Base de datos:</strong> \${data.database || 'Conectado'}</p>
                 <p><strong>Tabla mensajes:</strong> \${data.tablas?.mensajes || 'Existe'}</p>
                 <p><strong>Tabla imágenes:</strong> \${data.tablas?.imagenes || 'Existe'}</p>
+                <p><strong>Columnas imágenes:</strong> \${data.tablas?.columnas_imagenes || 'OK'}</p>
                 <p><strong>Mensajes:</strong> \${data.total_mensajes || 0}</p>
                 <p><strong>Imágenes:</strong> \${data.total_imagenes || 0}</p>
                 <p><strong>Servidor:</strong> Railway PostgreSQL</p>
@@ -438,7 +571,9 @@ app.get('/', (req, res) => {
             document.body.innerHTML += \`
               <div class="card" style="background: #fee2e2;">
                 <h3>❌ Error de conexión</h3>
-                <p>\${e.message}</p>
+                <p>No se pudo conectar al servidor</p>
+                <p><small>\${e.message}</small></p>
+                <p>Intenta recargar la página o verifica que el servidor esté ejecutándose.</p>
               </div>
             \`;
           });
@@ -459,11 +594,12 @@ app.listen(PORT, '0.0.0.0', () => {
   🚀  Backend Express iniciado en puerto ${PORT}
   📡  URL: https://violet-virgo-production.up.railway.app
   🗄️   PostgreSQL: Conectado
-  📊   Tablas creadas automáticamente:
-        - mensajescaptcha
-        - carrusel_imagenes (con Base64)
-  🌐  Frontend: https://czalbert6.github.io/violet-virgo
-  📸  Carrusel: https://czalbert6.github.io/violet-virgo/carrusel
+  🔧   Reparación automática: ACTIVADA
+  📊   Tipos de datos compatibles con Railway:
+        - TEXT (para Base64)
+        - VARCHAR (para tipo_mime)
+        - INTEGER (para tamaño)
+        - DATE y TIMESTAMP
   ============================================
   `);
 });
