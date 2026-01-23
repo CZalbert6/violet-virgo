@@ -368,6 +368,81 @@ import Layout from '../layout/Layout.astro';
     let tipoMime = '';
     
     // ====================
+    // FUNCIÓN DE PRUEBA RÁPIDA (para diagnóstico)
+    // ====================
+    window.probarConexion = async function() {
+      console.log('🧪 Probando conexión con el backend...');
+      
+      try {
+        // 1. Probar GET /api/carrusel
+        console.log('1️⃣ Probando GET /api/carrusel...');
+        const getRespuesta = await fetch(`${BACKEND_URL}/api/carrusel`);
+        console.log('📤 GET Status:', getRespuesta.status, getRespuesta.statusText);
+        
+        if (!getRespuesta.ok) {
+          const errorText = await getRespuesta.text();
+          console.error('❌ GET Error:', errorText);
+          mostrarMensaje(`❌ GET Error: ${getRespuesta.status} ${errorText}`, 'error');
+          return;
+        }
+        
+        const getDatos = await getRespuesta.json();
+        console.log('✅ GET funcionando:', getDatos);
+        
+        // 2. Probar POST con imagen pequeña de prueba
+        console.log('2️⃣ Probando POST /api/carrusel...');
+        const imagenTest = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+        
+        const datosPrueba = {
+          nombre: 'test_' + Date.now(),
+          imagen_base64: imagenTest,
+          tipo_mime: 'image/png'
+        };
+        
+        console.log('📤 Enviando datos de prueba:', datosPrueba);
+        
+        const postRespuesta = await fetch(`${BACKEND_URL}/api/carrusel`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(datosPrueba)
+        });
+        
+        console.log('📥 POST Status:', postRespuesta.status, postRespuesta.statusText);
+        console.log('📥 POST Headers:', Object.fromEntries(postRespuesta.headers.entries()));
+        
+        if (!postRespuesta.ok) {
+          const errorText = await postRespuesta.text();
+          console.error('❌ POST Error texto completo:', errorText);
+          try {
+            const errorJson = JSON.parse(errorText);
+            console.error('❌ POST Error JSON:', errorJson);
+            mostrarMensaje(`❌ POST Error ${postRespuesta.status}: ${errorJson.error || errorJson.message || errorText}`, 'error');
+          } catch {
+            mostrarMensaje(`❌ POST Error ${postRespuesta.status}: ${errorText}`, 'error');
+          }
+          return;
+        }
+        
+        const postDatos = await postRespuesta.json();
+        console.log('✅ POST funcionando:', postDatos);
+        mostrarMensaje('✅ ¡Conexión y envío funcionan correctamente!', 'success');
+        
+        // 3. Recargar imágenes para mostrar el test
+        setTimeout(() => {
+          cargarImagenes();
+        }, 1000);
+        
+      } catch (error) {
+        console.error('❌ Error en prueba:', error);
+        console.error('❌ Stack trace:', error.stack);
+        mostrarMensaje(`❌ Error de conexión: ${error.message}`, 'error');
+      }
+    };
+    
+    // ====================
     // FUNCIONES PRINCIPALES
     // ====================
     
@@ -764,7 +839,7 @@ import Layout from '../layout/Layout.astro';
       reader.readAsDataURL(archivo);
     }
     
-    // 10. Subir imagen al servidor - CORREGIDA
+    // 10. Subir imagen al servidor - CON DIAGNÓSTICO COMPLETO
     async function subirImagen() {
       if (!archivoSeleccionado || !imagenBase64) {
         mostrarMensaje('❌ Primero selecciona una imagen', 'error');
@@ -799,7 +874,8 @@ import Layout from '../layout/Layout.astro';
           nombre: nombre,
           tieneBase64: !!imagenBase64,
           tipoMime: tipoMime,
-          longitudBase64: imagenBase64.length
+          longitudBase64: imagenBase64.length,
+          timestamp: new Date().toISOString()
         });
         
         // Enviar al servidor
@@ -818,14 +894,38 @@ import Layout from '../layout/Layout.astro';
         
         progreso.style.width = '90%';
         
+        // ============================================
+        // DIAGNÓSTICO DETALLADO
+        // ============================================
+        console.log('🔍 DIAGNÓSTICO - Respuesta HTTP:', {
+          status: respuesta.status,
+          statusText: respuesta.statusText,
+          ok: respuesta.ok,
+          url: respuesta.url,
+          headers: Object.fromEntries(respuesta.headers.entries())
+        });
+        
         // Verificar si la respuesta es OK
         if (!respuesta.ok) {
           const errorText = await respuesta.text();
-          throw new Error(`HTTP ${respuesta.status}: ${errorText}`);
+          console.error('❌ Error texto completo del servidor:', errorText);
+          
+          // Intentar parsear como JSON
+          try {
+            const errorJson = JSON.parse(errorText);
+            console.error('❌ Error JSON del servidor:', errorJson);
+            throw new Error(`HTTP ${respuesta.status}: ${errorJson.error || errorJson.message || JSON.stringify(errorJson)}`);
+          } catch {
+            // Si no es JSON, usar el texto plano
+            throw new Error(`HTTP ${respuesta.status}: ${errorText}`);
+          }
         }
         
         const datos = await respuesta.json();
-        console.log('📥 Respuesta del servidor:', datos);
+        console.log('📥 Respuesta JSON del servidor:', datos);
+        // ============================================
+        // FIN DIAGNÓSTICO
+        // ============================================
         
         if (datos.success) {
           progreso.style.width = '100%';
@@ -847,6 +947,10 @@ import Layout from '../layout/Layout.astro';
         } else {
           // Mejor manejo de errores
           const errorMsg = datos.message || datos.error || 'Error desconocido';
+          console.error('❌ Error del servidor:', {
+            error: errorMsg,
+            datosCompletos: datos
+          });
           mostrarMensaje(`❌ Error: ${errorMsg}`, 'error');
           
           // Si es error de columna faltante, dar instrucción específica
@@ -856,16 +960,33 @@ import Layout from '../layout/Layout.astro';
             
             // Mostrar mensaje amigable
             mostrarMensaje('🔄 El servidor está reparando la base de datos. Intenta subir la imagen nuevamente en 30 segundos.', 'info');
+            
+            // Reintentar automáticamente después de 30 segundos
+            setTimeout(() => {
+              console.log('🔄 Reintentando automáticamente después de 30 segundos...');
+              // Puedes descomentar esta línea para reintento automático:
+              // subirImagen();
+            }, 30000);
           }
         }
       } catch (error) {
         console.error('❌ Error en subirImagen:', error);
+        console.error('❌ Stack trace:', error.stack);
         
         // Mensajes más amigables
         if (error.message.includes('Failed to fetch')) {
           mostrarMensaje('❌ No se pudo conectar al servidor. Verifica tu conexión a internet.', 'error');
         } else if (error.message.includes('500')) {
           mostrarMensaje('🔄 El servidor está reparando las tablas automáticamente. Intenta de nuevo en 30 segundos.', 'info');
+          
+          // Reintentar automáticamente después de 30 segundos
+          setTimeout(() => {
+            console.log('🔄 Reintentando automáticamente después de error 500...');
+            // Puedes descomentar esta línea para reintento automático:
+            // subirImagen();
+          }, 30000);
+        } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+          mostrarMensaje('🔄 Error de columna en la base de datos. El servidor está reparando automáticamente. Intenta en 30 segundos.', 'info');
         } else {
           mostrarMensaje(`❌ Error: ${error.message}`, 'error');
         }
@@ -926,17 +1047,28 @@ import Layout from '../layout/Layout.astro';
               ${BACKEND_URL}/health
             </a>
           </p>
-          <button onclick="location.reload()" style="
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-            cursor: pointer;
-          ">
-            🔄 Reintentar
-          </button>
+          <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <button onclick="location.reload()" style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+              🔄 Reintentar
+            </button>
+            <button onclick="probarConexion()" style="
+              background: #10b981;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+            ">
+              🧪 Probar Conexión
+            </button>
+          </div>
         </div>
       `;
     }
@@ -1056,6 +1188,26 @@ import Layout from '../layout/Layout.astro';
           }
         }, 5000);
       });
+      
+      // Botón de prueba en la interfaz (opcional)
+      const botonPrueba = document.createElement('button');
+      botonPrueba.innerHTML = '🧪 Probar Conexión';
+      botonPrueba.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #8b5cf6;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      `;
+      botonPrueba.onclick = probarConexion;
+      document.body.appendChild(botonPrueba);
     });
   </script>
 </Layout>
