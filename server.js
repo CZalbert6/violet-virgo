@@ -13,7 +13,7 @@ app.use(cors({
     'https://violet-virgo-production.up.railway.app',
     'http://localhost:4321'
   ],
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'],
   credentials: true
 }));
 app.use(express.json());
@@ -24,9 +24,14 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Crear tabla si no existe
+// ============================================
+// INICIALIZACIÓN DE TABLAS
+// ============================================
+
+// Crear tablas si no existen
 const initDB = async () => {
   try {
+    // Tabla de mensajes (ya existe)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS mensajescaptcha (
         id SERIAL PRIMARY KEY,
@@ -38,11 +43,27 @@ const initDB = async () => {
       )
     `);
     console.log('✅ Tabla mensajescaptcha lista');
+    
+    // Tabla de imágenes para el carrusel (NUEVA)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS carrusel_imagenes (
+        id SERIAL PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        imagen_url TEXT NOT NULL,
+        fecha DATE DEFAULT CURRENT_DATE
+      )
+    `);
+    console.log('✅ Tabla carrusel_imagenes lista');
+    
   } catch (error) {
     console.error('❌ Error inicializando DB:', error);
   }
 };
 initDB();
+
+// ============================================
+// RUTAS EXISTENTES (NO MODIFICAR)
+// ============================================
 
 // ✅ RUTA HEALTH - COMPATIBLE con tu frontend
 app.get('/health', async (req, res) => {
@@ -72,7 +93,9 @@ app.get('/health', async (req, res) => {
       servicio: 'Express + PostgreSQL en Railway',
       endpoints: {
         guardar: 'POST /api/guardar',
-        mensajes: 'GET /api/mensajes'
+        mensajes: 'GET /api/mensajes',
+        carrusel: 'GET /api/carrusel', // ← Agregado
+        subir_imagen: 'POST /api/carrusel' // ← Agregado
       }
     });
     
@@ -166,7 +189,126 @@ app.get('/api/mensajes', async (req, res) => {
   }
 });
 
-// ✅ RUTA RAIZ con información
+// ============================================
+// RUTAS NUEVAS PARA EL CARRUSEL (AGREGADAS)
+// ============================================
+
+// 🔄 GET /api/carrusel - Obtener todas las imágenes
+app.get('/api/carrusel', async (req, res) => {
+  try {
+    console.log('📸 GET /api/carrusel - Solicitando imágenes');
+    
+    const result = await pool.query(`
+      SELECT id, nombre, imagen_url, fecha 
+      FROM carrusel_imagenes 
+      ORDER BY id DESC
+    `);
+    
+    console.log(`✅ ${result.rows.length} imágenes encontradas`);
+    
+    res.json({ 
+      success: true, 
+      imagenes: result.rows 
+    });
+  } catch (error) {
+    console.error('❌ Error /api/carrusel:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// 📤 POST /api/carrusel - Subir nueva imagen
+app.post('/api/carrusel', async (req, res) => {
+  console.log('📨 POST /api/carrusel - Subiendo imagen');
+  console.log('Body:', req.body);
+  
+  try {
+    const { nombre, imagen_url } = req.body;
+    
+    // Validación simple
+    if (!nombre || !imagen_url) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nombre y URL son obligatorios' 
+      });
+    }
+    
+    // Validar que sea una URL de imagen
+    const esImagen = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(imagen_url);
+    if (!esImagen) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'URL debe ser una imagen (jpg, png, gif, webp, svg)' 
+      });
+    }
+    
+    // Insertar en la base de datos
+    const query = `
+      INSERT INTO carrusel_imagenes (nombre, imagen_url) 
+      VALUES ($1, $2) 
+      RETURNING id, nombre, imagen_url, fecha
+    `;
+    
+    const result = await pool.query(query, [nombre.trim(), imagen_url.trim()]);
+    
+    console.log('✅ Imagen subida:', result.rows[0]);
+    
+    res.json({
+      success: true,
+      message: 'Imagen agregada al carrusel',
+      imagen: result.rows[0]
+    });
+    
+  } catch (error) {
+    console.error('❌ Error subiendo imagen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// 🗑️ DELETE /api/carrusel/:id - Eliminar imagen
+app.delete('/api/carrusel/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🗑️ DELETE /api/carrusel/${id} - Eliminando imagen`);
+    
+    const result = await pool.query(
+      'DELETE FROM carrusel_imagenes WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Imagen no encontrada' 
+      });
+    }
+    
+    console.log(`✅ Imagen ${id} eliminada`);
+    
+    res.json({
+      success: true,
+      message: 'Imagen eliminada del carrusel',
+      id: result.rows[0].id
+    });
+    
+  } catch (error) {
+    console.error('❌ Error eliminando imagen:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+// ============================================
+// RUTA RAIZ ACTUALIZADA (solo agregué mención al carrusel)
+// ============================================
+
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -180,6 +322,7 @@ app.get('/', (req, res) => {
         .endpoint { background: #e2e8f0; padding: 10px; border-radius: 5px; margin: 5px 0; }
         .success { color: #10b981; }
         .info { color: #3b82f6; }
+        .new { background: #f0f9ff; border-left: 4px solid #3b82f6; }
       </style>
     </head>
     <body>
@@ -191,11 +334,22 @@ app.get('/', (req, res) => {
         <div class="endpoint"><strong>GET</strong> <a href="/health">/health</a> - Estado del sistema</div>
         <div class="endpoint"><strong>POST</strong> /api/guardar - Guardar mensajes</div>
         <div class="endpoint"><strong>GET</strong> <a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</div>
+        
+        <!-- NUEVOS ENDPOINTS (solo se agregó este bloque) -->
+        <div class="endpoint new">
+          <strong>🎨 CARRUSEL:</strong>
+          <div style="margin-left: 10px; margin-top: 5px;">
+            <div><strong>GET</strong> <a href="/api/carrusel">/api/carrusel</a> - Ver imágenes</div>
+            <div><strong>POST</strong> /api/carrusel - Subir imagen</div>
+            <div><strong>DELETE</strong> /api/carrusel/:id - Eliminar imagen</div>
+          </div>
+        </div>
       </div>
       
       <div class="card">
         <h3>🔗 Frontend conectado:</h3>
         <p><a href="https://czalbert6.github.io/violet-virgo" target="_blank">https://czalbert6.github.io/violet-virgo</a></p>
+        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes</a></p>
       </div>
       
       <script>
@@ -207,7 +361,7 @@ app.get('/', (req, res) => {
               <div class="card">
                 <h3>✅ Estado actual:</h3>
                 <p><strong>Base de datos:</strong> \${data.database || 'Conectado'}</p>
-                <p><strong>Tabla:</strong> \${data.tabla || 'Existe'}</p>
+                <p><strong>Tabla mensajes:</strong> \${data.tabla || 'Existe'}</p>
                 <p><strong>Mensajes guardados:</strong> \${data.total_mensajes || 0}</p>
                 <p><strong>Servidor:</strong> Railway PostgreSQL</p>
               </div>
@@ -227,7 +381,10 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Iniciar servidor
+// ============================================
+// INICIAR SERVIDOR (SIN CAMBIOS)
+// ============================================
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`
@@ -236,6 +393,7 @@ app.listen(PORT, '0.0.0.0', () => {
   📡  URL: https://violet-virgo-production.up.railway.app
   🗄️   PostgreSQL: Conectado
   🌐  Frontend: https://czalbert6.github.io/violet-virgo
+  📸  Carrusel: https://czalbert6.github.io/violet-virgo/carrusel
   ============================================
   `);
 });
