@@ -636,12 +636,7 @@ app.get('/', (req, res) => {
     <body>
       <h1>🚀 Backend PostgreSQL en Railway</h1>
       <p class="info">Servidor Express conectado a PostgreSQL</p>
-      
-      <div class="warning">
-        <strong>⚠️ IMPORTANTE:</strong> Este servidor ahora incluye reparación automática de tablas.
-        Si hay errores de columnas faltantes, se repararán automáticamente.
-      </div>
-      
+    
       <div class="card">
         <h3>📡 Endpoints disponibles:</h3>
         <div class="endpoint"><strong>GET</strong> <a href="/health">/health</a> - Estado del sistema</div>
@@ -663,7 +658,7 @@ app.get('/', (req, res) => {
       <div class="card">
         <h3>🔗 Frontend conectado:</h3>
         <p><a href="https://czalbert6.github.io/violet-virgo" target="_blank">https://czalbert6.github.io/violet-virgo</a></p>
-        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes (Base64)</a></p>
+        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes </a></p>
       </div>
       
       <script>
