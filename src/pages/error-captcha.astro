@@ -1,491 +1,395 @@
 ---
 // src/pages/error-captcha.astro
+import Layout from '../layout/Layout.astro';
 ---
 
-<nav style="
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 15px 20px;
-  border-radius: 0 0 15px 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 40px;
-">
+<Layout>
   <div style="
-    max-width: 1200px;
-    margin: 0 auto;
+    min-height: 80vh;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
   ">
-    <!-- Logo/Título -->
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <!-- Breadcrumbs -->
+    <nav style="
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+    ">
       <div style="
-        background: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        color: #667eea;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        gap: 8px;
+        font-size: 0.9rem;
       ">
-        🚀
+        <a href="/violet-virgo" style="
+          color: white;
+          text-decoration: none;
+          background: rgba(255,255,255,0.2);
+          padding: 8px 15px;
+          border-radius: 20px;
+          backdrop-filter: blur(10px);
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          transition: all 0.3s;
+        "
+        onmouseenter="this.style.background='rgba(255,255,255,0.3)';"
+        onmouseleave="this.style.background='rgba(255,255,255,0.2)';">
+          <span>🏠</span>
+          <span>Inicio</span>
+        </a>
+        <span style="color: rgba(255,255,255,0.5);">›</span>
+        <span style="color: white; background: rgba(239, 68, 68, 0.8); padding: 8px 15px; border-radius: 20px;">
+          Error Captcha
+        </span>
       </div>
-      <h1 style="color: white; margin: 0; font-size: 1.5rem; font-weight: 600;">
-        Astro + PostgreSQL
-      </h1>
-    </div>
+    </nav>
 
-    <!-- Menú de navegación -->
     <div style="
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-    ">
-      <a 
-        href="/" 
-        style="
-          padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-      >
-        <span>🏠</span>
-        <span>Inicio</span>
-      </a>
-      
-      <a 
-        href="formulario-validacion" 
-        style="
-          padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-      >
-        <span>📝</span>
-        <span>Formulario</span>
-      </a>
-      
-      <a 
-        href="error-captcha" 
-        style="
-          padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.3);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 600;
-          transition: all 0.3s;
-          border: 2px solid rgba(255, 255, 255, 0.5);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
-      >
-        <span>⚠️</span>
-        <span>Error Captcha</span>
-      </a>
-      
-      <a 
-        href="carrusel" 
-        style="
-          padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-      >
-        <span>🖼️</span>
-        <span>Carrusel</span>
-      </a>
-    </div>
-  </div>
-</nav>
-
-<div style="
-  min-height: 80vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-">
-  <div style="
-    max-width: 500px;
-    width: 100%;
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
-    position: relative;
-    overflow: hidden;
-    animation: aparecer 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  ">
-    <!-- Decoración -->
-    <div style="
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 150px;
-      height: 150px;
-      background: linear-gradient(45deg, #fbbf24, #f59e0b);
-      border-radius: 50%;
-      opacity: 0.1;
-    "></div>
-    <div style="
-      position: absolute;
-      bottom: -60px;
-      left: -60px;
-      width: 200px;
-      height: 200px;
-      background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-      border-radius: 50%;
-      opacity: 0.1;
-    "></div>
-    
-    <!-- Animación Lottie 404 -->
-    <div style="
-      width: 250px;
-      height: 200px;
-      margin: 0 auto 10px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 15px;
-      background: transparent;
-    ">
-      <iframe 
-        src="https://lottie.host/embed/2997cf11-acbe-4bf2-8205-19c0e960a613/VptfWLwL6Y.lottie"
-        style="
-          width: 100%;
-          height: 100%;
-          border: none;
-          background: transparent;
-        "
-        title="Animación Lottie Error 404"
-      ></iframe>
-    </div>
-    
-    <!-- Título -->
-    <h1 style="
-      font-size: 2.2rem;
-      color: #1f2937;
-      margin-bottom: 10px;
-      position: relative;
-      margin-top: 10px;
-    ">
-      ¡Captcha Requerido!
-    </h1>
-    
-    <!-- Mensaje simplificado -->
-    <p style="
-      color: #6b7280;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      margin-bottom: 25px;
-      position: relative;
-    ">
-      Completa el verificador de seguridad para continuar.
-    </p>
-    
-    <!-- Solución simplificada -->
-    <div style="
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 25px;
-      border-left: 4px solid #3b82f6;
-      position: relative;
-    ">
-      <h3 style="color: #1e40af; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
-        📝 Pasos a seguir:
-      </h3>
-      <div style="color: #475569; text-align: left; padding-left: 10px;">
-        <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-          <span style="
-            background: #3b82f6;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-right: 10px;
-            flex-shrink: 0;
-          ">1</span>
-          <span>Regresa al formulario principal</span>
-        </div>
-        <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
-          <span style="
-            background: #3b82f6;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-right: 10px;
-            flex-shrink: 0;
-          ">2</span>
-          <span>Completa el captcha</span>
-        </div>
-        <div style="display: flex; align-items: flex-start;">
-          <span style="
-            background: #3b82f6;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-right: 10px;
-            flex-shrink: 0;
-          ">3</span>
-          <span>Vuelve a intentar enviar</span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Botones -->
-    <div style="display: flex; gap: 15px; justify-content: center; position: relative;">
-      <button 
-        id="btnRegresar"
-        style="
-          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-          color: white;
-          padding: 15px 25px;
-          border: none;
-          border-radius: 50px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          transition: all 0.3s;
-          box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
-          flex: 1;
-          justify-content: center;
-        "
-        onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(59, 130, 246, 0.6)';"
-        onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.4)';"
-      >
-        ↩️ Volver
-      </button>
-      
-      <button 
-        id="btnInicio"
-        style="
-          background: white;
-          color: #3b82f6;
-          padding: 15px 25px;
-          border: 2px solid #3b82f6;
-          border-radius: 50px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          transition: all 0.3s;
-          flex: 1;
-          justify-content: center;
-        "
-        onmouseenter="this.style.background='#3b82f6'; this.style.color='white'; this.style.transform='translateY(-2px)';"
-        onmouseleave="this.style.background='white'; this.style.color='#3b82f6'; this.style.transform='translateY(0)';"
-      >
-        🏠 Inicio
-      </button>
-    </div>
-    
-    <!-- Contador -->
-    <div style="
-      margin-top: 25px;
-      padding: 15px;
-      background: #fef3c7;
-      border-radius: 10px;
-      color: #92400e;
-      font-size: 14px;
-      position: relative;
-      border: 1px dashed #f59e0b;
-    ">
-      <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <span style="
-          background: #dc2626;
-          color: white;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-family: monospace;
-          font-size: 1.2rem;
-          animation: latido 1s infinite;
-        " id="contador">10</span>
-        <span>Redirección automática en <span id="segundos" style="font-weight: bold;">10</span> segundos</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-  @keyframes aparecer {
-    0% { transform: scale(0.5) translateY(20px); opacity: 0; }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  
-  @keyframes latido {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-  
-  @keyframes brillo {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-  
-  @keyframes caer {
-    0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
-    100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
-  }
-</style>
-
-<script>
-  // Contador regresivo
-  function iniciarContador() {
-    let segundos = 10;
-    const contador = document.getElementById('contador');
-    const textoSegundos = document.getElementById('segundos');
-    
-    const intervalo = setInterval(() => {
-      segundos--;
-      contador.textContent = segundos;
-      textoSegundos.textContent = segundos;
-      
-      // Efecto visual para últimos 3 segundos
-      if (segundos <= 3) {
-        contador.style.background = '#ef4444';
-        contador.style.animation = 'latido 0.5s infinite';
-      }
-      
-      if (segundos <= 0) {
-        clearInterval(intervalo);
-        window.location.href = '/';
-      }
-    }, 1000);
-  }
-  
-  // Botón Regresar
-  document.getElementById('btnRegresar').addEventListener('click', function() {
-    if (document.referrer) {
-      window.history.back();
-    } else {
-      window.location.href = '/';
-    }
-  });
-  
-  // Botón Inicio
-  document.getElementById('btnInicio').addEventListener('click', function() {
-    window.location.href = '/';
-  });
-  
-  // Inicializar cuando cargue la página
-  document.addEventListener('DOMContentLoaded', function() {
-    iniciarContador();
-    
-    // Crear partículas de fondo
-    crearParticulas();
-  });
-  
-  // Función para crear partículas
-  function crearParticulas() {
-    const particulas = document.createElement('div');
-    particulas.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
+      max-width: 500px;
       width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      position: relative;
       overflow: hidden;
-    `;
-    
-    // Colores para partículas
-    const colores = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
-    
-    for (let i = 0; i < 20; i++) {
-      const particula = document.createElement('div');
-      const color = colores[Math.floor(Math.random() * colores.length)];
-      const tamaño = 2 + Math.random() * 4;
-      const duracion = 2 + Math.random() * 3;
-      const retraso = Math.random() * 2;
-      
-      particula.style.cssText = `
+      animation: aparecer 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    ">
+      <!-- Decoración -->
+      <div style="
         position: absolute;
-        width: ${tamaño}px;
-        height: ${tamaño}px;
-        background: ${color};
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(45deg, #fbbf24, #f59e0b);
         border-radius: 50%;
-        animation: caer ${duracion}s linear infinite ${retraso}s;
-        top: -20px;
-        left: ${Math.random() * 100}%;
-        opacity: ${0.2 + Math.random() * 0.3};
-        box-shadow: 0 0 5px ${color};
+        opacity: 0.1;
+      "></div>
+      <div style="
+        position: absolute;
+        bottom: -60px;
+        left: -60px;
+        width: 200px;
+        height: 200px;
+        background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        border-radius: 50%;
+        opacity: 0.1;
+      "></div>
+      
+      <!-- Animación Lottie 404 - CON IFRAME CORREGIDO -->
+      <div style="
+        width: 250px;
+        height: 200px;
+        margin: 0 auto 10px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        background: transparent;
+      ">
+        <iframe 
+          src="https://lottie.host/embed/2997cf11-acbe-4bf2-8205-19c0e960a613/VptfWLwL6Y.lottie"
+          style="
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
+          "
+          title="Animación Lottie Error 404"
+        ></iframe>
+      </div>
+      
+      <!-- Título -->
+      <h1 style="
+        font-size: 2.2rem;
+        color: #1f2937;
+        margin-bottom: 10px;
+        position: relative;
+        margin-top: 10px;
+      ">
+        ¡Captcha Requerido!
+      </h1>
+      
+      <!-- Mensaje simplificado -->
+      <p style="
+        color: #6b7280;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        position: relative;
+      ">
+        Completa el verificador de seguridad para continuar.
+      </p>
+      
+      <!-- Solución simplificada -->
+      <div style="
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-left: 4px solid #3b82f6;
+        position: relative;
+      ">
+        <h3 style="color: #1e40af; margin-top: 0; margin-bottom: 10px; font-size: 1.1rem;">
+          📝 Pasos a seguir:
+        </h3>
+        <div style="color: #475569; text-align: left; padding-left: 10px;">
+          <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">1</span>
+            <span>Regresa al formulario principal</span>
+          </div>
+          <div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">2</span>
+            <span>Completa el captcha</span>
+          </div>
+          <div style="display: flex; align-items: flex-start;">
+            <span style="
+              background: #3b82f6;
+              color: white;
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              margin-right: 10px;
+              flex-shrink: 0;
+            ">3</span>
+            <span>Vuelve a intentar enviar</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div style="display: flex; gap: 15px; justify-content: center; position: relative;">
+        <button 
+          id="btnRegresar"
+          style="
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            flex: 1;
+            justify-content: center;
+          "
+          onmouseenter="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(59, 130, 246, 0.6)';"
+          onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.4)';"
+        >
+          ↩️ Volver
+        </button>
+        
+        <button 
+          id="btnInicio"
+          style="
+            background: white;
+            color: #3b82f6;
+            padding: 15px 25px;
+            border: 2px solid #3b82f6;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            flex: 1;
+            justify-content: center;
+          "
+          onmouseenter="this.style.background='#3b82f6'; this.style.color='white'; this.style.transform='translateY(-2px)';"
+          onmouseleave="this.style.background='white'; this.style.color='#3b82f6'; this.style.transform='translateY(0)';"
+        >
+          🏠 Inicio
+        </button>
+      </div>
+      
+      <!-- Contador -->
+      <div style="
+        margin-top: 25px;
+        padding: 15px;
+        background: #fef3c7;
+        border-radius: 10px;
+        color: #92400e;
+        font-size: 14px;
+        position: relative;
+        border: 1px dashed #f59e0b;
+      ">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span style="
+            background: #dc2626;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2rem;
+            animation: latido 1s infinite;
+          " id="contador">10</span>
+          <span>Redirección automática en <span id="segundos" style="font-weight: bold;">10</span> segundos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes aparecer {
+      0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    
+    @keyframes latido {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    @keyframes brillo {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes caer {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+      100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
+    }
+  </style>
+
+  <script>
+    // Contador regresivo
+    function iniciarContador() {
+      let segundos = 10;
+      const contador = document.getElementById('contador');
+      const textoSegundos = document.getElementById('segundos');
+      
+      const intervalo = setInterval(() => {
+        segundos--;
+        contador.textContent = segundos;
+        textoSegundos.textContent = segundos;
+        
+        // Efecto visual para últimos 3 segundos
+        if (segundos <= 3) {
+          contador.style.background = '#ef4444';
+          contador.style.animation = 'latido 0.5s infinite';
+        }
+        
+        if (segundos <= 0) {
+          clearInterval(intervalo);
+          window.location.href = '/violet-virgo';
+        }
+      }, 1000);
+    }
+    
+    // Botón Regresar
+    document.getElementById('btnRegresar').addEventListener('click', function() {
+      if (document.referrer && document.referrer.includes('violet-virgo')) {
+        window.history.back();
+      } else {
+        window.location.href = '/violet-virgo';
+      }
+    });
+    
+    // Botón Inicio
+    document.getElementById('btnInicio').addEventListener('click', function() {
+      window.location.href = '/violet-virgo';
+    });
+    
+    // Inicializar cuando cargue la página
+    document.addEventListener('DOMContentLoaded', function() {
+      iniciarContador();
+      
+      // Crear partículas de fondo
+      crearParticulas();
+    });
+    
+    // Función para crear partículas
+    function crearParticulas() {
+      const particulas = document.createElement('div');
+      particulas.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
       `;
       
-      particulas.appendChild(particula);
+      // Colores para partículas
+      const colores = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981'];
+      
+      for (let i = 0; i < 20; i++) {
+        const particula = document.createElement('div');
+        const color = colores[Math.floor(Math.random() * colores.length)];
+        const tamaño = 2 + Math.random() * 4;
+        const duracion = 2 + Math.random() * 3;
+        const retraso = Math.random() * 2;
+        
+        particula.style.cssText = `
+          position: absolute;
+          width: ${tamaño}px;
+          height: ${tamaño}px;
+          background: ${color};
+          border-radius: 50%;
+          animation: caer ${duracion}s linear infinite ${retraso}s;
+          top: -20px;
+          left: ${Math.random() * 100}%;
+          opacity: ${0.2 + Math.random() * 0.3};
+          box-shadow: 0 0 5px ${color};
+        `;
+        
+        particulas.appendChild(particula);
+      }
+      
+      // Insertar antes del contenido principal
+      const contenedorPrincipal = document.querySelector('div[style*="min-height: 80vh"]');
+      if (contenedorPrincipal) {
+        contenedorPrincipal.insertBefore(particulas, contenedorPrincipal.firstChild);
+      }
     }
-    
-    // Insertar antes del contenido principal
-    const contenedorPrincipal = document.querySelector('div[style*="min-height: 80vh"]');
-    if (contenedorPrincipal) {
-      contenedorPrincipal.insertBefore(particulas, contenedorPrincipal.firstChild);
-    }
-  }
-</script>
+  </script>
+</Layout>
