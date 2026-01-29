@@ -70,7 +70,7 @@
       </a>
       
       <a 
-        href="https://czalbert6.github.io/violet-virgo/error-captcha/" 
+        href="formulario-validacion" 
         style="
           padding: 10px 20px;
           background: rgba(255, 255, 255, 0.2);
@@ -92,7 +92,7 @@
       </a>
       
       <a 
-        href="error-captcha" 
+        href="https://czalbert6.github.io/violet-virgo/error-captcha/" 
         style="
           padding: 10px 20px;
           background: rgba(255, 255, 255, 0.2);
@@ -305,7 +305,7 @@
 
   document.addEventListener('DOMContentLoaded', verificarSalud);
 
-  // 3. Lógica de Envío CON REDIRECCIÓN A ERROR-CAPTCHA
+  // 3. Lógica de Envío CON REDIRECCIÓN A ERROR-CAPTCHA (URL COMPLETA)
   document.getElementById('botonEnviar').addEventListener('click', async function() {
     const campo = document.getElementById('miCampoUnico');
     const resultado = document.getElementById('resultado');
@@ -324,9 +324,9 @@
       return;
     }
     
-    // ✅ MODIFICACIÓN: Redirigir a error-captcha si falta el captcha
+    // ✅ MODIFICACIÓN: Redirigir a la URL COMPLETA de error-captcha
     if (!tokenCaptcha) {
-      window.location.href = '/error-captcha';
+      window.location.href = 'https://czalbert6.github.io/violet-virgo/error-captcha/';
       return;
     }
 
