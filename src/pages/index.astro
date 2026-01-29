@@ -1,561 +1,452 @@
+---
 // src/pages/index.astro
-import Layout from '../layout/Layout.astro';
 ---
 
-<Layout>
-  <!-- Barra de navegación superior -->
-  <nav style="
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 15px 20px;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
+<nav style="
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 20px;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+">
+  <div style="
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
   ">
-    <div style="
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    ">
-      <!-- Logo/Título -->
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <div style="
-          background: white;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 20px;
-          color: #667eea;
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        ">
-          🚀
-        </div>
-        <h1 style="color: white; margin: 0; font-size: 1.5rem; font-weight: 600;">
-          Astro + PostgreSQL
-        </h1>
-      </div>
-
-      <!-- Menú de navegación -->
-      <div style="
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-      ">
-        <a 
-          href="/" 
-          style="
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-        >
-          <span>🏠</span>
-          <span>Inicio</span>
-        </a>
-        
-        <a 
-          href="formulario-validacion" 
-          style="
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-        >
-          <span>📝</span>
-          <span>Formulario</span>
-        </a>
-        
-        <a 
-          href="error-captcha" 
-          style="
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          "
-          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
-        >
-          <span>⚠️</span>
-          <span>Error Demo</span>
-        </a>
-        
-        <a 
-          href="carrusel" 
-          style="
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-          "
-          onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
-          onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
-        >
-          <span>🖼️</span>
-          <span>Carrusel</span>
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  <div style="text-align: center; padding: 20px;">
-    <!-- Título principal -->
-    <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
-      🎯 Sistema de Pruebas
-    </h1>
-    <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
-      Prueba diferentes funcionalidades conectadas a PostgreSQL en Railway
-    </p>
-    
-    <!-- Contenedor principal -->
-    <div style="
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    ">
-      
-      <div style="margin-bottom: 25px;">
-        <div style="
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 15px;
-          border-radius: 10px;
-          margin-bottom: 20px;
-          text-align: center;
-        ">
-          <div style="font-size: 24px; margin-bottom: 5px;">📝</div>
-          <div style="font-weight: 600; font-size: 1.2rem;">Enviar Mensaje a PostgreSQL</div>
-          <div style="font-size: 0.9rem; opacity: 0.9;">Tabla: <code>mensajescaptcha</code></div>
-        </div>
-        
-        <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
-          Tu mensaje:
-        </label>
-        <input 
-          type="text" 
-          id="miCampoUnico"
-          placeholder="Escribe algo para guardar en la BD..."
-          style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
-        >
-      </div>
-      
-      <div style="margin: 25px 0;">
-        <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
-      </div>
-      
-      <button 
-        id="botonEnviar"
-        style="
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-          color: white; 
-          padding: 16px; 
-          border: none; 
-          border-radius: 10px; 
-          font-size: 18px; 
-          font-weight: 600; 
-          cursor: pointer; 
-          width: 100%;
-          transition: all 0.3s;
-        "
-        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)';"
-        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
-      >
-        💾 Guardar en PostgreSQL
-      </button>
-      
-      <div id="resultado" style="
-        margin-top: 25px; 
-        padding: 20px; 
-        border-radius: 10px; 
-        display: none; 
-        text-align: left;
-        transition: all 0.3s;
-      "></div>
-      
-      <!-- Estado del sistema -->
-      <div id="estadoSistema" style="
-        margin-top: 25px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 10px;
-        border-left: 4px solid #3b82f6;
-      ">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-          <div style="
-            background: #3b82f6;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-          ">
-            🔍
-          </div>
-          <h3 style="margin: 0; color: #333; font-size: 1.1rem;">Estado del Sistema</h3>
-        </div>
-        
-        <div style="margin-bottom: 8px;">
-          <strong style="color: #555;">Backend:</strong> 
-          <span id="estadoTexto" style="margin-left: 10px;">Verificando...</span>
-        </div>
-        
-        <div style="
-          padding: 10px;
-          background: rgba(59, 130, 246, 0.1);
-          border-radius: 6px;
-          font-size: 0.85rem;
-          color: #475569;
-          margin-top: 10px;
-        ">
-          <div style="display: flex; align-items: center; gap: 5px;">
-            <span>🌐</span>
-            <span id="backendURL" style="font-family: monospace; word-break: break-all;">...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tarjetas de funcionalidades -->
-    <div style="
-      max-width: 1200px;
-      margin: 50px auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      padding: 0 20px;
-    ">
-      <!-- Tarjeta 1: Formulario de Validación -->
+    <!-- Logo/Título -->
+    <div style="display: flex; align-items: center; gap: 10px;">
       <div style="
         background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #3b82f6;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #667eea;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      ">
+        🚀
+      </div>
+      <h1 style="color: white; margin: 0; font-size: 1.5rem; font-weight: 600;">
+        Astro + PostgreSQL
+      </h1>
+    </div>
+
+    <!-- Menú de navegación (SOLO RUTAS SUPERIORES) -->
+    <div style="
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    ">
+      <a 
+        href="/" 
+        style="
+          padding: 10px 20px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+      >
+        <span>🏠</span>
+        <span>Inicio</span>
+      </a>
+      
+      <a 
+        href="formulario-validacion" 
+        style="
+          padding: 10px 20px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+      >
+        <span>📝</span>
+        <span>Formulario</span>
+      </a>
+      
+      <a 
+        href="carrusel" 
+        style="
+          padding: 10px 20px;
+          background: rgba(255, 255, 255, 0.3);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          transition: all 0.3s;
+          border: 2px solid rgba(255, 255, 255, 0.5);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
+      >
+        <span>🖼️</span>
+        <span>Carrusel</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div style="text-align: center; padding: 20px;">
+  <!-- Título principal -->
+  <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
+    🎯 Sistema de Pruebas
+  </h1>
+  <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+    Prueba diferentes funcionalidades conectadas a PostgreSQL en Railway
+  </p>
+  
+  <!-- Contenedor principal -->
+  <div style="
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  ">
+    
+    <div style="margin-bottom: 25px;">
+      <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+      ">
+        <div style="font-size: 24px; margin-bottom: 5px;">📝</div>
+        <div style="font-weight: 600; font-size: 1.2rem;">Enviar Mensaje a PostgreSQL</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Tabla: <code>mensajescaptcha</code></div>
+      </div>
+      
+      <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
+        Tu mensaje:
+      </label>
+      <input 
+        type="text" 
+        id="miCampoUnico"
+        placeholder="Escribe algo para guardar en la BD..."
+        style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
+      >
+    </div>
+    
+    <div style="margin: 25px 0;">
+      <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+    </div>
+    
+    <button 
+      id="botonEnviar"
+      style="
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+        color: white; 
+        padding: 16px; 
+        border: none; 
+        border-radius: 10px; 
+        font-size: 18px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        width: 100%;
         transition: all 0.3s;
       "
-      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
-      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)';"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+    >
+      💾 Guardar en PostgreSQL
+    </button>
+    
+    <div id="resultado" style="
+      margin-top: 25px; 
+      padding: 20px; 
+      border-radius: 10px; 
+      display: none; 
+      text-align: left;
+      transition: all 0.3s;
+    "></div>
+    
+    <!-- Estado del sistema -->
+    <div id="estadoSistema" style="
+      margin-top: 25px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 10px;
+      border-left: 4px solid #3b82f6;
+    ">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
         <div style="
           background: #3b82f6;
           color: white;
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
-          margin-bottom: 20px;
+          font-size: 14px;
         ">
-          📝
+          🔍
         </div>
-        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
-          Formulario de Validación
-        </h3>
-        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-          Prueba validaciones de formularios frontend con diferentes tipos de campos y reglas.
-        </p>
-        <a 
-          href="formulario-validacion" 
-          style="
-            display: inline-block;
-            padding: 10px 20px;
-            background: #3b82f6;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-          "
-          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
-        >
-          Ir al Formulario →
-        </a>
+        <h3 style="margin: 0; color: #333; font-size: 1.1rem;">Estado del Sistema</h3>
       </div>
-
-      <!-- Tarjeta 2: Error Captcha Demo -->
-      <div style="
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #ef4444;
-        transition: all 0.3s;
-      "
-      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
-      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
-        <div style="
-          background: #ef4444;
-          color: white;
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          margin-bottom: 20px;
-        ">
-          ⚠️
-        </div>
-        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
-          Error Captcha (Demo)
-        </h3>
-        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-          Simulación de errores de captcha para probar el manejo de errores en el frontend.
-        </p>
-        <a 
-          href="error-captcha" 
-          style="
-            display: inline-block;
-            padding: 10px 20px;
-            background: #ef4444;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-          "
-          onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)';"
-        >
-          Ver Demo →
-        </a>
+      
+      <div style="margin-bottom: 8px;">
+        <strong style="color: #555;">Backend:</strong> 
+        <span id="estadoTexto" style="margin-left: 10px;">Verificando...</span>
       </div>
-
-      <!-- Tarjeta 3: Carrusel de Imágenes -->
+      
       <div style="
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #8b5cf6;
-        transition: all 0.3s;
-      "
-      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
-      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
-        <div style="
-          background: #8b5cf6;
-          color: white;
-          width: 50px;
-          height: 50px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          margin-bottom: 20px;
-        ">
-          🖼️
+        padding: 10px;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: #475569;
+        margin-top: 10px;
+      ">
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <span>🌐</span>
+          <span id="backendURL" style="font-family: monospace; word-break: break-all;">...</span>
         </div>
-        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
-          Carrusel de Imágenes
-        </h3>
-        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-          Sube imágenes a PostgreSQL (Base64) y muéstralas en un carrusel interactivo.
-          <br><br>
-          <strong>✅ Funciona con tu backend Railway</strong>
-        </p>
-        <a 
-          href="carrusel" 
-          style="
-            display: inline-block;
-            padding: 10px 20px;
-            background: #8b5cf6;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
-          "
-          onmouseover="this.style.background='#7c3aed'; this.style.transform='translateY(-2px)';"
-          onmouseout="this.style.background='#8b5cf6'; this.style.transform='translateY(0)';"
-        >
-          Ver Carrusel →
-        </a>
       </div>
     </div>
   </div>
 
-  <script>
-    // ✅ CORRECCIÓN 1: Usa la URL de tu backend Express en Railway
-    const BACKEND_URL = 'https://violet-virgo-production.up.railway.app';
+  <!-- Tarjetas de funcionalidades -->
+  <div style="
+    max-width: 1200px;
+    margin: 50px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 0 20px;
+  ">
+    <!-- Tarjeta 1: Formulario de Validación -->
+    <div style="
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      border-top: 4px solid #3b82f6;
+      transition: all 0.3s;
+    "
+    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
+    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+      <div style="
+        background: #3b82f6;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+      ">
+        📝
+      </div>
+      <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
+        Formulario de Validación
+      </h3>
+      <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+        Prueba validaciones de formularios frontend con diferentes tipos de campos y reglas.
+      </p>
+      <a 
+        href="formulario-validacion" 
+        style="
+          display: inline-block;
+          padding: 10px 20px;
+          background: #3b82f6;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+      >
+        Ir al Formulario →
+      </a>
+    </div>
+
+    <!-- Tarjeta 2: Carrusel de Imágenes -->
+    <div style="
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      border-top: 4px solid #8b5cf6;
+      transition: all 0.3s;
+    "
+    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
+    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+      <div style="
+        background: #8b5cf6;
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+      ">
+        🖼️
+      </div>
+      <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
+        Carrusel de Imágenes
+      </h3>
+      <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+        Sube imágenes a PostgreSQL (Base64) y muéstralas en un carrusel interactivo.
+        <br><br>
+        <strong>✅ Funciona con tu backend Railway</strong>
+      </p>
+      <a 
+        href="carrusel" 
+        style="
+          display: inline-block;
+          padding: 10px 20px;
+          background: #8b5cf6;
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.background='#7c3aed'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='#8b5cf6'; this.style.transform='translateY(0)';"
+      >
+        Ver Carrusel →
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ✅ CORRECCIÓN 1: Usa la URL de tu backend Express en Railway
+  const BACKEND_URL = 'https://violet-virgo-production.up.railway.app';
+  
+  // 1. Cargar hCaptcha dinámicamente
+  const script = document.createElement('script');
+  script.src = 'https://js.hcaptcha.com/1/api.js';
+  script.async = true;
+  document.head.appendChild(script);
+  
+  // 2. Verificar Salud del Sistema al cargar
+  async function verificarSalud() {
+    const estadoTexto = document.getElementById('estadoTexto');
+    const backendURL = document.getElementById('backendURL');
+    backendURL.textContent = BACKEND_URL;
     
-    // 1. Cargar hCaptcha dinámicamente
-    const script = document.createElement('script');
-    script.src = 'https://js.hcaptcha.com/1/api.js';
-    script.async = true;
-    document.head.appendChild(script);
-    
-    // 2. Verificar Salud del Sistema al cargar
-    async function verificarSalud() {
-      const estadoTexto = document.getElementById('estadoTexto');
-      const backendURL = document.getElementById('backendURL');
-      backendURL.textContent = BACKEND_URL;
+    try {
+      const res = await fetch(`${BACKEND_URL}/health`);
+      const data = await res.json();
       
-      try {
-        const res = await fetch(`${BACKEND_URL}/health`);
-        const data = await res.json();
+      if (data.status === '✅ OK') {
+        let html = `<span style="color: #10b981;">✅ Conectado</span>`;
         
-        if (data.status === '✅ OK') {
-          let html = `<span style="color: #10b981;">✅ Conectado</span>`;
-          
-          // Mostrar estadísticas si están disponibles
-          if (data.total_mensajes !== undefined) {
-            html += ` | <span style="color: #3b82f6;">Mensajes: ${data.total_mensajes}</span>`;
-          }
-          if (data.total_imagenes !== undefined) {
-            html += ` | <span style="color: #8b5cf6;">Imágenes: ${data.total_imagenes}</span>`;
-          }
-          
-          estadoTexto.innerHTML = html;
-        } else {
-          throw new Error(data.error || 'Error desconocido');
+        // Mostrar estadísticas si están disponibles
+        if (data.total_mensajes !== undefined) {
+          html += ` | <span style="color: #3b82f6;">Mensajes: ${data.total_mensajes}</span>`;
         }
-      } catch (e) {
-        console.error('Error conexión backend:', e);
-        estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Sin conexión</span>';
+        if (data.total_imagenes !== undefined) {
+          html += ` | <span style="color: #8b5cf6;">Imágenes: ${data.total_imagenes}</span>`;
+        }
+        
+        estadoTexto.innerHTML = html;
+      } else {
+        throw new Error(data.error || 'Error desconocido');
       }
+    } catch (e) {
+      console.error('Error conexión backend:', e);
+      estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Sin conexión</span>';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', verificarSalud);
+
+  // 3. Lógica de Envío
+  document.getElementById('botonEnviar').addEventListener('click', async function() {
+    const campo = document.getElementById('miCampoUnico');
+    const resultado = document.getElementById('resultado');
+    const texto = campo.value.trim();
+    
+    // ✅ CORRECCIÓN 2: Obtener token de hCaptcha correctamente
+    let tokenCaptcha;
+    if (window.hcaptcha) {
+      tokenCaptcha = hcaptcha.getResponse();
+    } else {
+      tokenCaptcha = document.querySelector('[name="h-captcha-response"]')?.value;
     }
 
-    document.addEventListener('DOMContentLoaded', verificarSalud);
+    if (!texto) {
+      alert("Por favor escribe un mensaje");
+      return;
+    }
+    
+    if (!tokenCaptcha) {
+      alert("Por favor completa el captcha");
+      return;
+    }
 
-    // 3. Lógica de Envío
-    document.getElementById('botonEnviar').addEventListener('click', async function() {
-      const campo = document.getElementById('miCampoUnico');
-      const resultado = document.getElementById('resultado');
-      const texto = campo.value.trim();
-      
-      // ✅ CORRECCIÓN 2: Obtener token de hCaptcha correctamente
-      let tokenCaptcha;
-      if (window.hcaptcha) {
-        tokenCaptcha = hcaptcha.getResponse();
-      } else {
-        tokenCaptcha = document.querySelector('[name="h-captcha-response"]')?.value;
-      }
+    this.disabled = true;
+    this.textContent = 'Enviando...';
+    this.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
 
-      if (!texto) {
-        alert("Por favor escribe un mensaje");
-        return;
-      }
-      
-      if (!tokenCaptcha) {
-        alert("Por favor completa el captcha");
-        return;
-      }
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/guardar`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          texto: texto, 
+          hcaptcha: tokenCaptcha 
+        })
+      });
 
-      this.disabled = true;
-      this.textContent = 'Enviando...';
-      this.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+      const data = await response.json();
+      console.log('Respuesta backend:', data);
 
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/guardar`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            texto: texto, 
-            hcaptcha: tokenCaptcha 
-          })
-        });
-
-        const data = await response.json();
-        console.log('Respuesta backend:', data);
-
-        if (data.success) {
-          resultado.style.display = 'block';
-          resultado.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
-          resultado.style.borderLeft = '4px solid #10b981';
-          resultado.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-              <div style="
-                background: #10b981;
-                color: white;
-                width: 30px;
-                height: 30px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              ">✓</div>
-              <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Guardado exitoso!</strong>
-            </div>
-            <div style="color: #065f46;">
-              <strong>ID:</strong> ${data.id}<br>
-              <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
-              <strong>Mensaje:</strong> "${data.texto}"
-            </div>
-          `;
-          campo.value = '';
-          // Resetear captcha
-          if (window.hcaptcha) {
-            hcaptcha.reset();
-          }
-          // Actualizar estado
-          setTimeout(verificarSalud, 1000);
-        } else {
-          throw new Error(data.message || data.error || 'Error desconocido');
-        }
-      } catch (err) {
-        console.error('Error envío:', err);
+      if (data.success) {
         resultado.style.display = 'block';
-        resultado.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
-        resultado.style.borderLeft = '4px solid #ef4444';
+        resultado.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
+        resultado.style.borderLeft = '4px solid #10b981';
         resultado.innerHTML = `
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
             <div style="
-              background: #ef4444;
+              background: #10b981;
               color: white;
               width: 30px;
               height: 30px;
@@ -563,18 +454,52 @@ import Layout from '../layout/Layout.astro';
               display: flex;
               align-items: center;
               justify-content: center;
-            ">✗</div>
-            <strong style="font-size: 1.1rem; color: #991b1b;">❌ Error al guardar</strong>
+            ">✓</div>
+            <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Guardado exitoso!</strong>
           </div>
-          <div style="color: #991b1b;">
-            ${err.message}
+          <div style="color: #065f46;">
+            <strong>ID:</strong> ${data.id}<br>
+            <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
+            <strong>Mensaje:</strong> "${data.texto}"
           </div>
         `;
-      } finally {
-        this.disabled = false;
-        this.textContent = '💾 Guardar en PostgreSQL';
-        this.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        campo.value = '';
+        // Resetear captcha
+        if (window.hcaptcha) {
+          hcaptcha.reset();
+        }
+        // Actualizar estado
+        setTimeout(verificarSalud, 1000);
+      } else {
+        throw new Error(data.message || data.error || 'Error desconocido');
       }
-    });
-  </script>
-</Layout>
+    } catch (err) {
+      console.error('Error envío:', err);
+      resultado.style.display = 'block';
+      resultado.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
+      resultado.style.borderLeft = '4px solid #ef4444';
+      resultado.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <div style="
+            background: #ef4444;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">✗</div>
+          <strong style="font-size: 1.1rem; color: #991b1b;">❌ Error al guardar</strong>
+        </div>
+        <div style="color: #991b1b;">
+          ${err.message}
+        </div>
+      `;
+    } finally {
+      this.disabled = false;
+      this.textContent = '💾 Guardar en PostgreSQL';
+      this.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    }
+  });
+</script>
