@@ -39,7 +39,7 @@
       </h1>
     </div>
 
-    <!-- Menú de navegación (SOLO RUTAS SUPERIORES) -->
+    <!-- Menú de navegación (CON TODAS LAS RUTAS) -->
     <div style="
       display: flex;
       gap: 10px;
@@ -50,19 +50,20 @@
         href="/" 
         style="
           padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(255, 255, 255, 0.3);
           color: white;
           text-decoration: none;
           border-radius: 8px;
-          font-weight: 500;
+          font-weight: 600;
           transition: all 0.3s;
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          border: 2px solid rgba(255, 255, 255, 0.5);
           display: flex;
           align-items: center;
           gap: 8px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
       >
         <span>🏠</span>
         <span>Inicio</span>
@@ -91,23 +92,44 @@
       </a>
       
       <a 
-        href="carrusel" 
+        href="error-captcha" 
         style="
           padding: 10px 20px;
-          background: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.2);
           color: white;
           text-decoration: none;
           border-radius: 8px;
-          font-weight: 600;
+          font-weight: 500;
           transition: all 0.3s;
-          border: 2px solid rgba(255, 255, 255, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           display: flex;
           align-items: center;
           gap: 8px;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         "
-        onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
-        onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+      >
+        <span>⚠️</span>
+        <span>Error Captcha</span>
+      </a>
+      
+      <a 
+        href="carrusel" 
+        style="
+          padding: 10px 20px;
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: all 0.3s;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
       >
         <span>🖼️</span>
         <span>Carrusel</span>
@@ -238,118 +260,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Tarjetas de funcionalidades -->
-  <div style="
-    max-width: 1200px;
-    margin: 50px auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-    padding: 0 20px;
-  ">
-    <!-- Tarjeta 1: Formulario de Validación -->
-    <div style="
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      border-top: 4px solid #3b82f6;
-      transition: all 0.3s;
-    "
-    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
-    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
-      <div style="
-        background: #3b82f6;
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 20px;
-      ">
-        📝
-      </div>
-      <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
-        Formulario de Validación
-      </h3>
-      <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-        Prueba validaciones de formularios frontend con diferentes tipos de campos y reglas.
-      </p>
-      <a 
-        href="formulario-validacion" 
-        style="
-          display: inline-block;
-          padding: 10px 20px;
-          background: #3b82f6;
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s;
-        "
-        onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
-      >
-        Ir al Formulario →
-      </a>
-    </div>
-
-    <!-- Tarjeta 2: Carrusel de Imágenes -->
-    <div style="
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      border-top: 4px solid #8b5cf6;
-      transition: all 0.3s;
-    "
-    onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
-    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
-      <div style="
-        background: #8b5cf6;
-        color: white;
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 20px;
-      ">
-        🖼️
-      </div>
-      <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
-        Carrusel de Imágenes
-      </h3>
-      <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
-        Sube imágenes a PostgreSQL (Base64) y muéstralas en un carrusel interactivo.
-        <br><br>
-        <strong>✅ Funciona con tu backend Railway</strong>
-      </p>
-      <a 
-        href="carrusel" 
-        style="
-          display: inline-block;
-          padding: 10px 20px;
-          background: #8b5cf6;
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s;
-        "
-        onmouseover="this.style.background='#7c3aed'; this.style.transform='translateY(-2px)';"
-        onmouseout="this.style.background='#8b5cf6'; this.style.transform='translateY(0)';"
-      >
-        Ver Carrusel →
-      </a>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -395,7 +305,7 @@
 
   document.addEventListener('DOMContentLoaded', verificarSalud);
 
-  // 3. Lógica de Envío
+  // 3. Lógica de Envío CON REDIRECCIÓN A ERROR-CAPTCHA
   document.getElementById('botonEnviar').addEventListener('click', async function() {
     const campo = document.getElementById('miCampoUnico');
     const resultado = document.getElementById('resultado');
@@ -414,8 +324,9 @@
       return;
     }
     
+    // ✅ MODIFICACIÓN: Redirigir a error-captcha si falta el captcha
     if (!tokenCaptcha) {
-      alert("Por favor completa el captcha");
+      window.location.href = '/error-captcha';
       return;
     }
 
