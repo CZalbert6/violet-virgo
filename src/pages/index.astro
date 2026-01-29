@@ -3,36 +3,155 @@ import Layout from '../layout/Layout.astro';
 ---
 
 <Layout>
-  <div style="text-align: center; padding: 40px 20px;">
-    <!-- Breadcrumbs -->
-    <nav style="
-      margin-bottom: 30px;
-      text-align: left;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
+  <!-- Barra de navegación superior -->
+  <nav style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 15px 20px;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+  ">
+    <div style="
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
     ">
+      <!-- Logo/Título -->
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="
+          background: white;
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          color: #667eea;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        ">
+          🚀
+        </div>
+        <h1 style="color: white; margin: 0; font-size: 1.5rem; font-weight: 600;">
+          Astro + PostgreSQL
+        </h1>
+      </div>
+
+      <!-- Menú de navegación -->
       <div style="
         display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.9rem;
-        color: #666;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
       ">
-        <span style="color: #3b82f6;">🏠</span>
-        <span style="color: #3b82f6;">Inicio</span>
+        <a 
+          href="/" 
+          style="
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+        >
+          <span>🏠</span>
+          <span>Inicio</span>
+        </a>
+        
+        <a 
+          href="formulario-validacion" 
+          style="
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+        >
+          <span>📝</span>
+          <span>Formulario</span>
+        </a>
+        
+        <a 
+          href="error-captcha" 
+          style="
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+          onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+          onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)';"
+        >
+          <span>⚠️</span>
+          <span>Error Demo</span>
+        </a>
+        
+        <a 
+          href="carrusel" 
+          style="
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+          "
+          onmouseover="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.3)';"
+          onmouseout="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.2)';"
+        >
+          <span>🖼️</span>
+          <span>Carrusel</span>
+        </a>
       </div>
-    </nav>
-    
+    </div>
+  </nav>
+
+  <div style="text-align: center; padding: 20px;">
+    <!-- Título principal -->
     <h1 style="font-size: 2.5rem; color: #333; margin-bottom: 10px;">
-      🎯 Astro + Railway (PostgreSQL)
+      🎯 Sistema de Pruebas
     </h1>
-    <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px;">
-      Los datos se guardan en: <code>mensajescaptcha</code>
+    <p style="color: #666; font-size: 1.1rem; margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      Prueba diferentes funcionalidades conectadas a PostgreSQL en Railway
     </p>
     
+    <!-- Contenedor principal -->
     <div style="
-      max-width: 400px;
+      max-width: 500px;
       margin: 0 auto;
       background: white;
       padding: 30px;
@@ -41,13 +160,26 @@ import Layout from '../layout/Layout.astro';
     ">
       
       <div style="margin-bottom: 25px;">
+        <div style="
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px;
+          border-radius: 10px;
+          margin-bottom: 20px;
+          text-align: center;
+        ">
+          <div style="font-size: 24px; margin-bottom: 5px;">📝</div>
+          <div style="font-weight: 600; font-size: 1.2rem;">Enviar Mensaje a PostgreSQL</div>
+          <div style="font-size: 0.9rem; opacity: 0.9;">Tabla: <code>mensajescaptcha</code></div>
+        </div>
+        
         <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
-          📝 Tu mensaje:
+          Tu mensaje:
         </label>
         <input 
           type="text" 
           id="miCampoUnico"
-          placeholder="Escribe algo para PostgreSQL..."
+          placeholder="Escribe algo para guardar en la BD..."
           style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
         >
       </div>
@@ -58,102 +190,238 @@ import Layout from '../layout/Layout.astro';
       
       <button 
         id="botonEnviar"
-        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%;"
+        style="
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+          color: white; 
+          padding: 16px; 
+          border: none; 
+          border-radius: 10px; 
+          font-size: 18px; 
+          font-weight: 600; 
+          cursor: pointer; 
+          width: 100%;
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
       >
         💾 Guardar en PostgreSQL
       </button>
       
-      <div id="resultado" style="margin-top: 25px; padding: 20px; border-radius: 10px; display: none; text-align: left;"></div>
+      <div id="resultado" style="
+        margin-top: 25px; 
+        padding: 20px; 
+        border-radius: 10px; 
+        display: none; 
+        text-align: left;
+        transition: all 0.3s;
+      "></div>
       
-      <div id="estadoSistema" style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; font-size: 0.9rem; color: #666;">
-        <div>🔍 <strong>Estado:</strong> <span id="estadoTexto">Verificando...</span></div>
-        <div style="margin-top: 5px;">🌐 <small id="backendURL">...</small></div>
+      <!-- Estado del sistema -->
+      <div id="estadoSistema" style="
+        margin-top: 25px;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 10px;
+        border-left: 4px solid #3b82f6;
+      ">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <div style="
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+          ">
+            🔍
+          </div>
+          <h3 style="margin: 0; color: #333; font-size: 1.1rem;">Estado del Sistema</h3>
+        </div>
+        
+        <div style="margin-bottom: 8px;">
+          <strong style="color: #555;">Backend:</strong> 
+          <span id="estadoTexto" style="margin-left: 10px;">Verificando...</span>
+        </div>
+        
+        <div style="
+          padding: 10px;
+          background: rgba(59, 130, 246, 0.1);
+          border-radius: 6px;
+          font-size: 0.85rem;
+          color: #475569;
+          margin-top: 10px;
+        ">
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span>🌐</span>
+            <span id="backendURL" style="font-family: monospace; word-break: break-all;">...</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Enlaces a otras páginas -->
+    <!-- Tarjetas de funcionalidades -->
     <div style="
-      text-align: center;
-      margin-top: 40px;
-      padding: 20px;
-      background: #f8fafc;
-      border-radius: 10px;
-      max-width: 500px;
-      margin: 40px auto;
+      max-width: 1200px;
+      margin: 50px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      padding: 0 20px;
     ">
-      <h3 style="color: #333; margin-bottom: 15px;">🌐 Otras páginas de prueba</h3>
-      <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">
-        Estas páginas funcionan localmente sin conexión a la base de datos
-      </p>
-      <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+      <!-- Tarjeta 1: Formulario de Validación -->
+      <div style="
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #3b82f6;
+        transition: all 0.3s;
+      "
+      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+        <div style="
+          background: #3b82f6;
+          color: white;
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          margin-bottom: 20px;
+        ">
+          📝
+        </div>
+        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
+          Formulario de Validación
+        </h3>
+        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+          Prueba validaciones de formularios frontend con diferentes tipos de campos y reglas.
+        </p>
         <a 
-          href="/violet-virgo/formulario-validacion" 
+          href="formulario-validacion" 
           style="
-            padding: 12px 25px;
+            display: inline-block;
+            padding: 10px 20px;
             background: #3b82f6;
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
-            display: inline-block;
           "
           onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
           onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
         >
-          📝 Formulario de Validación
+          Ir al Formulario →
         </a>
+      </div>
+
+      <!-- Tarjeta 2: Error Captcha Demo -->
+      <div style="
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #ef4444;
+        transition: all 0.3s;
+      "
+      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+        <div style="
+          background: #ef4444;
+          color: white;
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          margin-bottom: 20px;
+        ">
+          ⚠️
+        </div>
+        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
+          Error Captcha (Demo)
+        </h3>
+        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+          Simulación de errores de captcha para probar el manejo de errores en el frontend.
+        </p>
         <a 
-          href="/violet-virgo/error-captcha" 
+          href="error-captcha" 
           style="
-            padding: 12px 25px;
+            display: inline-block;
+            padding: 10px 20px;
             background: #ef4444;
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
-            display: inline-block;
           "
           onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-2px)';"
           onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)';"
         >
-          ⚠️ Error Captcha (Demo)
+          Ver Demo →
         </a>
-        
-        <!-- NUEVO ENLACE AL CARRUSEL -->
+      </div>
+
+      <!-- Tarjeta 3: Carrusel de Imágenes -->
+      <div style="
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        border-top: 4px solid #8b5cf6;
+        transition: all 0.3s;
+      "
+      onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0, 0, 0, 0.12)';"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.08)';">
+        <div style="
+          background: #8b5cf6;
+          color: white;
+          width: 50px;
+          height: 50px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          margin-bottom: 20px;
+        ">
+          🖼️
+        </div>
+        <h3 style="color: #333; margin-top: 0; margin-bottom: 15px;">
+          Carrusel de Imágenes
+        </h3>
+        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+          Sube imágenes a PostgreSQL (Base64) y muéstralas en un carrusel interactivo.
+          <br><br>
+          <strong>✅ Funciona con tu backend Railway</strong>
+        </p>
         <a 
-          href="/violet-virgo/carrusel" 
+          href="carrusel" 
           style="
-            padding: 12px 25px;
+            display: inline-block;
+            padding: 10px 20px;
             background: #8b5cf6;
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
-            display: inline-block;
           "
           onmouseover="this.style.background='#7c3aed'; this.style.transform='translateY(-2px)';"
           onmouseout="this.style.background='#8b5cf6'; this.style.transform='translateY(0)';"
         >
-          🖼️ Carrusel de Imágenes
+          Ver Carrusel →
         </a>
-      </div>
-      
-      <!-- Descripción del carrusel -->
-      <div style="
-        margin-top: 20px;
-        padding: 15px;
-        background: #f0f9ff;
-        border-radius: 8px;
-        border-left: 4px solid #8b5cf6;
-        text-align: left;
-      ">
-        <h4 style="color: #5b21b6; margin-top: 0; margin-bottom: 8px;">🎨 Carrusel de Imágenes:</h4>
-        <p style="color: #475569; font-size: 0.9rem; margin: 0;">
-          Sube imágenes a PostgreSQL y muéstralas en un carrusel interactivo
-        </p>
       </div>
     </div>
   </div>
@@ -179,19 +447,23 @@ import Layout from '../layout/Layout.astro';
         const data = await res.json();
         
         if (data.status === '✅ OK') {
-          let html = `<span style="color: #10b981;">✅ Backend Activo</span>`;
-          if (data.tabla && data.tabla.exists) {
-            html += ` | <span style="color: #10b981;">${data.tabla.registros || 0} registros</span>`;
-          } else {
-            html += ` | <span style="color: #ef4444;">Tabla no encontrada</span>`;
+          let html = `<span style="color: #10b981;">✅ Conectado</span>`;
+          
+          // Mostrar estadísticas si están disponibles
+          if (data.total_mensajes !== undefined) {
+            html += ` | <span style="color: #3b82f6;">Mensajes: ${data.total_mensajes}</span>`;
           }
+          if (data.total_imagenes !== undefined) {
+            html += ` | <span style="color: #8b5cf6;">Imágenes: ${data.total_imagenes}</span>`;
+          }
+          
           estadoTexto.innerHTML = html;
         } else {
           throw new Error(data.error || 'Error desconocido');
         }
       } catch (e) {
         console.error('Error conexión backend:', e);
-        estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Backend Offline</span>';
+        estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Sin conexión</span>';
       }
     }
 
@@ -211,13 +483,19 @@ import Layout from '../layout/Layout.astro';
         tokenCaptcha = document.querySelector('[name="h-captcha-response"]')?.value;
       }
 
-      if (!texto || !tokenCaptcha) {
-        alert("Por favor escribe un mensaje y completa el captcha");
+      if (!texto) {
+        alert("Por favor escribe un mensaje");
+        return;
+      }
+      
+      if (!tokenCaptcha) {
+        alert("Por favor completa el captcha");
         return;
       }
 
       this.disabled = true;
       this.textContent = 'Enviando...';
+      this.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
 
       try {
         const response = await fetch(`${BACKEND_URL}/api/guardar`, {
@@ -237,28 +515,65 @@ import Layout from '../layout/Layout.astro';
 
         if (data.success) {
           resultado.style.display = 'block';
-          resultado.style.background = '#d1fae5';
+          resultado.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
+          resultado.style.borderLeft = '4px solid #10b981';
           resultado.innerHTML = `
-            <strong>✅ Éxito!</strong><br>
-            ID: ${data.id}<br>
-            Fecha: ${new Date(data.fecha).toLocaleString()}
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <div style="
+                background: #10b981;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">✓</div>
+              <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Guardado exitoso!</strong>
+            </div>
+            <div style="color: #065f46;">
+              <strong>ID:</strong> ${data.id}<br>
+              <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
+              <strong>Mensaje:</strong> "${data.texto}"
+            </div>
           `;
           campo.value = '';
           // Resetear captcha
           if (window.hcaptcha) {
             hcaptcha.reset();
           }
+          // Actualizar estado
+          setTimeout(verificarSalud, 1000);
         } else {
-          throw new Error(data.error || data.detalle || 'Error desconocido');
+          throw new Error(data.message || data.error || 'Error desconocido');
         }
       } catch (err) {
         console.error('Error envío:', err);
         resultado.style.display = 'block';
-        resultado.style.background = '#fee2e2';
-        resultado.innerHTML = `<strong>❌ Error:</strong><br>${err.message}`;
+        resultado.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
+        resultado.style.borderLeft = '4px solid #ef4444';
+        resultado.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="
+              background: #ef4444;
+              color: white;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">✗</div>
+            <strong style="font-size: 1.1rem; color: #991b1b;">❌ Error al guardar</strong>
+          </div>
+          <div style="color: #991b1b;">
+            ${err.message}
+          </div>
+        `;
       } finally {
         this.disabled = false;
         this.textContent = '💾 Guardar en PostgreSQL';
+        this.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
       }
     });
   </script>
