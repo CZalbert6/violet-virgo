@@ -92,7 +92,7 @@
       </a>
       
       <a 
-        href="https://czalbert6.github.io/violet-virgo/error-captcha.html" 
+        href="error-captcha" 
         style="
           padding: 10px 20px;
           background: rgba(255, 255, 255, 0.2);
@@ -305,7 +305,7 @@
 
   document.addEventListener('DOMContentLoaded', verificarSalud);
 
-  // 3. Lógica de Envío CON REDIRECCIÓN A ERROR-CAPTCHA (URL COMPLETA CON .html)
+  // 3. Lógica de Envío CON ALERTA SIMPLE
   document.getElementById('botonEnviar').addEventListener('click', async function() {
     const campo = document.getElementById('miCampoUnico');
     const resultado = document.getElementById('resultado');
@@ -320,13 +320,13 @@
     }
 
     if (!texto) {
-      alert("Por favor escribe un mensaje");
+      alert("❌ Por favor escribe un mensaje");
       return;
     }
     
-    // ✅ MODIFICACIÓN: Redirigir a la URL COMPLETA de error-captcha CON .html
+    // ✅ MODIFICACIÓN: Solo alerta simple
     if (!tokenCaptcha) {
-      window.location.href = 'https://czalbert6.github.io/violet-virgo/error-captcha.html';
+      alert("⚠️ Por favor completa el captcha");
       return;
     }
 
