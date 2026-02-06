@@ -772,9 +772,9 @@
     mensajesFiltrados.sort((a, b) => {
       switch(orden) {
         case 'fecha_desc':
-          return new Date(b.fecha) - new Date(a.fecha);
+          return new Date(b.created_at) - new Date(a.created_at);
         case 'fecha_asc':
-          return new Date(a.fecha) - new Date(b.fecha);
+          return new Date(a.created_at) - new Date(b.created_at);
         case 'texto_asc':
           return a.texto.localeCompare(b.texto);
         case 'texto_desc':
@@ -805,7 +805,7 @@
     let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">';
     
     mensajesPaginados.forEach((mensaje) => {
-      const fecha = new Date(mensaje.fecha).toLocaleString('es-ES', {
+      const fecha = new Date(mensaje.created_at).toLocaleString('es-ES', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -1081,7 +1081,7 @@
     });
   }
   
-  // 7. Actualizar Mensaje - CORREGIDO
+  // 7. Actualizar Mensaje - CORREGIDO (URL CORRECTA)
   async function actualizarMensaje() {
     const nuevoTexto = document.getElementById('inputEditarMensaje').value.trim();
     
@@ -1100,97 +1100,28 @@
     btnActualizar.textContent = 'Actualizando...';
     
     try {
-      // VERIFICAR: Mostrar qué estamos enviando
+      // ✅ USAR LA URL CORRECTA PARA EDITAR: /api/mensajes/:id con método PUT
+      const url = `${BACKEND_URL}/api/mensajes/${mensajeAEditar.id}`;
+      
       console.log('🔄 Actualizando mensaje:', {
         id: mensajeAEditar.id,
         texto: nuevoTexto,
-        url: `${BACKEND_URL}/api/mensajes/${mensajeAEditar.id}`
+        url: url
       });
-      
-      // INTENTAR CON ENDPOINT CORRECTO
-      // Primero probamos la ruta que probablemente exista
-      let url = `${BACKEND_URL}/api/guardar`;
-      let method = 'PUT';
-      let body = JSON.stringify({ 
-        id: mensajeAEditar.id,
-        texto: nuevoTexto 
-      });
-      
-      console.log('📤 Enviando a:', { url, method, body });
       
       const response = await fetch(url, {
-        method: method,
+        method: 'PUT',  // ✅ USAR MÉTODO PUT
         headers: { 
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: body
+        body: JSON.stringify({ 
+          texto: nuevoTexto 
+        })
       });
       
-      // Verificar respuesta
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Error respuesta:', errorText);
-        
-        // Si falla, intentar con POST y estructura diferente
-        try {
-          const fallbackResponse = await fetch(`${BACKEND_URL}/api/guardar`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ 
-              id: mensajeAEditar.id,
-              texto: nuevoTexto,
-              accion: 'actualizar'
-            })
-          });
-          
-          if (!fallbackResponse.ok) {
-            throw new Error(`HTTP ${fallbackResponse.status}: ${await fallbackResponse.text()}`);
-          }
-          
-          const fallbackData = await fallbackResponse.json();
-          console.log('✅ Actualización exitosa (fallback):', fallbackData);
-          
-          mostrarResultado('success', `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-              <div style="
-                background: #10b981;
-                color: white;
-                width: 30px;
-                height: 30px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              ">✓</div>
-              <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje actualizado!</strong>
-            </div>
-            <div style="color: #065f46; margin-left: 40px;">
-              <strong>ID:</strong> ${mensajeAEditar.id}<br>
-              <strong>Mensaje actualizado:</strong> "${nuevoTexto}"
-            </div>
-          `, 'resultadoEditar');
-          
-          // Ocultar formulario después de 2 segundos
-          setTimeout(() => {
-            cancelarEdicion();
-            cargarMensajes();
-            verificarSalud();
-          }, 2000);
-          
-          return;
-          
-        } catch (fallbackError) {
-          console.error('❌ Error en fallback:', fallbackError);
-          throw new Error(`No se pudo actualizar: ${errorText}`);
-        }
-      }
-      
       const data = await response.json();
-      console.log('📥 Respuesta actualización:', data);
+      console.log('📥 Respuesta del servidor:', data);
       
       if (data.success) {
         mostrarResultado('success', `
@@ -1206,11 +1137,11 @@
               justify-content: center;
             ">✓</div>
             <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje actualizado!</strong>
-          </div>
-          <div style="color: #065f46; margin-left: 40px;">
-            <strong>ID:</strong> ${data.mensaje?.id || mensajeAEditar.id}<br>
-            <strong>Mensaje actualizado:</strong> "${data.mensaje?.texto || nuevoTexto}"
-          </div>
+            </div>
+            <div style="color: #065f46; margin-left: 40px;">
+              <strong>ID:</strong> ${data.mensaje?.id || mensajeAEditar.id}<br>
+              <strong>Mensaje actualizado:</strong> "${data.mensaje?.texto || nuevoTexto}"
+            </div>
         `, 'resultadoEditar');
         
         // Ocultar formulario después de 2 segundos
@@ -1239,8 +1170,7 @@
           <strong style="color: #991b1b;">❌ Error al actualizar</strong>
         </div>
         <div style="color: #991b1b; margin-left: 40px; margin-top: 5px;">
-          ${err.message}<br><br>
-          <small>Nota: El backend no tiene soporte para edición.</small>
+          ${err.message}
         </div>
       `, 'resultadoEditar');
     } finally {
@@ -1256,101 +1186,58 @@
     document.getElementById('resultadoEditar').style.display = 'none';
   }
   
-  // 9. Eliminar Mensaje - CORREGIDO
+  // 9. Eliminar Mensaje - CORREGIDO (URL CORRECTA)
   async function eliminarMensaje(id) {
     try {
       console.log('🗑️ Eliminando mensaje ID:', id);
       
-      // VERIFICAR: Mostrar qué estamos intentando
-      console.log('🔄 Intentando eliminar en:', `${BACKEND_URL}/api/mensajes/${id}`);
+      // ✅ USAR LA URL CORRECTA PARA ELIMINAR: /api/mensajes/:id con método DELETE
+      const url = `${BACKEND_URL}/api/mensajes/${id}`;
       
-      // Intentar con DELETE
-      let response;
-      try {
-        response = await fetch(`${BACKEND_URL}/api/mensajes/${id}`, {
-          method: 'DELETE',
-          headers: { 
-            'Accept': 'application/json'
-          }
-        });
-      } catch (deleteError) {
-        console.log('❌ DELETE falló, intentando POST:', deleteError);
-        
-        // Si DELETE falla, intentar con POST
-        response = await fetch(`${BACKEND_URL}/api/guardar`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            id: id,
-            accion: 'eliminar'
-          })
-        });
-      }
+      console.log('🔄 Intentando eliminar en:', url);
       
-      // Verificar si la respuesta es JSON
-      const contentType = response.headers.get('content-type');
-      let data;
-      
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        console.log('📥 Respuesta no JSON:', text);
-        // Intentar parsear como JSON de todas formas
-        try {
-          data = JSON.parse(text);
-        } catch {
-          // Si no es JSON, crear un objeto de respuesta
-          data = {
-            success: response.ok,
-            message: text || 'Operación completada'
-          };
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: { 
+          'Accept': 'application/json'
         }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        mostrarResultado('success', `
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="
+              background: #10b981;
+              color: white;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">✓</div>
+            <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje eliminado!</strong>
+          </div>
+          <div style="color: #065f46; margin-left: 40px;">
+            <strong>ID:</strong> ${id}<br>
+            El mensaje ha sido eliminado correctamente.
+          </div>
+        `, 'resultadoCrear');
+        
+        // Recargar lista después de 1 segundo
+        setTimeout(() => {
+          cargarMensajes();
+          verificarSalud();
+        }, 1000);
+        
+      } else {
+        throw new Error(data.message || 'Error desconocido');
       }
-      
-      if (!response.ok && !data.success) {
-        throw new Error(data.message || `HTTP ${response.status}: ${data.message || 'Error desconocido'}`);
-      }
-      
-      // Mostrar mensaje de éxito
-      mostrarResultado('success', `
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-          <div style="
-            background: #10b981;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          ">✓</div>
-          <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje eliminado!</strong>
-        </div>
-        <div style="color: #065f46; margin-left: 40px;">
-          <strong>ID:</strong> ${id}<br>
-          El mensaje ha sido eliminado correctamente.
-        </div>
-      `, 'resultadoCrear');
-      
-      // Ocultar después de 3 segundos
-      setTimeout(() => {
-        const resultadoDiv = document.getElementById('resultadoCrear');
-        if (resultadoDiv) resultadoDiv.style.display = 'none';
-      }, 3000);
-      
-      // Recargar lista después de 1 segundo
-      setTimeout(() => {
-        cargarMensajes();
-        verificarSalud();
-      }, 1000);
       
     } catch (err) {
       console.error('Error eliminando mensaje:', err);
-      
       mostrarResultado('error', `
         <div style="display: flex; align-items: center; gap: 10px;">
           <div style="
@@ -1366,8 +1253,7 @@
           <strong style="color: #991b1b;">❌ Error al eliminar</strong>
         </div>
         <div style="color: #991b1b; margin-left: 40px; margin-top: 5px;">
-          ${err.message}<br><br>
-          <small>Nota: El backend no tiene soporte para eliminación.</small>
+          ${err.message}
         </div>
       `, 'resultadoCrear');
     } finally {
@@ -1547,9 +1433,13 @@
     function hacerResponsive() {
       const listaMensajes = document.getElementById('listaMensajes');
       if (window.innerWidth < 768) {
-        listaMensajes.style.gridTemplateColumns = '1fr';
+        if (listaMensajes) {
+          listaMensajes.style.gridTemplateColumns = '1fr';
+        }
       } else {
-        listaMensajes.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+        if (listaMensajes) {
+          listaMensajes.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+        }
       }
     }
     
