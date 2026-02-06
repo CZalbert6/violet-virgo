@@ -13,7 +13,7 @@ app.use(cors({
     'https://violet-virgo-production.up.railway.app',
     'http://localhost:4321'
   ],
-  methods: ['GET', 'POST', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -198,7 +198,9 @@ app.get('/health', async (req, res) => {
         guardar: 'POST /api/guardar',
         mensajes: 'GET /api/mensajes',
         carrusel: 'GET /api/carrusel',
-        subir_imagen: 'POST /api/carrusel'
+        subir_imagen: 'POST /api/carrusel',
+        actualizar_mensaje: 'PUT /api/mensajes/:id',  // NUEVO
+        eliminar_mensaje: 'DELETE /api/mensajes/:id'  // NUEVO
       }
     });
     
@@ -284,6 +286,108 @@ app.get('/api/mensajes', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: error.message 
+    });
+  }
+});
+
+// ============================================
+// RUTAS CRUD PARA MENSAJES - NUEVAS
+// ============================================
+
+// 🔄 PUT /api/mensajes/:id - Actualizar mensaje
+app.put('/api/mensajes/:id', async (req, res) => {
+  console.log('✏️ PUT /api/mensajes/:id - Actualizando mensaje');
+  
+  const { id } = req.params;
+  const { texto } = req.body;
+  
+  if (!texto || texto.trim() === "") {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'El texto es obligatorio para actualizar' 
+    });
+  }
+  
+  try {
+    // Verificar que el mensaje existe
+    const checkResult = await pool.query(
+      'SELECT id FROM mensajescaptcha WHERE id = $1',
+      [id]
+    );
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Mensaje no encontrado' 
+      });
+    }
+    
+    // Actualizar mensaje
+    const result = await pool.query(`
+      UPDATE mensajescaptcha 
+      SET texto = $1, created_at = NOW() 
+      WHERE id = $2 
+      RETURNING id, texto, created_at
+    `, [texto.trim(), id]);
+    
+    console.log(`✅ Mensaje ${id} actualizado: "${texto.trim()}"`);
+    
+    res.json({
+      success: true,
+      message: 'Mensaje actualizado exitosamente',
+      mensaje: result.rows[0]
+    });
+    
+  } catch (error) {
+    console.error('❌ Error actualizando mensaje:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      message: 'Error al actualizar el mensaje'
+    });
+  }
+});
+
+// 🗑️ DELETE /api/mensajes/:id - Eliminar mensaje
+app.delete('/api/mensajes/:id', async (req, res) => {
+  console.log('🗑️ DELETE /api/mensajes/:id - Eliminando mensaje');
+  
+  const { id } = req.params;
+  
+  try {
+    // Verificar que el mensaje existe
+    const checkResult = await pool.query(
+      'SELECT id FROM mensajescaptcha WHERE id = $1',
+      [id]
+    );
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Mensaje no encontrado' 
+      });
+    }
+    
+    // Eliminar mensaje
+    const result = await pool.query(
+      'DELETE FROM mensajescaptcha WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
+    console.log(`✅ Mensaje ${id} eliminado`);
+    
+    res.json({
+      success: true,
+      message: 'Mensaje eliminado exitosamente',
+      id: result.rows[0].id
+    });
+    
+  } catch (error) {
+    console.error('❌ Error eliminando mensaje:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      message: 'Error al eliminar el mensaje'
     });
   }
 });
@@ -631,6 +735,7 @@ app.get('/', (req, res) => {
         .info { color: #3b82f6; }
         .new { background: #f0f9ff; border-left: 4px solid #8b5cf6; }
         .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; margin: 10px 0; }
+        .crud { background: #dcfce7; border-left: 4px solid #10b981; }
       </style>
     </head>
     <body>
@@ -642,6 +747,15 @@ app.get('/', (req, res) => {
         <div class="endpoint"><strong>GET</strong> <a href="/health">/health</a> - Estado del sistema</div>
         <div class="endpoint"><strong>POST</strong> /api/guardar - Guardar mensajes</div>
         <div class="endpoint"><strong>GET</strong> <a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</div>
+        
+        <!-- NUEVOS ENDPOINTS CRUD PARA MENSAJES -->
+        <div class="endpoint crud">
+          <strong>📝 CRUD MENSAJES:</strong>
+          <div style="margin-left: 10px; margin-top: 5px;">
+            <div><strong>PUT</strong> /api/mensajes/:id - Actualizar mensaje</div>
+            <div><strong>DELETE</strong> /api/mensajes/:id - Eliminar mensaje</div>
+          </div>
+        </div>
         
         <!-- NUEVOS ENDPOINTS PARA CARRUSEL -->
         <div class="endpoint new">
@@ -658,7 +772,7 @@ app.get('/', (req, res) => {
       <div class="card">
         <h3>🔗 Frontend conectado:</h3>
         <p><a href="https://czalbert6.github.io/violet-virgo" target="_blank">https://czalbert6.github.io/violet-virgo</a></p>
-        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes </a></p>
+        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes</a></p>
       </div>
       
       <script>
@@ -676,6 +790,7 @@ app.get('/', (req, res) => {
                 <p><strong>Mensajes:</strong> \${data.total_mensajes || 0}</p>
                 <p><strong>Imágenes:</strong> \${data.total_imagenes || 0}</p>
                 <p><strong>Servidor:</strong> Railway PostgreSQL</p>
+                <p><strong>CRUD activo:</strong> \${data.endpoints?.actualizar_mensaje ? '✅ Sí' : '❌ No'}</p>
               </div>
             \`;
           })
@@ -712,6 +827,9 @@ app.listen(PORT, '0.0.0.0', () => {
         - VARCHAR (para tipo_mime)
         - INTEGER (para tamaño)
         - DATE y TIMESTAMP
+  🔄   CRUD COMPLETO para mensajes: ACTIVADO
+        - PUT /api/mensajes/:id
+        - DELETE /api/mensajes/:id
   ============================================
   `);
 });
