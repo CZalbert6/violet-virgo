@@ -781,23 +781,14 @@ app.get('/', (req, res) => {
         <div class="endpoint"><strong>POST</strong> /api/guardar - Guardar mensajes</div>
         <div class="endpoint"><strong>GET</strong> <a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</div>
         
-        <!-- NUEVOS ENDPOINTS CRUD PARA MENSAJES -->
-        <div class="endpoint crud">
-          <strong>📝 CRUD MENSAJES:</strong>
-          <div style="margin-left: 10px; margin-top: 5px;">
-            <div><strong>PUT</strong> /api/mensajes/:id - Actualizar mensaje (mantiene created_at)</div>
-            <div><strong>DELETE</strong> /api/mensajes/:id - Eliminar mensaje</div>
-          </div>
-        </div>
+      
         
         <!-- NUEVOS ENDPOINTS PARA CARRUSEL -->
         <div class="endpoint new">
           <strong>🎨 CARRUSEL (Base64):</strong>
           <div style="margin-left: 10px; margin-top: 5px;">
             <div><strong>GET</strong> <a href="/api/carrusel">/api/carrusel</a> - Ver imágenes</div>
-            <div><strong>POST</strong> /api/carrusel - Subir imagen (Base64)</div>
-            <div><strong>GET</strong> /api/carrusel/:id - Obtener imagen completa</div>
-            <div><strong>DELETE</strong> /api/carrusel/:id - Eliminar imagen</div>
+
           </div>
         </div>
       </div>
