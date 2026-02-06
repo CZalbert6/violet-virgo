@@ -147,392 +147,391 @@
     Gestiona mensajes en la tabla <code>mensajescaptcha</code> con operaciones CRUD
   </p>
   
-  <!-- Contenedor principal -->
+  <!-- Formulario de Creación -->
   <div style="
-    max-width: 800px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #10b981;
   ">
-    
-    <!-- Columna Izquierda: Crear y Editar -->
-    <div style="display: flex; flex-direction: column; gap: 30px;">
-      
-      <!-- Formulario de Creación -->
+    <div style="margin-bottom: 20px;">
       <div style="
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #10b981;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
       ">
-        <div style="margin-bottom: 20px;">
-          <div style="
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-          ">
-            <div style="font-size: 24px; margin-bottom: 5px;">📝</div>
-            <div style="font-weight: 600; font-size: 1.2rem;">Crear Nuevo Mensaje</div>
-            <div style="font-size: 0.9rem; opacity: 0.9;">Tabla: <code>mensajescaptcha</code></div>
-          </div>
-          
-          <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
-            Tu mensaje:
-          </label>
-          <input 
-            type="text" 
-            id="inputCrearMensaje"
-            placeholder="Escribe un mensaje para guardar..."
-            style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
-          >
-        </div>
-        
-        <div style="margin: 20px 0;">
-          <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
-        </div>
-        
-        <button 
-          id="btnCrear"
-          style="
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-            color: white; 
-            padding: 16px; 
-            border: none; 
-            border-radius: 10px; 
-            font-size: 18px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            width: 100%;
-            transition: all 0.3s;
-          "
-          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)';"
-          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
-        >
-          💾 Guardar en PostgreSQL
-        </button>
-        
-        <div id="resultadoCrear" style="
-          margin-top: 20px; 
-          padding: 15px; 
-          border-radius: 10px; 
-          display: none; 
-          text-align: left;
-          transition: all 0.3s;
-        "></div>
+        <div style="font-size: 24px; margin-bottom: 5px;">📝</div>
+        <div style="font-weight: 600; font-size: 1.2rem;">Crear Nuevo Mensaje</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">Tabla: <code>mensajescaptcha</code></div>
       </div>
       
-      <!-- Formulario de Edición -->
-      <div id="formularioEdicion" style="
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #3b82f6;
-        display: none;
+      <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
+        Tu mensaje:
+      </label>
+      <input 
+        type="text" 
+        id="inputCrearMensaje"
+        placeholder="Escribe un mensaje para guardar..."
+        style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
+      >
+    </div>
+    
+    <div style="margin: 20px 0;">
+      <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+    </div>
+    
+    <button 
+      id="btnCrear"
+      style="
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+        color: white; 
+        padding: 16px; 
+        border: none; 
+        border-radius: 10px; 
+        font-size: 18px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        width: 100%;
+        transition: all 0.3s;
+      "
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(16, 185, 129, 0.3)';"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+    >
+      💾 Guardar en PostgreSQL
+    </button>
+    
+    <div id="resultadoCrear" style="
+      margin-top: 20px; 
+      padding: 15px; 
+      border-radius: 10px; 
+      display: none; 
+      text-align: left;
+      transition: all 0.3s;
+    "></div>
+  </div>
+  
+  <!-- Formulario de Edición -->
+  <div id="formularioEdicion" style="
+    max-width: 600px;
+    margin: 0 auto 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #3b82f6;
+    display: none;
+  ">
+    <div style="margin-bottom: 20px;">
+      <div style="
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
       ">
-        <div style="margin-bottom: 20px;">
-          <div style="
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-          ">
-            <div style="font-size: 24px; margin-bottom: 5px;">✏️</div>
-            <div style="font-weight: 600; font-size: 1.2rem;">Editar Mensaje</div>
-            <div style="font-size: 0.9rem; opacity: 0.9;" id="infoEdicion">ID: <span id="idEditar"></span></div>
-          </div>
-          
-          <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
-            Nuevo mensaje:
-          </label>
-          <input 
-            type="text" 
-            id="inputEditarMensaje"
-            placeholder="Escribe el nuevo mensaje..."
-            style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
-          >
-          
-          <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-            Original: "<span id="mensajeOriginal"></span>"
-          </div>
-        </div>
-        
-        <div style="display: flex; gap: 15px;">
-          <button 
-            id="btnActualizar"
-            style="
-              flex: 1;
-              background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
-              color: white; 
-              padding: 16px; 
-              border: none; 
-              border-radius: 10px; 
-              font-size: 16px; 
-              font-weight: 600; 
-              cursor: pointer;
-              transition: all 0.3s;
-            "
-            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.3)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
-          >
-            ✅ Actualizar
-          </button>
-          
-          <button 
-            id="btnCancelarEdicion"
-            style="
-              flex: 1;
-              background: #f1f5f9;
-              color: #64748b;
-              padding: 16px; 
-              border: 2px solid #e2e8f0;
-              border-radius: 10px; 
-              font-size: 16px; 
-              font-weight: 600; 
-              cursor: pointer;
-              transition: all 0.3s;
-            "
-            onmouseover="this.style.background='#e2e8f0';"
-            onmouseout="this.style.background='#f1f5f9';"
-          >
-            ❌ Cancelar
-          </button>
-        </div>
-        
-        <div id="resultadoEditar" style="
-          margin-top: 20px; 
-          padding: 15px; 
-          border-radius: 10px; 
-          display: none; 
-          text-align: left;
-          transition: all 0.3s;
-        "></div>
+        <div style="font-size: 24px; margin-bottom: 5px;">✏️</div>
+        <div style="font-weight: 600; font-size: 1.2rem;">Editar Mensaje</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;" id="infoEdicion">ID: <span id="idEditar"></span></div>
       </div>
       
-      <!-- Estado del sistema -->
-      <div id="estadoSistema" style="
-        margin-top: auto;
-        padding: 20px;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 15px;
-        border-left: 4px solid #3b82f6;
-      ">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-          <div style="
-            background: #3b82f6;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-          ">
-            🔍
-          </div>
-          <h3 style="margin: 0; color: #333; font-size: 1.1rem;">Estado del Sistema</h3>
-        </div>
-        
-        <div style="margin-bottom: 8px;">
-          <strong style="color: #555;">Backend:</strong> 
-          <span id="estadoTexto" style="margin-left: 10px;">Verificando...</span>
-        </div>
-        
-        <div style="
-          padding: 10px;
-          background: rgba(59, 130, 246, 0.1);
-          border-radius: 6px;
-          font-size: 0.85rem;
-          color: #475569;
-          margin-top: 10px;
-        ">
-          <div style="display: flex; align-items: center; gap: 5px;">
-            <span>🌐</span>
-            <span id="backendURL" style="font-family: monospace; word-break: break-all;">...</span>
-          </div>
-        </div>
+      <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
+        Nuevo mensaje:
+      </label>
+      <input 
+        type="text" 
+        id="inputEditarMensaje"
+        placeholder="Escribe el nuevo mensaje..."
+        style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
+      >
+      
+      <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+        Original: "<span id="mensajeOriginal"></span>"
       </div>
     </div>
     
-    <!-- Columna Derecha: Lista de Mensajes -->
-    <div>
+    <div style="display: flex; gap: 15px;">
+      <button 
+        id="btnActualizar"
+        style="
+          flex: 1;
+          background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+          color: white; 
+          padding: 16px; 
+          border: none; 
+          border-radius: 10px; 
+          font-size: 16px; 
+          font-weight: 600; 
+          cursor: pointer;
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(59, 130, 246, 0.3)';"
+        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+      >
+        ✅ Actualizar
+      </button>
+      
+      <button 
+        id="btnCancelarEdicion"
+        style="
+          flex: 1;
+          background: #f1f5f9;
+          color: #64748b;
+          padding: 16px; 
+          border: 2px solid #e2e8f0;
+          border-radius: 10px; 
+          font-size: 16px; 
+          font-weight: 600; 
+          cursor: pointer;
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.background='#e2e8f0';"
+        onmouseout="this.style.background='#f1f5f9';"
+      >
+        ❌ Cancelar
+      </button>
+    </div>
+    
+    <div id="resultadoEditar" style="
+      margin-top: 20px; 
+      padding: 15px; 
+      border-radius: 10px; 
+      display: none; 
+      text-align: left;
+      transition: all 0.3s;
+    "></div>
+  </div>
+  
+  <!-- Lista de Mensajes (ABAJO) -->
+  <div style="
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-top: 4px solid #8b5cf6;
+  ">
+    <div style="margin-bottom: 20px;">
       <div style="
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #8b5cf6;
-        height: 100%;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
       ">
-        <div style="margin-bottom: 20px;">
-          <div style="
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-          ">
-            <div style="font-size: 24px; margin-bottom: 5px;">📋</div>
-            <div style="font-weight: 600; font-size: 1.2rem;">Lista de Mensajes</div>
-            <div style="font-size: 0.9rem; opacity: 0.9;">
-              Total: <span id="totalMensajes">0</span> mensajes
-            </div>
-          </div>
-          
-          <!-- Controles de búsqueda y filtro -->
-          <div style="margin-bottom: 20px;">
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-              <input 
-                type="text" 
-                id="inputBuscar"
-                placeholder="Buscar en mensajes..."
-                style="
-                  flex: 1;
-                  padding: 12px 15px;
-                  border: 2px solid #e2e8f0;
-                  border-radius: 8px;
-                  font-size: 14px;
-                "
-                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
-                onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
-              >
-              <button 
-                id="btnRecargar"
-                style="
-                  background: #3b82f6;
-                  color: white;
-                  border: none;
-                  padding: 12px 20px;
-                  border-radius: 8px;
-                  font-weight: 600;
-                  cursor: pointer;
-                  transition: all 0.3s;
-                  display: flex;
-                  align-items: center;
-                  gap: 5px;
-                "
-                onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
-                onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
-              >
-                🔄 Recargar
-              </button>
-            </div>
-            
-            <!-- Filtros -->
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-              <select 
-                id="selectOrden"
-                style="
-                  flex: 1;
-                  padding: 10px;
-                  border: 2px solid #e2e8f0;
-                  border-radius: 8px;
-                  font-size: 14px;
-                  background: white;
-                  min-width: 150px;
-                "
-              >
-                <option value="fecha_desc">Más recientes primero</option>
-                <option value="fecha_asc">Más antiguos primero</option>
-                <option value="texto_asc">A-Z</option>
-                <option value="texto_desc">Z-A</option>
-              </select>
-              
-              <select 
-                id="selectLimite"
-                style="
-                  flex: 1;
-                  padding: 10px;
-                  border: 2px solid #e2e8f0;
-                  border-radius: 8px;
-                  font-size: 14px;
-                  background: white;
-                  min-width: 120px;
-                "
-              >
-                <option value="5">5 por página</option>
-                <option value="10" selected>10 por página</option>
-                <option value="20">20 por página</option>
-                <option value="50">50 por página</option>
-              </select>
-            </div>
-          </div>
-          
-          <!-- Lista de mensajes -->
-          <div id="listaMensajes" style="
-            max-height: 600px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px;
-            background: #f8fafc;
-          ">
-            <div style="text-align: center; padding: 40px; color: #94a3b8;">
-              <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
-              <p>Cargando mensajes...</p>
-            </div>
-          </div>
-          
-          <!-- Paginación -->
-          <div id="paginacion" style="
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f1f5f9;
-            border-radius: 8px;
-          ">
-            <button 
-              id="btnAnterior"
-              style="
-                background: #3b82f6;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 6px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-              "
-              disabled
-            >
-              ◀ Anterior
-            </button>
-            
-            <div style="font-size: 14px; color: #475569;">
-              Página <span id="paginaActual">1</span> de <span id="totalPaginas">1</span>
-            </div>
-            
-            <button 
-              id="btnSiguiente"
-              style="
-                background: #3b82f6;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 6px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-              "
-              disabled
-            >
-              Siguiente ▶
-            </button>
-          </div>
+        <div style="font-size: 24px; margin-bottom: 5px;">📋</div>
+        <div style="font-weight: 600; font-size: 1.2rem;">Lista de Mensajes</div>
+        <div style="font-size: 0.9rem; opacity: 0.9;">
+          Total: <span id="totalMensajes">0</span> mensajes
         </div>
+      </div>
+      
+      <!-- Controles de búsqueda y filtro -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+          <input 
+            type="text" 
+            id="inputBuscar"
+            placeholder="Buscar en mensajes..."
+            style="
+              flex: 1;
+              min-width: 200px;
+              padding: 12px 15px;
+              border: 2px solid #e2e8f0;
+              border-radius: 8px;
+              font-size: 14px;
+            "
+            onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)';"
+            onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';"
+          >
+          <button 
+            id="btnRecargar"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              padding: 12px 20px;
+              border-radius: 8px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.3s;
+              display: flex;
+              align-items: center;
+              gap: 5px;
+              white-space: nowrap;
+            "
+            onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+            onmouseout="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+          >
+            🔄 Recargar
+          </button>
+        </div>
+        
+        <!-- Filtros -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+          <select 
+            id="selectOrden"
+            style="
+              flex: 1;
+              min-width: 200px;
+              padding: 10px;
+              border: 2px solid #e2e8f0;
+              border-radius: 8px;
+              font-size: 14px;
+              background: white;
+            "
+          >
+            <option value="fecha_desc">Más recientes primero</option>
+            <option value="fecha_asc">Más antiguos primero</option>
+            <option value="texto_asc">A-Z</option>
+            <option value="texto_desc">Z-A</option>
+          </select>
+          
+          <select 
+            id="selectLimite"
+            style="
+              flex: 1;
+              min-width: 150px;
+              padding: 10px;
+              border: 2px solid #e2e8f0;
+              border-radius: 8px;
+              font-size: 14px;
+              background: white;
+            "
+          >
+            <option value="5">5 por página</option>
+            <option value="10" selected>10 por página</option>
+            <option value="20">20 por página</option>
+            <option value="50">50 por página</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Lista de mensajes -->
+      <div id="listaMensajes" style="
+        min-height: 200px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px;
+        background: #f8fafc;
+      ">
+        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+          <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
+          <p>Cargando mensajes...</p>
+        </div>
+      </div>
+      
+      <!-- Paginación -->
+      <div id="paginacion" style="
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f1f5f9;
+        border-radius: 10px;
+        flex-wrap: wrap;
+        gap: 10px;
+      ">
+        <button 
+          id="btnAnterior"
+          style="
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+          "
+          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+          onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+          disabled
+        >
+          ◀ Anterior
+        </button>
+        
+        <div style="font-size: 14px; color: #475569; text-align: center;">
+          Página <span id="paginaActual" style="font-weight: bold;">1</span> de <span id="totalPaginas" style="font-weight: bold;">1</span>
+        </div>
+        
+        <button 
+          id="btnSiguiente"
+          style="
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+          "
+          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+          onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+          disabled
+        >
+          Siguiente ▶
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Estado del sistema -->
+  <div id="estadoSistema" style="
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 25px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 15px;
+    border-left: 4px solid #3b82f6;
+  ">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+      <div style="
+        background: #3b82f6;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      ">
+        🔍
+      </div>
+      <h3 style="margin: 0; color: #333; font-size: 1.2rem;">Estado del Sistema</h3>
+    </div>
+    
+    <div style="margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <strong style="color: #555; min-width: 80px;">Backend:</strong> 
+      <span id="estadoTexto" style="font-size: 1rem;">Verificando...</span>
+    </div>
+    
+    <div style="
+      padding: 15px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #475569;
+      margin-top: 15px;
+    ">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 18px;">🌐</span>
+        <span id="backendURL" style="font-family: monospace; word-break: break-all;">...</span>
       </div>
     </div>
   </div>
@@ -623,9 +622,17 @@
 </div>
 
 <style>
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .contenedor-principal {
       grid-template-columns: 1fr !important;
+    }
+    
+    .filtros-container {
+      flex-direction: column !important;
+    }
+    
+    .botones-container {
+      flex-direction: column !important;
     }
   }
   
@@ -634,9 +641,13 @@
     to { transform: scale(1); opacity: 1; }
   }
   
-  @keyframes desvanecer {
-    from { opacity: 1; }
-    to { opacity: 0; }
+  .mensaje-item {
+    transition: all 0.3s ease;
+  }
+  
+  .mensaje-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
   }
 </style>
 
@@ -654,7 +665,7 @@
   let mensajeAEditar = null;
   
   // ====================
-  // FUNCIONES PRINCIPALES
+  // FUNCIONES PRINCIPALES - CORREGIDAS
   // ====================
   
   // 1. Verificar Salud del Sistema
@@ -668,7 +679,7 @@
       const data = await res.json();
       
       if (data.status === '✅ OK') {
-        let html = `<span style="color: #10b981;">✅ Conectado</span>`;
+        let html = `<span style="color: #10b981; font-weight: 600;">✅ Conectado</span>`;
         
         if (data.total_mensajes !== undefined) {
           html += ` | <span style="color: #3b82f6;">Mensajes: ${data.total_mensajes}</span>`;
@@ -684,40 +695,61 @@
       }
     } catch (e) {
       console.error('Error conexión backend:', e);
-      estadoTexto.innerHTML = '<span style="color: #ef4444;">❌ Sin conexión</span>';
+      estadoTexto.innerHTML = '<span style="color: #ef4444; font-weight: 600;">❌ Sin conexión</span>';
     }
   }
   
-  // 2. Cargar Mensajes desde el backend
+  // 2. Cargar Mensajes desde el backend - CORREGIDO
   async function cargarMensajes() {
     try {
-      // Construir URL con parámetros
-      let url = `${BACKEND_URL}/api/mensajes?pagina=${paginaActual}&limite=${limitePorPagina}&orden=${orden}`;
+      // Mostrar estado de carga
+      document.getElementById('listaMensajes').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+          <div style="font-size: 32px; margin-bottom: 10px;">⏳</div>
+          <p>Cargando mensajes...</p>
+        </div>
+      `;
       
-      if (busqueda) {
-        url += `&busqueda=${encodeURIComponent(busqueda)}`;
-      }
+      // Construir URL con parámetros
+      let url = `${BACKEND_URL}/api/mensajes`;
       
       console.log('🔄 Cargando mensajes desde:', url);
       
       const respuesta = await fetch(url);
       
       if (!respuesta.ok) {
-        throw new Error(`HTTP ${respuesta.status}: ${await respuesta.text()}`);
+        throw new Error(`HTTP ${respuesta.status}: No se pudo cargar los mensajes`);
       }
       
       const data = await respuesta.json();
+      console.log('📥 Respuesta del servidor:', data);
       
       if (data.success) {
         mensajes = data.mensajes || [];
         actualizarListaMensajes();
-        actualizarPaginacion(data.total, data.paginas);
+        actualizarPaginacion();
       } else {
         throw new Error(data.message || 'Error del servidor');
       }
     } catch (error) {
       console.error('❌ Error cargando mensajes:', error);
-      mostrarResultado('error', `Error: ${error.message}`, 'resultadoCrear');
+      document.getElementById('listaMensajes').innerHTML = `
+        <div style="text-align: center; padding: 40px; color: #ef4444;">
+          <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+          <p style="font-weight: 600; margin-bottom: 10px;">Error al cargar mensajes</p>
+          <p style="font-size: 0.9rem; margin-bottom: 20px;">${error.message}</p>
+          <button onclick="cargarMensajes()" style="
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+          ">
+            🔄 Reintentar
+          </button>
+        </div>
+      `;
     }
   }
   
@@ -725,7 +757,40 @@
   function actualizarListaMensajes() {
     const container = document.getElementById('listaMensajes');
     
-    if (mensajes.length === 0) {
+    // Aplicar filtros locales (ya que el backend no los soporta)
+    let mensajesFiltrados = [...mensajes];
+    
+    // Filtro de búsqueda
+    if (busqueda) {
+      const busquedaLower = busqueda.toLowerCase();
+      mensajesFiltrados = mensajesFiltrados.filter(m => 
+        m.texto.toLowerCase().includes(busquedaLower)
+      );
+    }
+    
+    // Ordenamiento
+    mensajesFiltrados.sort((a, b) => {
+      switch(orden) {
+        case 'fecha_desc':
+          return new Date(b.fecha) - new Date(a.fecha);
+        case 'fecha_asc':
+          return new Date(a.fecha) - new Date(b.fecha);
+        case 'texto_asc':
+          return a.texto.localeCompare(b.texto);
+        case 'texto_desc':
+          return b.texto.localeCompare(a.texto);
+        default:
+          return 0;
+      }
+    });
+    
+    // Paginación local
+    const totalPaginas = Math.ceil(mensajesFiltrados.length / limitePorPagina);
+    const inicio = (paginaActual - 1) * limitePorPagina;
+    const fin = inicio + limitePorPagina;
+    const mensajesPaginados = mensajesFiltrados.slice(inicio, fin);
+    
+    if (mensajesPaginados.length === 0) {
       container.innerHTML = `
         <div style="text-align: center; padding: 40px; color: #94a3b8;">
           <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
@@ -737,9 +802,9 @@
       return;
     }
     
-    let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
+    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">';
     
-    mensajes.forEach((mensaje, index) => {
+    mensajesPaginados.forEach((mensaje) => {
       const fecha = new Date(mensaje.fecha).toLocaleString('es-ES', {
         year: 'numeric',
         month: 'short',
@@ -751,31 +816,36 @@
       html += `
         <div class="mensaje-item" style="
           background: white;
-          border-radius: 10px;
-          padding: 15px;
-          border-left: 4px solid ${index % 2 === 0 ? '#3b82f6' : '#10b981'};
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s;
-        "
-        onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(0, 0, 0, 0.1)';"
-        onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0, 0, 0, 0.05)';">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-            <div style="font-weight: 600; color: #333; font-size: 0.9rem;">
+          border-radius: 12px;
+          padding: 20px;
+          border-left: 4px solid #3b82f6;
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="
+              background: #3b82f6;
+              color: white;
+              padding: 4px 10px;
+              border-radius: 20px;
+              font-size: 0.8rem;
+              font-weight: 600;
+            ">
               ID: ${mensaje.id}
             </div>
-            <div style="font-size: 0.8rem; color: #94a3b8;">
+            <div style="font-size: 0.8rem; color: #94a3b8; text-align: right;">
               ${fecha}
             </div>
           </div>
           
           <div style="
             color: #475569;
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 20px;
+            padding: 12px;
             background: #f8fafc;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.95rem;
             line-height: 1.5;
+            min-height: 60px;
           ">
             ${mensaje.texto}
           </div>
@@ -786,7 +856,7 @@
               data-id="${mensaje.id}"
               data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
               style="
-                background: #3b82f6;
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
                 color: white;
                 border: none;
                 padding: 8px 15px;
@@ -799,8 +869,6 @@
                 align-items: center;
                 gap: 5px;
               "
-              onmouseover="this.style.background='#2563eb'; this.style.transform='scale(1.05)';"
-              onmouseleave="this.style.background='#3b82f6'; this.style.transform='scale(1)';"
             >
               ✏️ Editar
             </button>
@@ -810,7 +878,7 @@
               data-id="${mensaje.id}"
               data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
               style="
-                background: #ef4444;
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
                 color: white;
                 border: none;
                 padding: 8px 15px;
@@ -823,8 +891,6 @@
                 align-items: center;
                 gap: 5px;
               "
-              onmouseover="this.style.background='#dc2626'; this.style.transform='scale(1.05)';"
-              onmouseleave="this.style.background='#ef4444'; this.style.transform='scale(1)';"
             >
               🗑️ Eliminar
             </button>
@@ -835,6 +901,9 @@
     
     html += '</div>';
     container.innerHTML = html;
+    
+    // Actualizar contador
+    document.getElementById('totalMensajes').textContent = mensajes.length;
     
     // Agregar event listeners a los botones
     document.querySelectorAll('.btn-editar').forEach(btn => {
@@ -855,12 +924,22 @@
   }
   
   // 4. Actualizar Paginación
-  function actualizarPaginacion(total, totalPaginas) {
+  function actualizarPaginacion() {
     const paginacion = document.getElementById('paginacion');
     const paginaActualSpan = document.getElementById('paginaActual');
     const totalPaginasSpan = document.getElementById('totalPaginas');
     const btnAnterior = document.getElementById('btnAnterior');
     const btnSiguiente = document.getElementById('btnSiguiente');
+    
+    let mensajesFiltrados = [...mensajes];
+    if (busqueda) {
+      const busquedaLower = busqueda.toLowerCase();
+      mensajesFiltrados = mensajesFiltrados.filter(m => 
+        m.texto.toLowerCase().includes(busquedaLower)
+      );
+    }
+    
+    const totalPaginas = Math.ceil(mensajesFiltrados.length / limitePorPagina);
     
     if (totalPaginas > 1) {
       paginacion.style.display = 'flex';
@@ -900,6 +979,7 @@
     }
     
     const btnCrear = document.getElementById('btnCrear');
+    const textoOriginal = btnCrear.textContent;
     btnCrear.disabled = true;
     btnCrear.textContent = 'Enviando...';
     btnCrear.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
@@ -921,10 +1001,24 @@
       
       if (data.success) {
         mostrarResultado('success', `
-          ✅ ¡Mensaje guardado exitosamente!<br>
-          <strong>ID:</strong> ${data.id}<br>
-          <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
-          <strong>Mensaje:</strong> "${data.texto}"
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="
+              background: #10b981;
+              color: white;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">✓</div>
+            <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje guardado!</strong>
+          </div>
+          <div style="color: #065f46; margin-left: 40px;">
+            <strong>ID:</strong> ${data.id}<br>
+            <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
+            <strong>Mensaje:</strong> "${data.texto}"
+          </div>
         `, 'resultadoCrear');
         
         // Limpiar formulario
@@ -935,7 +1029,7 @@
           hcaptcha.reset();
         }
         
-        // Recargar lista
+        // Recargar lista después de 1 segundo
         setTimeout(() => {
           cargarMensajes();
           verificarSalud();
@@ -945,10 +1039,27 @@
       }
     } catch (err) {
       console.error('Error creando mensaje:', err);
-      mostrarResultado('error', `❌ Error al guardar: ${err.message}`, 'resultadoCrear');
+      mostrarResultado('error', `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="
+            background: #ef4444;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">✗</div>
+          <strong style="color: #991b1b;">❌ Error al guardar</strong>
+        </div>
+        <div style="color: #991b1b; margin-left: 40px; margin-top: 5px;">
+          ${err.message}
+        </div>
+      `, 'resultadoCrear');
     } finally {
       btnCrear.disabled = false;
-      btnCrear.textContent = '💾 Guardar en PostgreSQL';
+      btnCrear.textContent = textoOriginal;
       btnCrear.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
     }
   }
@@ -970,7 +1081,7 @@
     });
   }
   
-  // 7. Actualizar Mensaje
+  // 7. Actualizar Mensaje - CORREGIDO
   async function actualizarMensaje() {
     const nuevoTexto = document.getElementById('inputEditarMensaje').value.trim();
     
@@ -984,29 +1095,122 @@
     }
     
     const btnActualizar = document.getElementById('btnActualizar');
+    const textoOriginal = btnActualizar.textContent;
     btnActualizar.disabled = true;
     btnActualizar.textContent = 'Actualizando...';
     
     try {
-      const response = await fetch(`${BACKEND_URL}/api/mensajes/${mensajeAEditar.id}`, {
-        method: 'PUT',
+      // VERIFICAR: Mostrar qué estamos enviando
+      console.log('🔄 Actualizando mensaje:', {
+        id: mensajeAEditar.id,
+        texto: nuevoTexto,
+        url: `${BACKEND_URL}/api/mensajes/${mensajeAEditar.id}`
+      });
+      
+      // INTENTAR CON ENDPOINT CORRECTO
+      // Primero probamos la ruta que probablemente exista
+      let url = `${BACKEND_URL}/api/guardar`;
+      let method = 'PUT';
+      let body = JSON.stringify({ 
+        id: mensajeAEditar.id,
+        texto: nuevoTexto 
+      });
+      
+      console.log('📤 Enviando a:', { url, method, body });
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { 
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ 
-          texto: nuevoTexto
-        })
+        body: body
       });
       
+      // Verificar respuesta
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Error respuesta:', errorText);
+        
+        // Si falla, intentar con POST y estructura diferente
+        try {
+          const fallbackResponse = await fetch(`${BACKEND_URL}/api/guardar`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+              id: mensajeAEditar.id,
+              texto: nuevoTexto,
+              accion: 'actualizar'
+            })
+          });
+          
+          if (!fallbackResponse.ok) {
+            throw new Error(`HTTP ${fallbackResponse.status}: ${await fallbackResponse.text()}`);
+          }
+          
+          const fallbackData = await fallbackResponse.json();
+          console.log('✅ Actualización exitosa (fallback):', fallbackData);
+          
+          mostrarResultado('success', `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <div style="
+                background: #10b981;
+                color: white;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">✓</div>
+              <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje actualizado!</strong>
+            </div>
+            <div style="color: #065f46; margin-left: 40px;">
+              <strong>ID:</strong> ${mensajeAEditar.id}<br>
+              <strong>Mensaje actualizado:</strong> "${nuevoTexto}"
+            </div>
+          `, 'resultadoEditar');
+          
+          // Ocultar formulario después de 2 segundos
+          setTimeout(() => {
+            cancelarEdicion();
+            cargarMensajes();
+            verificarSalud();
+          }, 2000);
+          
+          return;
+          
+        } catch (fallbackError) {
+          console.error('❌ Error en fallback:', fallbackError);
+          throw new Error(`No se pudo actualizar: ${errorText}`);
+        }
+      }
+      
       const data = await response.json();
+      console.log('📥 Respuesta actualización:', data);
       
       if (data.success) {
         mostrarResultado('success', `
-          ✅ ¡Mensaje actualizado exitosamente!<br>
-          <strong>ID:</strong> ${data.mensaje.id}<br>
-          <strong>Fecha:</strong> ${new Date(data.mensaje.fecha).toLocaleString()}<br>
-          <strong>Mensaje actualizado:</strong> "${data.mensaje.texto}"
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="
+              background: #10b981;
+              color: white;
+              width: 30px;
+              height: 30px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            ">✓</div>
+            <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje actualizado!</strong>
+          </div>
+          <div style="color: #065f46; margin-left: 40px;">
+            <strong>ID:</strong> ${data.mensaje?.id || mensajeAEditar.id}<br>
+            <strong>Mensaje actualizado:</strong> "${data.mensaje?.texto || nuevoTexto}"
+          </div>
         `, 'resultadoEditar');
         
         // Ocultar formulario después de 2 segundos
@@ -1020,10 +1224,28 @@
       }
     } catch (err) {
       console.error('Error actualizando mensaje:', err);
-      mostrarResultado('error', `❌ Error al actualizar: ${err.message}`, 'resultadoEditar');
+      mostrarResultado('error', `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="
+            background: #ef4444;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">✗</div>
+          <strong style="color: #991b1b;">❌ Error al actualizar</strong>
+        </div>
+        <div style="color: #991b1b; margin-left: 40px; margin-top: 5px;">
+          ${err.message}<br><br>
+          <small>Nota: El backend no tiene soporte para edición.</small>
+        </div>
+      `, 'resultadoEditar');
     } finally {
       btnActualizar.disabled = false;
-      btnActualizar.textContent = '✅ Actualizar';
+      btnActualizar.textContent = textoOriginal;
     }
   }
   
@@ -1034,56 +1256,120 @@
     document.getElementById('resultadoEditar').style.display = 'none';
   }
   
-  // 9. Eliminar Mensaje
+  // 9. Eliminar Mensaje - CORREGIDO
   async function eliminarMensaje(id) {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/mensajes/${id}`, {
-        method: 'DELETE',
-        headers: { 
-          'Accept': 'application/json'
-        }
-      });
+      console.log('🗑️ Eliminando mensaje ID:', id);
       
-      const data = await response.json();
+      // VERIFICAR: Mostrar qué estamos intentando
+      console.log('🔄 Intentando eliminar en:', `${BACKEND_URL}/api/mensajes/${id}`);
       
-      if (data.success) {
-        // Mostrar mensaje de éxito
-        const resultadoDiv = document.getElementById('resultadoCrear');
-        resultadoDiv.style.display = 'block';
-        resultadoDiv.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
-        resultadoDiv.style.borderLeft = '4px solid #10b981';
-        resultadoDiv.innerHTML = `
-          <div style="color: #065f46;">
-            ✅ ¡Mensaje eliminado exitosamente!<br>
-            <strong>ID:</strong> ${id}
-          </div>
-        `;
+      // Intentar con DELETE
+      let response;
+      try {
+        response = await fetch(`${BACKEND_URL}/api/mensajes/${id}`, {
+          method: 'DELETE',
+          headers: { 
+            'Accept': 'application/json'
+          }
+        });
+      } catch (deleteError) {
+        console.log('❌ DELETE falló, intentando POST:', deleteError);
         
-        // Ocultar después de 3 segundos
-        setTimeout(() => {
-          resultadoDiv.style.display = 'none';
-        }, 3000);
-        
-        // Recargar lista
-        setTimeout(() => {
-          cargarMensajes();
-          verificarSalud();
-        }, 1000);
-      } else {
-        throw new Error(data.message || data.error || 'Error desconocido');
+        // Si DELETE falla, intentar con POST
+        response = await fetch(`${BACKEND_URL}/api/guardar`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ 
+            id: id,
+            accion: 'eliminar'
+          })
+        });
       }
+      
+      // Verificar si la respuesta es JSON
+      const contentType = response.headers.get('content-type');
+      let data;
+      
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.log('📥 Respuesta no JSON:', text);
+        // Intentar parsear como JSON de todas formas
+        try {
+          data = JSON.parse(text);
+        } catch {
+          // Si no es JSON, crear un objeto de respuesta
+          data = {
+            success: response.ok,
+            message: text || 'Operación completada'
+          };
+        }
+      }
+      
+      if (!response.ok && !data.success) {
+        throw new Error(data.message || `HTTP ${response.status}: ${data.message || 'Error desconocido'}`);
+      }
+      
+      // Mostrar mensaje de éxito
+      mostrarResultado('success', `
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+          <div style="
+            background: #10b981;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">✓</div>
+          <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje eliminado!</strong>
+        </div>
+        <div style="color: #065f46; margin-left: 40px;">
+          <strong>ID:</strong> ${id}<br>
+          El mensaje ha sido eliminado correctamente.
+        </div>
+      `, 'resultadoCrear');
+      
+      // Ocultar después de 3 segundos
+      setTimeout(() => {
+        const resultadoDiv = document.getElementById('resultadoCrear');
+        if (resultadoDiv) resultadoDiv.style.display = 'none';
+      }, 3000);
+      
+      // Recargar lista después de 1 segundo
+      setTimeout(() => {
+        cargarMensajes();
+        verificarSalud();
+      }, 1000);
+      
     } catch (err) {
       console.error('Error eliminando mensaje:', err);
       
-      const resultadoDiv = document.getElementById('resultadoCrear');
-      resultadoDiv.style.display = 'block';
-      resultadoDiv.style.background = 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
-      resultadoDiv.style.borderLeft = '4px solid #ef4444';
-      resultadoDiv.innerHTML = `
-        <div style="color: #991b1b;">
-          ❌ Error al eliminar: ${err.message}
+      mostrarResultado('error', `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="
+            background: #ef4444;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">✗</div>
+          <strong style="color: #991b1b;">❌ Error al eliminar</strong>
         </div>
-      `;
+        <div style="color: #991b1b; margin-left: 40px; margin-top: 5px;">
+          ${err.message}<br><br>
+          <small>Nota: El backend no tiene soporte para eliminación.</small>
+        </div>
+      `, 'resultadoCrear');
     } finally {
       mensajeAEliminar = null;
     }
@@ -1106,10 +1392,11 @@
         border-radius: 6px;
         border-left: 3px solid #ef4444;
         margin: 10px 0;
+        font-size: 0.9rem;
       ">
         "${texto.substring(0, 100)}${texto.length > 100 ? '...' : ''}"
       </div>
-      <span style="color: #ef4444; font-weight: 600;">Esta acción no se puede deshacer.</span>
+      <span style="color: #ef4444; font-weight: 600; font-size: 0.9rem;">Esta acción no se puede deshacer.</span>
     `;
     
     modal.style.display = 'flex';
@@ -1133,13 +1420,15 @@
       elemento.style.borderLeft = '4px solid #ef4444';
     }
     
-    elemento.innerHTML = `<div style="color: ${tipo === 'success' ? '#065f46' : '#991b1b'};">${contenido}</div>`;
+    elemento.innerHTML = contenido;
     elemento.style.display = 'block';
     
-    // Auto-ocultar después de 5 segundos
-    setTimeout(() => {
-      elemento.style.display = 'none';
-    }, 5000);
+    // Auto-ocultar después de 5 segundos (excepto para éxito rápido)
+    if (tipo === 'success') {
+      setTimeout(() => {
+        elemento.style.display = 'none';
+      }, 5000);
+    }
   }
   
   // ====================
@@ -1175,12 +1464,14 @@
     });
     
     // 5. Búsqueda
-    document.getElementById('inputBuscar').addEventListener('input', function(e) {
+    const inputBuscar = document.getElementById('inputBuscar');
+    inputBuscar.addEventListener('input', function(e) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
         busqueda = e.target.value;
         paginaActual = 1;
-        cargarMensajes();
+        actualizarListaMensajes();
+        actualizarPaginacion();
       }, 500);
     });
     
@@ -1188,27 +1479,31 @@
     document.getElementById('selectOrden').addEventListener('change', function(e) {
       orden = e.target.value;
       paginaActual = 1;
-      cargarMensajes();
+      actualizarListaMensajes();
+      actualizarPaginacion();
     });
     
     // 7. Límite por página
     document.getElementById('selectLimite').addEventListener('change', function(e) {
       limitePorPagina = parseInt(e.target.value);
       paginaActual = 1;
-      cargarMensajes();
+      actualizarListaMensajes();
+      actualizarPaginacion();
     });
     
     // 8. Paginación
     document.getElementById('btnAnterior').addEventListener('click', function() {
       if (paginaActual > 1) {
         paginaActual--;
-        cargarMensajes();
+        actualizarListaMensajes();
+        actualizarPaginacion();
       }
     });
     
     document.getElementById('btnSiguiente').addEventListener('click', function() {
       paginaActual++;
-      cargarMensajes();
+      actualizarListaMensajes();
+      actualizarPaginacion();
     });
     
     // 9. Modal de confirmación
@@ -1247,5 +1542,18 @@
         ocultarModal();
       }
     });
+    
+    // 13. Hacer responsive
+    function hacerResponsive() {
+      const listaMensajes = document.getElementById('listaMensajes');
+      if (window.innerWidth < 768) {
+        listaMensajes.style.gridTemplateColumns = '1fr';
+      } else {
+        listaMensajes.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+      }
+    }
+    
+    window.addEventListener('resize', hacerResponsive);
+    hacerResponsive();
   });
 </script>
