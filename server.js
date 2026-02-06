@@ -31,7 +31,7 @@ const pool = new Pool({
 // Crear tablas si no existen
 const initDB = async () => {
   try {
-    // 1. Tabla de mensajes (ya existe)
+    // 1. Tabla de mensajes - CON updated_at
     await pool.query(`
       CREATE TABLE IF NOT EXISTS mensajescaptcha (
         id SERIAL PRIMARY KEY,
@@ -43,6 +43,23 @@ const initDB = async () => {
       )
     `);
     console.log('✅ Tabla mensajescaptcha lista');
+    
+    // Verificar si existe la columna updated_at, si no, agregarla
+    const columnCheckMensajes = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'mensajescaptcha' 
+      AND column_name = 'updated_at'
+    `);
+    
+    if (columnCheckMensajes.rows.length === 0) {
+      try {
+        await pool.query(`ALTER TABLE mensajescaptcha ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()`);
+        console.log('✅ Columna updated_at agregada a mensajescaptcha');
+      } catch (alterError) {
+        console.log('ℹ️ updated_at ya existe o no se pudo agregar:', alterError.message);
+      }
+    }
     
     // 2. Tabla de imágenes para el carrusel (CON TIPOS COMPATIBLES)
     await pool.query(`
@@ -182,13 +199,28 @@ app.get('/health', async (req, res) => {
       columnStatus = '⚠️ Error verificando columnas';
     }
     
+    // 6. Verificar si mensajescaptcha tiene updated_at
+    let updatedAtStatus = '❌ No verificada';
+    try {
+      const updatedAtCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'mensajescaptcha' 
+        AND column_name = 'updated_at'
+      `);
+      updatedAtStatus = updatedAtCheck.rows.length > 0 ? '✅ Existe' : '❌ No existe';
+    } catch (e) {
+      updatedAtStatus = '⚠️ Error verificando';
+    }
+    
     res.json({
       status: '✅ OK',
       database: '✅ Conectado',
       tablas: {
         mensajes: tableResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
         imagenes: tableImagenesResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
-        columnas_imagenes: columnStatus
+        columnas_imagenes: columnStatus,
+        mensajes_updated_at: updatedAtStatus
       },
       total_mensajes: total_mensajes,
       total_imagenes: total_imagenes,
@@ -199,8 +231,8 @@ app.get('/health', async (req, res) => {
         mensajes: 'GET /api/mensajes',
         carrusel: 'GET /api/carrusel',
         subir_imagen: 'POST /api/carrusel',
-        actualizar_mensaje: 'PUT /api/mensajes/:id',  // NUEVO
-        eliminar_mensaje: 'DELETE /api/mensajes/:id'  // NUEVO
+        actualizar_mensaje: 'PUT /api/mensajes/:id',
+        eliminar_mensaje: 'DELETE /api/mensajes/:id'
       }
     });
     
@@ -233,9 +265,9 @@ app.post('/api/guardar', async (req, res) => {
 
     const query = `
       INSERT INTO mensajescaptcha 
-      (texto, token_captcha, ip_address, user_agent) 
-      VALUES ($1, $2, $3, $4) 
-      RETURNING id, created_at
+      (texto, token_captcha, ip_address, user_agent, updated_at) 
+      VALUES ($1, $2, $3, $4, NOW()) 
+      RETURNING id, created_at, updated_at
     `;
     
     const values = [
@@ -251,6 +283,7 @@ app.post('/api/guardar', async (req, res) => {
       success: true,
       id: result.rows[0].id,
       fecha: result.rows[0].created_at,
+      updated_at: result.rows[0].updated_at,
       message: 'Guardado en PostgreSQL Railway',
       texto: texto.trim()
     });
@@ -270,7 +303,7 @@ app.post('/api/guardar', async (req, res) => {
 app.get('/api/mensajes', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT id, texto, created_at 
+      SELECT id, texto, created_at, updated_at 
       FROM mensajescaptcha 
       ORDER BY id DESC 
       LIMIT 100
@@ -291,10 +324,10 @@ app.get('/api/mensajes', async (req, res) => {
 });
 
 // ============================================
-// RUTAS CRUD PARA MENSAJES - NUEVAS
+// RUTAS CRUD PARA MENSAJES - NUEVAS (CORREGIDAS)
 // ============================================
 
-// 🔄 PUT /api/mensajes/:id - Actualizar mensaje
+// 🔄 PUT /api/mensajes/:id - Actualizar mensaje (CORREGIDO)
 app.put('/api/mensajes/:id', async (req, res) => {
   console.log('✏️ PUT /api/mensajes/:id - Actualizando mensaje');
   
@@ -309,9 +342,9 @@ app.put('/api/mensajes/:id', async (req, res) => {
   }
   
   try {
-    // Verificar que el mensaje existe
+    // Verificar que el mensaje existe y obtener la fecha original
     const checkResult = await pool.query(
-      'SELECT id FROM mensajescaptcha WHERE id = $1',
+      'SELECT id, created_at FROM mensajescaptcha WHERE id = $1',
       [id]
     );
     
@@ -322,12 +355,14 @@ app.put('/api/mensajes/:id', async (req, res) => {
       });
     }
     
-    // Actualizar mensaje
+    const fechaOriginal = checkResult.rows[0].created_at;
+    
+    // Actualizar SOLO el texto y updated_at, mantener created_at original
     const result = await pool.query(`
       UPDATE mensajescaptcha 
-      SET texto = $1, created_at = NOW() 
+      SET texto = $1, updated_at = NOW() 
       WHERE id = $2 
-      RETURNING id, texto, created_at
+      RETURNING id, texto, created_at, updated_at
     `, [texto.trim(), id]);
     
     console.log(`✅ Mensaje ${id} actualizado: "${texto.trim()}"`);
@@ -335,7 +370,12 @@ app.put('/api/mensajes/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Mensaje actualizado exitosamente',
-      mensaje: result.rows[0]
+      mensaje: {
+        id: result.rows[0].id,
+        texto: result.rows[0].texto,
+        created_at: fechaOriginal,  // Mantener la fecha original de creación
+        updated_at: result.rows[0].updated_at  // Nueva fecha de actualización
+      }
     });
     
   } catch (error) {
@@ -752,7 +792,7 @@ app.get('/', (req, res) => {
         <div class="endpoint crud">
           <strong>📝 CRUD MENSAJES:</strong>
           <div style="margin-left: 10px; margin-top: 5px;">
-            <div><strong>PUT</strong> /api/mensajes/:id - Actualizar mensaje</div>
+            <div><strong>PUT</strong> /api/mensajes/:id - Actualizar mensaje (mantiene created_at)</div>
             <div><strong>DELETE</strong> /api/mensajes/:id - Eliminar mensaje</div>
           </div>
         </div>
@@ -791,6 +831,7 @@ app.get('/', (req, res) => {
                 <p><strong>Imágenes:</strong> \${data.total_imagenes || 0}</p>
                 <p><strong>Servidor:</strong> Railway PostgreSQL</p>
                 <p><strong>CRUD activo:</strong> \${data.endpoints?.actualizar_mensaje ? '✅ Sí' : '❌ No'}</p>
+                <p><strong>Updated_at:</strong> \${data.tablas?.mensajes_updated_at || 'No verificada'}</p>
               </div>
             \`;
           })
@@ -828,7 +869,7 @@ app.listen(PORT, '0.0.0.0', () => {
         - INTEGER (para tamaño)
         - DATE y TIMESTAMP
   🔄   CRUD COMPLETO para mensajes: ACTIVADO
-        - PUT /api/mensajes/:id
+        - PUT /api/mensajes/:id (mantiene created_at)
         - DELETE /api/mensajes/:id
   ============================================
   `);
