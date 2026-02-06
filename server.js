@@ -342,7 +342,7 @@ app.put('/api/mensajes/:id', async (req, res) => {
   }
   
   try {
-    // Verificar que el mensaje existe y obtener la fecha original
+    // Verificar que el mensaje existe
     const checkResult = await pool.query(
       'SELECT id, created_at FROM mensajescaptcha WHERE id = $1',
       [id]
@@ -354,8 +354,6 @@ app.put('/api/mensajes/:id', async (req, res) => {
         message: 'Mensaje no encontrado' 
       });
     }
-    
-    const fechaOriginal = checkResult.rows[0].created_at;
     
     // Actualizar SOLO el texto y updated_at, mantener created_at original
     const result = await pool.query(`
@@ -370,12 +368,7 @@ app.put('/api/mensajes/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Mensaje actualizado exitosamente',
-      mensaje: {
-        id: result.rows[0].id,
-        texto: result.rows[0].texto,
-        created_at: fechaOriginal,  // Mantener la fecha original de creación
-        updated_at: result.rows[0].updated_at  // Nueva fecha de actualización
-      }
+      mensaje: result.rows[0]
     });
     
   } catch (error) {
@@ -508,7 +501,7 @@ app.get('/api/carrusel', async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: error.message,
-      help: 'La tabla puede no tener las columnas correctas. Verifica /health'
+      help: 'La tabla puede no tener las columnas correctas. Verifica /health para diagnóstico'
     });
   }
 });
