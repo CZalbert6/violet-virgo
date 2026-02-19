@@ -175,9 +175,13 @@
       <input 
         type="text" 
         id="inputCrearMensaje"
-        placeholder="Escribe un mensaje para guardar..."
+        maxlength="50"
+        placeholder="Escribe un mensaje para guardar... (máx. 50 caracteres)"
         style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
       >
+      <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+        <span id="contadorCrear" style="font-size: 12px; color: #6b7280;">0/50</span>
+      </div>
     </div>
     
     <div style="margin: 20px 0;">
@@ -236,7 +240,6 @@
       ">
         <div style="font-size: 24px; margin-bottom: 5px;">✏️</div>
         <div style="font-weight: 600; font-size: 1.2rem;">Editar Mensaje</div>
-        <div style="font-size: 0.9rem; opacity: 0.9;" id="infoEdicion">ID: <span id="idEditar"></span></div>
       </div>
       
       <label style="display: block; text-align: left; margin-bottom: 10px; font-weight: 600; color: #555;">
@@ -245,12 +248,13 @@
       <input 
         type="text" 
         id="inputEditarMensaje"
-        placeholder="Escribe el nuevo mensaje..."
+        maxlength="50"
+        placeholder="Escribe el nuevo mensaje... (máx. 50 caracteres)"
         style="width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px;"
       >
-      
-      <div style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-        Original: "<span id="mensajeOriginal"></span>"
+      <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+        <span style="font-size: 12px; color: #6b7280;">Original: "<span id="mensajeOriginal"></span>"</span>
+        <span id="contadorEditar" style="font-size: 12px; color: #6b7280;">0/50</span>
       </div>
     </div>
     
@@ -751,7 +755,7 @@
     }
   }
   
-  // 3. Actualizar Lista de Mensajes en el DOM
+  // 3. Actualizar Lista de Mensajes en el DOM (SIN ID)
   function actualizarListaMensajes() {
     const container = document.getElementById('listaMensajes');
     
@@ -819,18 +823,8 @@
           border-left: 4px solid #3b82f6;
           box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
         ">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-            <div style="
-              background: #3b82f6;
-              color: white;
-              padding: 4px 10px;
-              border-radius: 20px;
-              font-size: 0.8rem;
-              font-weight: 600;
-            ">
-              ID: ${mensaje.id}
-            </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; text-align: right;">
+          <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 0.8rem; color: #94a3b8;">
               ${fecha}
             </div>
           </div>
@@ -844,6 +838,7 @@
             font-size: 0.95rem;
             line-height: 1.5;
             min-height: 60px;
+            word-wrap: break-word;
           ">
             ${mensaje.texto}
           </div>
@@ -954,12 +949,42 @@
     }
   }
   
+  // Función para actualizar contadores de caracteres
+  function actualizarContadores() {
+    // Contador para crear
+    const inputCrear = document.getElementById('inputCrearMensaje');
+    const contadorCrear = document.getElementById('contadorCrear');
+    if (inputCrear && contadorCrear) {
+      inputCrear.addEventListener('input', function() {
+        const length = this.value.length;
+        contadorCrear.textContent = `${length}/50`;
+        contadorCrear.style.color = length >= 50 ? '#ef4444' : '#6b7280';
+      });
+    }
+    
+    // Contador para editar
+    const inputEditar = document.getElementById('inputEditarMensaje');
+    const contadorEditar = document.getElementById('contadorEditar');
+    if (inputEditar && contadorEditar) {
+      inputEditar.addEventListener('input', function() {
+        const length = this.value.length;
+        contadorEditar.textContent = `${length}/50`;
+        contadorEditar.style.color = length >= 50 ? '#ef4444' : '#6b7280';
+      });
+    }
+  }
+  
   // 5. Crear Nuevo Mensaje
   async function crearMensaje() {
     const texto = document.getElementById('inputCrearMensaje').value.trim();
     
     if (!texto) {
       alert("❌ Por favor escribe un mensaje");
+      return;
+    }
+    
+    if (texto.length > 50) {
+      alert("❌ El mensaje no puede tener más de 50 caracteres");
       return;
     }
     
@@ -1013,7 +1038,6 @@
             <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje guardado!</strong>
           </div>
           <div style="color: #065f46; margin-left: 40px;">
-            <strong>ID:</strong> ${data.id}<br>
             <strong>Fecha:</strong> ${new Date(data.fecha).toLocaleString()}<br>
             <strong>Mensaje:</strong> "${data.texto}"
           </div>
@@ -1021,6 +1045,7 @@
         
         // Limpiar formulario
         document.getElementById('inputCrearMensaje').value = '';
+        document.getElementById('contadorCrear').textContent = '0/50';
         
         // Resetear captcha
         if (window.hcaptcha) {
@@ -1067,9 +1092,16 @@
     mensajeAEditar = { id, textoOriginal };
     
     document.getElementById('formularioEdicion').style.display = 'block';
-    document.getElementById('idEditar').textContent = id;
     document.getElementById('mensajeOriginal').textContent = textoOriginal;
     document.getElementById('inputEditarMensaje').value = textoOriginal;
+    
+    // Actualizar contador
+    const contadorEditar = document.getElementById('contadorEditar');
+    if (contadorEditar) {
+      contadorEditar.textContent = `${textoOriginal.length}/50`;
+      contadorEditar.style.color = textoOriginal.length >= 50 ? '#ef4444' : '#6b7280';
+    }
+    
     document.getElementById('inputEditarMensaje').focus();
     
     // Desplazar al formulario de edición
@@ -1085,6 +1117,11 @@
     
     if (!nuevoTexto) {
       alert("❌ Por favor escribe el nuevo mensaje");
+      return;
+    }
+    
+    if (nuevoTexto.length > 50) {
+      alert("❌ El mensaje no puede tener más de 50 caracteres");
       return;
     }
     
@@ -1137,7 +1174,6 @@
             <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje actualizado!</strong>
             </div>
             <div style="color: #065f46; margin-left: 40px;">
-              <strong>ID:</strong> ${data.mensaje?.id || mensajeAEditar.id}<br>
               <strong>Mensaje actualizado:</strong> "${data.mensaje?.texto || nuevoTexto}"
             </div>
         `, 'resultadoEditar');
@@ -1219,7 +1255,6 @@
             <strong style="font-size: 1.1rem; color: #065f46;">✅ ¡Mensaje eliminado!</strong>
           </div>
           <div style="color: #065f46; margin-left: 40px;">
-            <strong>ID:</strong> ${id}<br>
             El mensaje ha sido eliminado correctamente.
           </div>
         `, 'resultadoCrear');
@@ -1269,7 +1304,7 @@
     
     titulo.textContent = '¿Eliminar Mensaje?';
     mensaje.innerHTML = `
-      Estás a punto de eliminar el mensaje con ID: <strong>${id}</strong><br><br>
+      Estás a punto de eliminar este mensaje<br><br>
       <div style="
         background: #fee2e2;
         padding: 10px;
@@ -1325,6 +1360,9 @@
     script.src = 'https://js.hcaptcha.com/1/api.js';
     script.async = true;
     document.head.appendChild(script);
+    
+    // Inicializar contadores
+    actualizarContadores();
     
     // Inicializar
     verificarSalud();
