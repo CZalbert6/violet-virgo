@@ -256,14 +256,16 @@
         </div>
       </div>
       
-      <!-- Lista de mensajes - VERSIÓN PROFESIONAL -->
+      <!-- Lista de mensajes - VERSIÓN PROFESIONAL con altura ajustable -->
       <div id="listaMensajes" style="
-        min-height: 200px;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 0;
         background: #f8fafc;
         overflow: hidden;
+        min-height: auto;
+        height: auto;
+        display: block;
       ">
         <div style="text-align: center; padding: 40px; color: #94a3b8;">
           <div style="font-size: 48px; margin-bottom: 10px;">📭</div>
@@ -271,63 +273,139 @@
         </div>
       </div>
       
-      <!-- Paginación -->
+      <!-- Paginación mejorada con flechas de inicio y fin -->
       <div id="paginacion" style="
         display: none;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         margin-top: 20px;
         padding: 15px;
         background: #f1f5f9;
         border-radius: 10px;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 5px;
       ">
-        <button 
-          id="btnAnterior"
-          style="
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+          <!-- Botón ir al inicio (<<) -->
+          <button 
+            id="btnInicio"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              width: 45px;
+              height: 45px;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 18px;
+              transition: all 0.3s;
+            "
+            onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+            onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+            disabled
+            title="Ir al inicio"
+          >
+            <span>⏮️</span>
+          </button>
+          
+          <!-- Botón anterior (<) -->
+          <button 
+            id="btnAnterior"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              width: 45px;
+              height: 45px;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 18px;
+              transition: all 0.3s;
+            "
+            onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+            onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+            disabled
+            title="Página anterior"
+          >
+            <span>◀</span>
+          </button>
+          
+          <!-- Información de página -->
+          <div style="
+            background: white;
+            padding: 8px 20px;
             border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 600;
-          "
-          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
-          onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
-          disabled
-        >
-          ◀ Anterior
-        </button>
-        
-        <div style="font-size: 14px; color: #475569; text-align: center;">
-          Página <span id="paginaActual" style="font-weight: bold;">1</span> de <span id="totalPaginas" style="font-weight: bold;">1</span>
+            font-size: 14px;
+            color: #475569;
+            text-align: center;
+            font-weight: 500;
+            min-width: 120px;
+            margin: 0 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+          ">
+            Página <span id="paginaActual" style="font-weight: bold;">1</span> / <span id="totalPaginas" style="font-weight: bold;">1</span>
+          </div>
+          
+          <!-- Botón siguiente (>) -->
+          <button 
+            id="btnSiguiente"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              width: 45px;
+              height: 45px;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 18px;
+              transition: all 0.3s;
+            "
+            onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+            onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+            disabled
+            title="Página siguiente"
+          >
+            <span>▶</span>
+          </button>
+          
+          <!-- Botón ir al final (>>) -->
+          <button 
+            id="btnFinal"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              width: 45px;
+              height: 45px;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 600;
+              font-size: 18px;
+              transition: all 0.3s;
+            "
+            onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
+            onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
+            disabled
+            title="Ir al final"
+          >
+            <span>⏭️</span>
+          </button>
         </div>
-        
-        <button 
-          id="btnSiguiente"
-          style="
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 600;
-          "
-          onmouseover="this.style.background='#2563eb'; this.style.transform='translateY(-2px)';"
-          onmouseleave="this.style.background='#3b82f6'; this.style.transform='translateY(0)';"
-          disabled
-        >
-          Siguiente ▶
-        </button>
       </div>
     </div>
   </div>
@@ -746,6 +824,15 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 0.95rem;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .tabla-mensajes thead {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+    z-index: 10;
   }
   
   .tabla-mensajes th {
@@ -1039,13 +1126,15 @@
     });
   }
   
-  // 4. Actualizar Paginación
+  // 4. Actualizar Paginación - VERSIÓN MEJORADA
   function actualizarPaginacion() {
     const paginacion = document.getElementById('paginacion');
     const paginaActualSpan = document.getElementById('paginaActual');
     const totalPaginasSpan = document.getElementById('totalPaginas');
     const btnAnterior = document.getElementById('btnAnterior');
     const btnSiguiente = document.getElementById('btnSiguiente');
+    const btnInicio = document.getElementById('btnInicio');
+    const btnFinal = document.getElementById('btnFinal');
     
     let mensajesFiltrados = [...mensajes];
     if (busqueda) {
@@ -1062,11 +1151,21 @@
       paginaActualSpan.textContent = paginaActual;
       totalPaginasSpan.textContent = totalPaginas;
       
-      btnAnterior.disabled = paginaActual === 1;
-      btnSiguiente.disabled = paginaActual === totalPaginas;
+      // Estado de los botones
+      const esPrimeraPagina = paginaActual === 1;
+      const esUltimaPagina = paginaActual === totalPaginas;
       
-      btnAnterior.style.opacity = btnAnterior.disabled ? '0.5' : '1';
-      btnSiguiente.style.opacity = btnSiguiente.disabled ? '0.5' : '1';
+      // Botones de navegación
+      btnAnterior.disabled = esPrimeraPagina;
+      btnInicio.disabled = esPrimeraPagina;
+      btnSiguiente.disabled = esUltimaPagina;
+      btnFinal.disabled = esUltimaPagina;
+      
+      // Estilos visuales para botones deshabilitados
+      [btnAnterior, btnSiguiente, btnInicio, btnFinal].forEach(btn => {
+        btn.style.opacity = btn.disabled ? '0.5' : '1';
+        btn.style.cursor = btn.disabled ? 'default' : 'pointer';
+      });
     } else {
       paginacion.style.display = 'none';
     }
@@ -1499,7 +1598,7 @@
       actualizarPaginacion();
     });
     
-    // Paginación
+    // Paginación - Botones existentes
     document.getElementById('btnAnterior').addEventListener('click', function() {
       if (paginaActual > 1) {
         paginaActual--;
@@ -1512,6 +1611,32 @@
       paginaActual++;
       actualizarListaMensajes();
       actualizarPaginacion();
+    });
+    
+    // Nuevos botones de paginación (inicio y final)
+    document.getElementById('btnInicio').addEventListener('click', function() {
+      if (paginaActual > 1) {
+        paginaActual = 1;
+        actualizarListaMensajes();
+        actualizarPaginacion();
+      }
+    });
+    
+    document.getElementById('btnFinal').addEventListener('click', function() {
+      let mensajesFiltrados = [...mensajes];
+      if (busqueda) {
+        const busquedaLower = busqueda.toLowerCase();
+        mensajesFiltrados = mensajesFiltrados.filter(m => 
+          m.texto.toLowerCase().includes(busquedaLower)
+        );
+      }
+      const totalPaginas = Math.ceil(mensajesFiltrados.length / limitePorPagina);
+      
+      if (paginaActual < totalPaginas) {
+        paginaActual = totalPaginas;
+        actualizarListaMensajes();
+        actualizarPaginacion();
+      }
     });
     
     // Modal de confirmación
