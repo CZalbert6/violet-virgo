@@ -2,6 +2,9 @@
 // src/pages/index.astro
 ---
 
+<!-- Agregar Bootstrap solo para los estilos que necesitamos -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <nav style="
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 15px 20px;
@@ -1000,7 +1003,7 @@
     }
   }
   
-  // 3. Actualizar Lista de Mensajes en el DOM - VERSIÓN PROFESIONAL
+  // 3. Actualizar Lista de Mensajes en el DOM - VERSIÓN CON BOOTSTRAP
   function actualizarListaMensajes() {
     const container = document.getElementById('listaMensajes');
     
@@ -1045,7 +1048,7 @@
       return;
     }
     
-    // Generar tabla profesional
+    // Generar tabla con Bootstrap solo para los elementos visuales
     let html = `
       <div style="overflow-x: auto;">
         <table class="tabla-mensajes">
@@ -1053,7 +1056,7 @@
             <tr>
               <th>MENSAJE</th>
               <th style="width: 180px;">FECHA</th>
-              <th style="width: 200px; text-align: right;">ACCIONES</th>
+              <th style="width: 220px; text-align: right;">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
@@ -1072,25 +1075,37 @@
         <tr>
           <td data-label="MENSAJE" style="max-width: 500px; word-wrap: break-word;">${mensaje.texto}</td>
           <td data-label="FECHA">
-            <span class="badge-fecha">${fecha}</span>
+            <!-- FECHA con diseño Bootstrap mejorado -->
+            <span class="badge bg-light text-dark px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.85rem; font-weight: 500; border: 1px solid #e2e8f0;">
+              📅 ${fecha}
+            </span>
           </td>
           <td data-label="ACCIONES" style="text-align: right;">
-            <div class="acciones-mensaje">
+            <div class="d-flex gap-2 justify-content-end">
+              <!-- BOTÓN EDITAR con diseño Bootstrap -->
               <button 
-                class="btn-accion btn-editar"
+                class="btn btn-sm d-inline-flex align-items-center gap-1 px-3 py-2 border-0 rounded-3 shadow-sm"
+                style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white; transition: all 0.2s;"
                 data-id="${mensaje.id}"
                 data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(79, 70, 229, 0.3)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.05)';"
               >
                 <span style="font-size: 14px;">✏️</span>
-                <span>Editar</span>
+                <span class="fw-semibold">Editar</span>
               </button>
+              
+              <!-- BOTÓN ELIMINAR con diseño Bootstrap -->
               <button 
-                class="btn-accion btn-eliminar"
+                class="btn btn-sm d-inline-flex align-items-center gap-1 px-3 py-2 border-0 rounded-3 shadow-sm"
+                style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; transition: all 0.2s;"
                 data-id="${mensaje.id}"
                 data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(239, 68, 68, 0.3)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.05)';"
               >
                 <span style="font-size: 14px;">🗑️</span>
-                <span>Eliminar</span>
+                <span class="fw-semibold">Eliminar</span>
               </button>
             </div>
           </td>
@@ -1109,19 +1124,16 @@
     document.getElementById('totalMensajes').textContent = mensajes.length;
     
     // Agregar event listeners a los botones
-    document.querySelectorAll('.btn-editar').forEach(btn => {
+    document.querySelectorAll('[data-id]').forEach(btn => {
       btn.addEventListener('click', function() {
         const id = this.getAttribute('data-id');
         const texto = this.getAttribute('data-texto');
-        iniciarEdicion(id, texto);
-      });
-    });
-    
-    document.querySelectorAll('.btn-eliminar').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const texto = this.getAttribute('data-texto');
-        mostrarModalConfirmacion(id, texto);
+        
+        if (this.classList.contains('btn-editar') || this.innerHTML.includes('Editar') || this.innerHTML.includes('✏️')) {
+          iniciarEdicion(id, texto);
+        } else {
+          mostrarModalConfirmacion(id, texto);
+        }
       });
     });
   }
