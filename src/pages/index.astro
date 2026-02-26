@@ -173,9 +173,9 @@
     <span>Nuevo Mensaje</span>
   </button>
   
-  <!-- Lista de Mensajes -->
+  <!-- Lista de Mensajes - AHORA MÁS ANCHA -->
   <div style="
-    max-width: 1200px;
+    max-width: 1400px;  /* Aumentado de 1200px a 1400px */
     margin: 0 auto;
     background: white;
     padding: 30px;
@@ -415,7 +415,7 @@
   
   <!-- Estado del sistema -->
   <div id="estadoSistema" style="
-    max-width: 1200px;
+    max-width: 1400px;  /* También aumentado para mantener consistencia */
     margin: 40px auto 0;
     padding: 25px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -822,12 +822,12 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
   }
   
-  /* Estilos profesionales para la tabla */
+  /* Estilos profesionales para la tabla - AHORA MÁS ESPACIOSA */
   .tabla-mensajes {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.95rem;
-    max-height: 500px;
+    font-size: 1rem;  /* Aumentado de 0.95rem a 1rem */
+    max-height: 600px; /* Aumentado de 500px a 600px */
     overflow-y: auto;
   }
   
@@ -840,18 +840,18 @@
   
   .tabla-mensajes th {
     background: #f8fafc;
-    padding: 16px 20px;
+    padding: 20px 25px;  /* Aumentado de 16px 20px a 20px 25px */
     text-align: left;
     color: #475569;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.9rem;   /* Aumentado de 0.85rem a 0.9rem */
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 2px solid #e2e8f0;
   }
   
   .tabla-mensajes td {
-    padding: 16px 20px;
+    padding: 20px 25px;   /* Aumentado de 16px 20px a 20px 25px */
     border-bottom: 1px solid #f1f5f9;
     color: #1e293b;
   }
@@ -864,39 +864,47 @@
     border-bottom: none;
   }
   
+  /* Estilo para la columna de mensaje - ahora más ancha */
+  .tabla-mensajes td:first-child {
+    max-width: 700px;     /* Aumentado de 500px a 700px */
+    word-wrap: break-word;
+    font-size: 1.05rem;   /* Texto un poco más grande */
+  }
+  
   .badge-fecha {
     background: #f1f5f9;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 8px 16px;     /* Aumentado de 6px 12px a 8px 16px */
+    border-radius: 30px;   /* Aumentado de 20px a 30px */
+    font-size: 0.9rem;     /* Aumentado de 0.85rem a 0.9rem */
     color: #475569;
     display: inline-block;
     font-weight: 500;
+    border: 1px solid #e2e8f0;
   }
   
   .acciones-mensaje {
     display: flex;
-    gap: 10px;
+    gap: 15px;            /* Aumentado de 10px a 15px */
     justify-content: flex-end;
   }
   
   .btn-accion {
-    padding: 8px 16px;
+    padding: 10px 20px;    /* Aumentado de 8px 16px a 10px 20px */
     border: none;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    border-radius: 10px;   /* Aumentado de 8px a 10px */
+    font-size: 0.9rem;     /* Aumentado de 0.85rem a 0.9rem */
     font-weight: 500;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;              /* Aumentado de 6px a 8px */
     transition: all 0.2s;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
   
   .btn-accion:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
   
   .btn-editar {
@@ -915,6 +923,13 @@
   
   .btn-eliminar:hover {
     background: #fecaca;
+  }
+  
+  /* Ajustes para los botones con Bootstrap */
+  .btn-editar-bs, .btn-eliminar-bs {
+    font-size: 0.95rem !important;
+    padding: 10px 22px !important;
+    gap: 10px !important;
   }
 </style>
 
@@ -1003,7 +1018,7 @@
     }
   }
   
-  // 3. Actualizar Lista de Mensajes en el DOM - VERSIÓN CON BOOTSTRAP
+  // 3. Actualizar Lista de Mensajes en el DOM - VERSIÓN CON BOOTSTRAP Y ESPACIADO MEJORADO
   function actualizarListaMensajes() {
     const container = document.getElementById('listaMensajes');
     
@@ -1048,15 +1063,15 @@
       return;
     }
     
-    // Generar tabla con Bootstrap solo para los elementos visuales
+    // Generar tabla con Bootstrap y espaciado mejorado
     let html = `
       <div style="overflow-x: auto;">
         <table class="tabla-mensajes">
           <thead>
             <tr>
-              <th>MENSAJE</th>
-              <th style="width: 180px;">FECHA</th>
-              <th style="width: 220px; text-align: right;">ACCIONES</th>
+              <th style="width: 50%;">MENSAJE</th>  <!-- Columna más ancha -->
+              <th style="width: 20%;">FECHA</th>
+              <th style="width: 30%; text-align: right;">ACCIONES</th>
             </tr>
           </thead>
           <tbody>
@@ -1073,38 +1088,38 @@
       
       html += `
         <tr>
-          <td data-label="MENSAJE" style="max-width: 500px; word-wrap: break-word;">${mensaje.texto}</td>
-          <td data-label="FECHA">
-            <!-- FECHA con diseño Bootstrap mejorado -->
-            <span class="badge bg-light text-dark px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.85rem; font-weight: 500; border: 1px solid #e2e8f0;">
+          <td data-label="MENSAJE" style="font-size: 1.1rem; padding: 22px 25px;">${mensaje.texto}</td>
+          <td data-label="FECHA" style="padding: 22px 25px;">
+            <!-- FECHA con diseño Bootstrap mejorado y más grande -->
+            <span class="badge bg-light text-dark px-4 py-3 rounded-pill shadow-sm" style="font-size: 0.95rem; font-weight: 500; border: 1px solid #e2e8f0;">
               📅 ${fecha}
             </span>
           </td>
-          <td data-label="ACCIONES" style="text-align: right;">
-            <div class="d-flex gap-2 justify-content-end">
-              <!-- BOTÓN EDITAR con diseño Bootstrap -->
+          <td data-label="ACCIONES" style="text-align: right; padding: 22px 25px;">
+            <div class="d-flex gap-3 justify-content-end">
+              <!-- BOTÓN EDITAR más grande y espaciado -->
               <button 
-                class="btn btn-sm d-inline-flex align-items-center gap-1 px-3 py-2 border-0 rounded-3 shadow-sm"
-                style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white; transition: all 0.2s;"
+                class="btn btn-sm d-inline-flex align-items-center gap-2 px-4 py-3 border-0 rounded-3 shadow-sm"
+                style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); color: white; transition: all 0.2s; font-size: 0.95rem; font-weight: 500;"
                 data-id="${mensaje.id}"
                 data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(79, 70, 229, 0.3)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.05)';"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(79, 70, 229, 0.4)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.1)';"
               >
-                <span style="font-size: 14px;">✏️</span>
+                <span style="font-size: 16px;">✏️</span>
                 <span class="fw-semibold">Editar</span>
               </button>
               
-              <!-- BOTÓN ELIMINAR con diseño Bootstrap -->
+              <!-- BOTÓN ELIMINAR más grande y espaciado -->
               <button 
-                class="btn btn-sm d-inline-flex align-items-center gap-1 px-3 py-2 border-0 rounded-3 shadow-sm"
-                style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; transition: all 0.2s;"
+                class="btn btn-sm d-inline-flex align-items-center gap-2 px-4 py-3 border-0 rounded-3 shadow-sm"
+                style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; transition: all 0.2s; font-size: 0.95rem; font-weight: 500;"
                 data-id="${mensaje.id}"
                 data-texto="${mensaje.texto.replace(/"/g, '&quot;')}"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(239, 68, 68, 0.3)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.05)';"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(239, 68, 68, 0.4)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.1)';"
               >
-                <span style="font-size: 14px;">🗑️</span>
+                <span style="font-size: 16px;">🗑️</span>
                 <span class="fw-semibold">Eliminar</span>
               </button>
             </div>
@@ -1129,7 +1144,7 @@
         const id = this.getAttribute('data-id');
         const texto = this.getAttribute('data-texto');
         
-        if (this.classList.contains('btn-editar') || this.innerHTML.includes('Editar') || this.innerHTML.includes('✏️')) {
+        if (this.innerHTML.includes('Editar') || this.innerHTML.includes('✏️')) {
           iniciarEdicion(id, texto);
         } else {
           mostrarModalConfirmacion(id, texto);
