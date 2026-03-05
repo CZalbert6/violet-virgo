@@ -1,7 +1,7 @@
 ---
 // src/pages/login.astro
-// No necesitas código de backend aquí, solo HTML/JS para el frontend
 const title = "Iniciar Sesión / Registro";
+const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'https://violet-virgo-production.up.railway.app';
 ---
 
 <!DOCTYPE html>
@@ -84,8 +84,12 @@ const title = "Iniciar Sesión / Registro";
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background: #5a67d8;
+    }
+    button:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
     }
     .message {
       margin-top: 1rem;
@@ -111,9 +115,15 @@ const title = "Iniciar Sesión / Registro";
     .info a {
       color: #667eea;
       text-decoration: none;
+      cursor: pointer;
     }
     .info a:hover {
       text-decoration: underline;
+    }
+    .field-note {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.25rem;
     }
   </style>
 </head>
@@ -128,8 +138,9 @@ const title = "Iniciar Sesión / Registro";
     <!-- Formulario de Login -->
     <form id="loginForm" onsubmit="handleLogin(event)">
       <div class="form-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" required />
+        <label for="loginIdentifier">Email o nombre de usuario</label>
+        <input type="text" id="loginIdentifier" placeholder="email@ejemplo.com o usuario123" required />
+        <div class="field-note">Puedes usar email o nombre de usuario</div>
       </div>
       <div class="form-group">
         <label for="loginPassword">Contraseña</label>
@@ -142,34 +153,40 @@ const title = "Iniciar Sesión / Registro";
     <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
       <div class="form-group">
         <label for="registerEmail">Email</label>
-        <input type="email" id="registerEmail" required />
+        <input type="email" id="registerEmail" placeholder="tu@email.com">
+        <div class="field-note">O usa nombre de usuario abajo</div>
+      </div>
+      <div class="or-divider" style="text-align: center; margin: 0.5rem 0; color: #666;">O</div>
+      <div class="form-group">
+        <label for="registerUsername">Nombre de usuario</label>
+        <input type="text" id="registerUsername" minlength="3" maxlength="30" placeholder="usuario123">
+      </div>
+      <div class="form-group">
+        <label for="registerNombre">Nombre completo (opcional)</label>
+        <input type="text" id="registerNombre" placeholder="Juan Pérez">
       </div>
       <div class="form-group">
         <label for="registerPassword">Contraseña (mínimo 6 caracteres)</label>
-        <input type="password" id="registerPassword" required />
-      </div>
-      <div class="form-group">
-        <label for="registerNombre">Nombre (opcional)</label>
-        <input type="text" id="registerNombre" />
+        <input type="password" id="registerPassword" required minlength="6" />
       </div>
       <button type="submit">Registrarse</button>
     </form>
 
     <div id="message" class="message"></div>
     <div class="info">
-      <span id="infoText">¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a></span>
+      <span id="infoText">¿No tienes cuenta? <a onclick="showRegister()">Regístrate</a></span>
     </div>
   </div>
 
   <script>
-    const API_URL = 'https://violet-virgo-production.up.railway.app'; // Cambia si es otra URL
+    const API_URL = "{backendUrl}";
 
     function showLogin() {
       document.getElementById('loginForm').style.display = 'block';
       document.getElementById('registerForm').style.display = 'none';
       document.getElementById('tabLogin').classList.add('active');
       document.getElementById('tabRegister').classList.remove('active');
-      document.getElementById('infoText').innerHTML = '¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a>';
+      document.getElementById('infoText').innerHTML = '¿No tienes cuenta? <a onclick="showRegister()">Regístrate</a>';
       document.getElementById('message').style.display = 'none';
     }
 
@@ -178,15 +195,26 @@ const title = "Iniciar Sesión / Registro";
       document.getElementById('registerForm').style.display = 'block';
       document.getElementById('tabLogin').classList.remove('active');
       document.getElementById('tabRegister').classList.add('active');
-      document.getElementById('infoText').innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Inicia Sesión</a>';
+      document.getElementById('infoText').innerHTML = '¿Ya tienes cuenta? <a onclick="showLogin()">Inicia Sesión</a>';
       document.getElementById('message').style.display = 'none';
     }
 
     async function handleLogin(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
+      const identifier = document.getElementById('loginIdentifier').value.trim();
       const password = document.getElementById('loginPassword').value;
       const messageDiv = document.getElementById('message');
+      
+      // Determinar si es email o username
+      const isEmail = identifier.includes('@');
+      
+      const loginData = { password };
+      if (isEmail) {
+        loginData.email = identifier;
+      } else {
+        loginData.username = identifier;
+      }
+
       messageDiv.className = 'message';
       messageDiv.style.display = 'none';
 
@@ -194,66 +222,96 @@ const title = "Iniciar Sesión / Registro";
         const response = await fetch(`${API_URL}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify(loginData)
         });
+        
         const data = await response.json();
+        
         if (data.success) {
-          // Guardar token en localStorage
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          messageDiv.className = 'message success';
-          messageDiv.innerText = '✅ Login exitoso. Redirigiendo...';
-          messageDiv.style.display = 'block';
+          showMessage('✅ Login exitoso. Redirigiendo...', 'success');
           setTimeout(() => {
-            window.location.href = '/'; // o a donde quieras
+            window.location.href = '/';
           }, 1500);
         } else {
-          messageDiv.className = 'message error';
-          messageDiv.innerText = data.message || 'Error en login';
-          messageDiv.style.display = 'block';
+          showMessage(data.message || 'Error en login', 'error');
         }
       } catch (error) {
-        messageDiv.className = 'message error';
-        messageDiv.innerText = 'Error de conexión';
-        messageDiv.style.display = 'block';
+        console.error('Error:', error);
+        showMessage('Error de conexión con el servidor', 'error');
       }
     }
 
     async function handleRegister(e) {
       e.preventDefault();
-      const email = document.getElementById('registerEmail').value;
+      const email = document.getElementById('registerEmail').value.trim();
+      const username = document.getElementById('registerUsername').value.trim();
+      const nombre = document.getElementById('registerNombre').value.trim();
       const password = document.getElementById('registerPassword').value;
-      const nombre = document.getElementById('registerNombre').value;
       const messageDiv = document.getElementById('message');
-      messageDiv.className = 'message';
-      messageDiv.style.display = 'none';
+      
+      // Validaciones
+      if (!email && !username) {
+        showMessage('Debes proporcionar email o nombre de usuario', 'error');
+        return;
+      }
+
+      if (email && !isValidEmail(email)) {
+        showMessage('El email no es válido', 'error');
+        return;
+      }
+
+      if (username && username.length < 3) {
+        showMessage('El nombre de usuario debe tener al menos 3 caracteres', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+
+      const registerData = { password };
+      if (email) registerData.email = email;
+      if (username) registerData.username = username;
+      if (nombre) registerData.nombre = nombre;
 
       try {
         const response = await fetch(`${API_URL}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password, nombre })
+          body: JSON.stringify(registerData)
         });
+        
         const data = await response.json();
+        
         if (data.success) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
-          messageDiv.className = 'message success';
-          messageDiv.innerText = '✅ Registro exitoso. Redirigiendo...';
-          messageDiv.style.display = 'block';
+          showMessage('✅ Registro exitoso. Redirigiendo...', 'success');
           setTimeout(() => {
             window.location.href = '/';
           }, 1500);
         } else {
-          messageDiv.className = 'message error';
-          messageDiv.innerText = data.message || 'Error en registro';
-          messageDiv.style.display = 'block';
+          showMessage(data.message || 'Error en registro', 'error');
         }
       } catch (error) {
-        messageDiv.className = 'message error';
-        messageDiv.innerText = 'Error de conexión';
-        messageDiv.style.display = 'block';
+        console.error('Error:', error);
+        showMessage('Error de conexión con el servidor', 'error');
       }
+    }
+
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
     }
   </script>
 </body>

@@ -1,0 +1,279 @@
+---
+// src/pages/register.astro
+// Clave de prueba de hCaptcha - siempre funciona
+const siteKey = '10000000-ffff-ffff-ffff-000000000001';
+const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'https://violet-virgo-production.up.railway.app';
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro</title>
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background: #5a67d8;
+    }
+    button:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
+    .h-captcha {
+      margin-bottom: 1.2rem;
+      display: flex;
+      justify-content: center;
+    }
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .login-link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .login-link a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    .captcha-info {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+      margin-top: 0.5rem;
+      background: #f0f0f0;
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+    .or-divider {
+      text-align: center;
+      margin: 0.5rem 0;
+      color: #666;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Crear cuenta</h2>
+    <div class="captcha-info">
+      🔓 Captcha en modo prueba - cualquier respuesta funciona
+    </div>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="tu@email.com">
+      </div>
+      <div class="or-divider">O</div>
+      <div class="form-group">
+        <label for="username">Nombre de usuario</label>
+        <input type="text" id="username" name="username" minlength="3" maxlength="30" placeholder="usuario123">
+      </div>
+      <div class="form-group">
+        <label for="nombre">Nombre completo (opcional)</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Juan Pérez">
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" required minlength="6" placeholder="••••••">
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" placeholder="••••••">
+      </div>
+      <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001" data-callback="onCaptchaSuccess"></div>
+      <button type="submit" id="submitBtn">Registrarse</button>
+    </form>
+    <div id="message" class="message" style="display: none;"></div>
+    <div class="login-link">
+      ¿Ya tienes cuenta? <a href="/login">Inicia sesión</a>
+    </div>
+  </div>
+
+  <script>
+    const backendUrl = "{backendUrl}";
+    let captchaToken = null;
+
+    // Función que llama hCaptcha cuando se completa
+    window.onCaptchaSuccess = function(token) {
+      captchaToken = token;
+      console.log('✅ Captcha completado en modo prueba');
+    };
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const nombre = document.getElementById('nombre').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const messageDiv = document.getElementById('message');
+      
+      // Validaciones
+      if (!email && !username) {
+        showMessage('Debes proporcionar email o nombre de usuario', 'error');
+        return;
+      }
+
+      if (email && !isValidEmail(email)) {
+        showMessage('El email no es válido', 'error');
+        return;
+      }
+
+      if (username && username.length < 3) {
+        showMessage('El nombre de usuario debe tener al menos 3 caracteres', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showMessage('Las contraseñas no coinciden', 'error');
+        return;
+      }
+      
+      // El captcha es opcional en modo prueba, pero si está presente lo enviamos
+      // Si no, enviamos un token vacío o genérico
+
+      // Deshabilitar botón
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registrando...';
+
+      // Preparar datos para enviar
+      const requestData = {
+        password,
+        captchaToken: captchaToken || 'test-token-modo-prueba' // Token genérico para modo prueba
+      };
+
+      if (email) requestData.email = email;
+      if (username) requestData.username = username;
+      if (nombre) requestData.nombre = nombre;
+
+      try {
+        const response = await fetch(`${backendUrl}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage('¡Registro exitoso! Redirigiendo al login...', 'success');
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
+        } else {
+          showMessage(data.message || 'Error en el registro', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Registrarse';
+          // Reset captcha
+          if (window.hcaptcha) {
+            window.hcaptcha.reset();
+          }
+          captchaToken = null;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('Error de conexión con el servidor', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Registrarse';
+        if (window.hcaptcha) {
+          window.hcaptcha.reset();
+        }
+        captchaToken = null;
+      }
+    });
+
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
