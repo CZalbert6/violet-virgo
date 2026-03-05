@@ -1,10 +1,8 @@
-// server.js - VERSIÓN CON AUTENTICACIÓN DE USUARIOS (agregada sin borrar lo anterior)
+// server.js - VERSIÓN CORREGIDA para tipos de datos de Railway
 import express from 'express';
 import pkg from 'pg';
 const { Pool } = pkg;
 import cors from 'cors';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
 const app = express();
 
@@ -26,16 +24,14 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Clave secreta para JWT (debe estar en variable de entorno en producción)
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_cambiar_en_produccion';
-
 // ============================================
-// INICIALIZACIÓN DE TABLAS (se agrega tabla usuarios)
+// INICIALIZACIÓN DE TABLAS (CON TIPOS COMPATIBLES)
 // ============================================
 
+// Crear tablas si no existen
 const initDB = async () => {
   try {
-    // 1. Tabla de mensajes (existente)
+    // 1. Tabla de mensajes - CON updated_at
     await pool.query(`
       CREATE TABLE IF NOT EXISTS mensajescaptcha (
         id SERIAL PRIMARY KEY,
@@ -48,13 +44,14 @@ const initDB = async () => {
     `);
     console.log('✅ Tabla mensajescaptcha lista');
     
-    // Verificar columna updated_at en mensajes
+    // Verificar si existe la columna updated_at, si no, agregarla
     const columnCheckMensajes = await pool.query(`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'mensajescaptcha' 
       AND column_name = 'updated_at'
     `);
+    
     if (columnCheckMensajes.rows.length === 0) {
       try {
         await pool.query(`ALTER TABLE mensajescaptcha ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()`);
@@ -64,44 +61,54 @@ const initDB = async () => {
       }
     }
     
-    // 2. Tabla de imágenes para el carrusel (existente)
+    // 2. Tabla de imágenes para el carrusel (CON TIPOS COMPATIBLES)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS carrusel_imagenes (
         id SERIAL PRIMARY KEY,
         nombre TEXT NOT NULL,
         imagen_url TEXT,
-        imagen_base64 TEXT,
-        tipo_mime VARCHAR(100),
-        tamano INTEGER,
-        fecha DATE DEFAULT CURRENT_DATE,
-        created_at TIMESTAMP DEFAULT NOW()
+        imagen_base64 TEXT,                    -- Usamos TEXT (compatible)
+        tipo_mime VARCHAR(100),                -- Usamos VARCHAR (compatible)
+        tamano INTEGER,                        -- Usamos INTEGER (compatible)
+        fecha DATE DEFAULT CURRENT_DATE,       -- DATE es compatible
+        created_at TIMESTAMP DEFAULT NOW()     -- TIMESTAMP es compatible
       )
     `);
     console.log('✅ Tabla carrusel_imagenes creada/verificada');
     
-    // Verificar columnas de carrusel_imagenes (código existente)
+    // 3. VERIFICAR que las columnas existen, si no, crearlas
     const columnCheck = await pool.query(`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'carrusel_imagenes'
     `);
+    
     const columns = columnCheck.rows.map(row => row.column_name);
+    console.log('📋 Columnas actuales:', columns);
+    
+    // Agregar columnas faltantes si es necesario
     if (!columns.includes('imagen_base64')) {
       await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN imagen_base64 TEXT`);
       console.log('✅ Columna imagen_base64 agregada');
     }
+    
     if (!columns.includes('tipo_mime')) {
       await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN tipo_mime VARCHAR(100)`);
       console.log('✅ Columna tipo_mime agregada');
     }
+    
     if (!columns.includes('tamano')) {
       await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN tamano INTEGER`);
       console.log('✅ Columna tamano agregada');
     }
+    
+    // CORRECCIÓN: Agregar created_at si falta
     if (!columns.includes('created_at')) {
       await pool.query(`ALTER TABLE carrusel_imagenes ADD COLUMN created_at TIMESTAMP DEFAULT NOW()`);
       console.log('✅ Columna created_at agregada');
     }
+    
+    // CORRECCIÓN: Intentar quitar NOT NULL constraint de imagen_url si existe
     try {
       await pool.query(`
         ALTER TABLE carrusel_imagenes 
@@ -112,26 +119,16 @@ const initDB = async () => {
       console.log('ℹ️ No se pudo remover NOT NULL (puede que no exista o ya esté removido):', constraintError.message);
     }
     
-    // ========== NUEVA TABLA DE USUARIOS ==========
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS usuarios (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        nombre VARCHAR(100),
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-    console.log('✅ Tabla usuarios creada/verificada');
-    
   } catch (error) {
     console.error('❌ Error inicializando DB:', error);
-    // Reparación de tabla carrusel (existente)
+    
+    // Si hay error específico de columna, intentar solucionar
     if (error.message.includes('column') && error.message.includes('does not exist')) {
-      console.log('🔄 Intentando reparar tabla carrusel...');
+      console.log('🔄 Intentando reparar tabla...');
       try {
+        // Crear tabla desde cero
         await pool.query(`DROP TABLE IF EXISTS carrusel_imagenes`);
+        
         await pool.query(`
           CREATE TABLE carrusel_imagenes (
             id SERIAL PRIMARY KEY,
@@ -154,36 +151,24 @@ const initDB = async () => {
 initDB();
 
 // ============================================
-// MIDDLEWARE DE AUTENTICACIÓN (NUEVO)
-// ============================================
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-  if (!token) return res.status(401).json({ success: false, message: 'Token no proporcionado' });
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ success: false, message: 'Token inválido' });
-    req.user = user;
-    next();
-  });
-};
-
-// ============================================
 // RUTAS EXISTENTES (NO MODIFICAR)
 // ============================================
 
-// ✅ RUTA HEALTH - actualizada para incluir info de usuarios
+// ✅ RUTA HEALTH - COMPATIBLE con tu frontend
 app.get('/health', async (req, res) => {
   try {
+    // 1. Verificar conexión DB
     const dbResult = await pool.query('SELECT NOW()');
+    
+    // 2. Contar mensajes
     const countResult = await pool.query('SELECT COUNT(*) as total FROM mensajescaptcha');
     const total_mensajes = parseInt(countResult.rows[0].total);
+    
+    // 3. Contar imágenes
     const countImagenes = await pool.query('SELECT COUNT(*) as total FROM carrusel_imagenes');
     const total_imagenes = parseInt(countImagenes.rows[0].total);
-    // Nueva: contar usuarios
-    const countUsuarios = await pool.query('SELECT COUNT(*) as total FROM usuarios');
-    const total_usuarios = parseInt(countUsuarios.rows[0].total);
-
+    
+    // 4. Verificar tablas existen
     const tableResult = await pool.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -191,6 +176,7 @@ app.get('/health', async (req, res) => {
         AND table_name = 'mensajescaptcha'
       )
     `);
+    
     const tableImagenesResult = await pool.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables 
@@ -198,14 +184,8 @@ app.get('/health', async (req, res) => {
         AND table_name = 'carrusel_imagenes'
       )
     `);
-    const tableUsuariosResult = await pool.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'usuarios'
-      )
-    `);
-
+    
+    // 5. Verificar columnas de carrusel_imagenes
     let columnStatus = '❌ No verificada';
     try {
       const columnCheck = await pool.query(`
@@ -218,7 +198,8 @@ app.get('/health', async (req, res) => {
     } catch (e) {
       columnStatus = '⚠️ Error verificando columnas';
     }
-
+    
+    // 6. Verificar si mensajescaptcha tiene updated_at
     let updatedAtStatus = '❌ No verificada';
     try {
       const updatedAtCheck = await pool.query(`
@@ -231,20 +212,18 @@ app.get('/health', async (req, res) => {
     } catch (e) {
       updatedAtStatus = '⚠️ Error verificando';
     }
-
+    
     res.json({
       status: '✅ OK',
       database: '✅ Conectado',
       tablas: {
         mensajes: tableResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
         imagenes: tableImagenesResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
-        usuarios: tableUsuariosResult.rows[0].exists ? '✅ Existe' : '❌ No existe',
         columnas_imagenes: columnStatus,
         mensajes_updated_at: updatedAtStatus
       },
       total_mensajes: total_mensajes,
       total_imagenes: total_imagenes,
-      total_usuarios: total_usuarios,
       fecha_servidor: dbResult.rows[0].now,
       servicio: 'Express + PostgreSQL en Railway',
       endpoints: {
@@ -253,44 +232,74 @@ app.get('/health', async (req, res) => {
         carrusel: 'GET /api/carrusel',
         subir_imagen: 'POST /api/carrusel',
         actualizar_mensaje: 'PUT /api/mensajes/:id',
-        eliminar_mensaje: 'DELETE /api/mensajes/:id',
-        // Nuevos endpoints
-        register: 'POST /api/register',
-        login: 'POST /api/login',
-        me: 'GET /api/me (requiere token)'
+        eliminar_mensaje: 'DELETE /api/mensajes/:id'
       }
     });
+    
   } catch (error) {
     console.error('Error /health:', error);
-    res.status(500).json({ status: '❌ ERROR', error: error.message });
+    res.status(500).json({
+      status: '❌ ERROR',
+      error: error.message,
+      ayuda: 'Revisa la conexión a PostgreSQL'
+    });
   }
 });
 
-// Rutas existentes de mensajes y carrusel (sin cambios)
+// ✅ RUTA GUARDAR - COMPATIBLE con tu frontend
 app.post('/api/guardar', async (req, res) => {
   console.log('📨 POST /api/guardar recibido');
+  
   const { texto, hcaptcha } = req.body;
+
   if (!texto || texto.trim() === "") {
-    return res.status(400).json({ success: false, message: 'El texto es obligatorio' });
+    return res.status(400).json({ 
+      success: false, 
+      message: 'El texto es obligatorio' 
+    });
   }
+
   try {
     const ip = req.headers['x-forwarded-for'] || req.ip || '0.0.0.0';
     const userAgent = req.headers['user-agent'] || 'desconocido';
+
     const query = `
       INSERT INTO mensajescaptcha 
       (texto, token_captcha, ip_address, user_agent, updated_at) 
       VALUES ($1, $2, $3, $4, NOW()) 
       RETURNING id, created_at, updated_at
     `;
-    const values = [texto.trim(), hcaptcha || null, ip.substring(0, 50), userAgent.substring(0, 500)];
+    
+    const values = [
+      texto.trim(), 
+      hcaptcha || null, 
+      ip.substring(0, 50),
+      userAgent.substring(0, 500)
+    ];
+    
     const result = await pool.query(query, values);
-    res.json({ success: true, id: result.rows[0].id, fecha: result.rows[0].created_at, updated_at: result.rows[0].updated_at, message: 'Guardado en PostgreSQL Railway', texto: texto.trim() });
+    
+    res.json({
+      success: true,
+      id: result.rows[0].id,
+      fecha: result.rows[0].created_at,
+      updated_at: result.rows[0].updated_at,
+      message: 'Guardado en PostgreSQL Railway',
+      texto: texto.trim()
+    });
+    
   } catch (error) {
     console.error('❌ Error /api/guardar:', error);
-    res.status(500).json({ success: false, message: 'Error al guardar en PostgreSQL', error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al guardar en PostgreSQL',
+      error: error.message,
+      code: error.code
+    });
   }
 });
 
+// ✅ RUTA MENSAJES - COMPATIBLE
 app.get('/api/mensajes', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -299,72 +308,156 @@ app.get('/api/mensajes', async (req, res) => {
       ORDER BY id DESC 
       LIMIT 100
     `);
-    res.json({ success: true, total: result.rows.length, mensajes: result.rows });
+    
+    res.json({ 
+      success: true, 
+      total: result.rows.length,
+      mensajes: result.rows 
+    });
   } catch (error) {
     console.error('Error /api/mensajes:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 });
 
+// ============================================
+// RUTAS CRUD PARA MENSAJES - NUEVAS (CORREGIDAS)
+// ============================================
+
+// 🔄 PUT /api/mensajes/:id - Actualizar mensaje (CORREGIDO)
 app.put('/api/mensajes/:id', async (req, res) => {
   console.log('✏️ PUT /api/mensajes/:id - Actualizando mensaje');
+  
   const { id } = req.params;
   const { texto } = req.body;
+  
   if (!texto || texto.trim() === "") {
-    return res.status(400).json({ success: false, message: 'El texto es obligatorio para actualizar' });
+    return res.status(400).json({ 
+      success: false, 
+      message: 'El texto es obligatorio para actualizar' 
+    });
   }
+  
   try {
-    const checkResult = await pool.query('SELECT id, created_at FROM mensajescaptcha WHERE id = $1', [id]);
+    // Verificar que el mensaje existe
+    const checkResult = await pool.query(
+      'SELECT id, created_at FROM mensajescaptcha WHERE id = $1',
+      [id]
+    );
+    
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Mensaje no encontrado' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Mensaje no encontrado' 
+      });
     }
+    
+    // Actualizar SOLO el texto y updated_at, mantener created_at original
     const result = await pool.query(`
       UPDATE mensajescaptcha 
       SET texto = $1, updated_at = NOW() 
       WHERE id = $2 
       RETURNING id, texto, created_at, updated_at
     `, [texto.trim(), id]);
+    
     console.log(`✅ Mensaje ${id} actualizado: "${texto.trim()}"`);
-    res.json({ success: true, message: 'Mensaje actualizado exitosamente', mensaje: result.rows[0] });
+    
+    res.json({
+      success: true,
+      message: 'Mensaje actualizado exitosamente',
+      mensaje: result.rows[0]
+    });
+    
   } catch (error) {
     console.error('❌ Error actualizando mensaje:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      message: 'Error al actualizar el mensaje'
+    });
   }
 });
 
+// 🗑️ DELETE /api/mensajes/:id - Eliminar mensaje
 app.delete('/api/mensajes/:id', async (req, res) => {
   console.log('🗑️ DELETE /api/mensajes/:id - Eliminando mensaje');
+  
   const { id } = req.params;
+  
   try {
-    const checkResult = await pool.query('SELECT id FROM mensajescaptcha WHERE id = $1', [id]);
+    // Verificar que el mensaje existe
+    const checkResult = await pool.query(
+      'SELECT id FROM mensajescaptcha WHERE id = $1',
+      [id]
+    );
+    
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Mensaje no encontrado' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Mensaje no encontrado' 
+      });
     }
-    const result = await pool.query('DELETE FROM mensajescaptcha WHERE id = $1 RETURNING id', [id]);
+    
+    // Eliminar mensaje
+    const result = await pool.query(
+      'DELETE FROM mensajescaptcha WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
     console.log(`✅ Mensaje ${id} eliminado`);
-    res.json({ success: true, message: 'Mensaje eliminado exitosamente', id: result.rows[0].id });
+    
+    res.json({
+      success: true,
+      message: 'Mensaje eliminado exitosamente',
+      id: result.rows[0].id
+    });
+    
   } catch (error) {
     console.error('❌ Error eliminando mensaje:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      message: 'Error al eliminar el mensaje'
+    });
   }
 });
 
+// ============================================
+// RUTAS NUEVAS PARA EL CARRUSEL CON BASE64
+// ============================================
+
+// 🔄 GET /api/carrusel - Obtener todas las imágenes (solo metadata) - CORREGIDO
 app.get('/api/carrusel', async (req, res) => {
   try {
     console.log('📸 GET /api/carrusel - Solicitando imágenes');
+    
+    // CORREGIDO: Consulta sin created_at
     const result = await pool.query(`
       SELECT id, nombre, tipo_mime, tamano, fecha 
       FROM carrusel_imagenes 
       ORDER BY id DESC
     `);
+    
     console.log(`✅ ${result.rows.length} imágenes encontradas`);
-    res.json({ success: true, imagenes: result.rows });
+    
+    res.json({ 
+      success: true, 
+      imagenes: result.rows 
+    });
   } catch (error) {
     console.error('❌ Error /api/carrusel:', error);
-    // Código de fallback (existente)
+    
+    // Si hay error de columna, intentar consulta alternativa
     if (error.message.includes('column') && error.message.includes('does not exist')) {
       console.log('🔄 Intentando consulta alternativa...');
       try {
+        // Intentar con menos columnas
+        const columnNames = ['id', 'nombre', 'fecha']; // Columnas básicas que deberían existir
+        
+        // Construir query dinámica basada en columnas disponibles
         let availableColumns = [];
         try {
           const columnCheck = await pool.query(`
@@ -373,224 +466,293 @@ app.get('/api/carrusel', async (req, res) => {
             WHERE table_name = 'carrusel_imagenes'
           `);
           availableColumns = columnCheck.rows.map(row => row.column_name);
+          console.log('📋 Columnas disponibles:', availableColumns);
         } catch (e) {
-          availableColumns = ['id', 'nombre'];
+          availableColumns = ['id', 'nombre']; // Columnas mínimas
         }
+        
+        // Filtrar columnas que realmente existen
         const safeColumns = availableColumns.filter(col => 
           ['id', 'nombre', 'tipo_mime', 'tamano', 'fecha', 'created_at'].includes(col)
         );
-        if (safeColumns.length === 0) safeColumns.push('id', 'nombre');
-        const query = `SELECT ${safeColumns.join(', ')} FROM carrusel_imagenes ORDER BY id DESC`;
+        
+        if (safeColumns.length === 0) {
+          safeColumns.push('id', 'nombre'); // Columnas mínimas
+        }
+        
+        const query = `
+          SELECT ${safeColumns.join(', ')} 
+          FROM carrusel_imagenes 
+          ORDER BY id DESC
+        `;
+        
         const result = await pool.query(query);
-        return res.json({ success: true, imagenes: result.rows || [], message: 'Consulta realizada con columnas disponibles' });
+        
+        return res.json({ 
+          success: true, 
+          imagenes: result.rows || [],
+          message: 'Consulta realizada con columnas disponibles'
+        });
       } catch (retryError) {
         console.error('❌ Error al reintentar:', retryError);
       }
     }
-    res.status(500).json({ success: false, error: error.message, help: 'La tabla puede no tener las columnas correctas. Verifica /health para diagnóstico' });
+    
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      help: 'La tabla puede no tener las columnas correctas. Verifica /health para diagnóstico'
+    });
   }
 });
 
+// 📤 POST /api/carrusel - Subir nueva imagen (BASE64) - CORREGIDO CON imagen_url
 app.post('/api/carrusel', async (req, res) => {
   console.log('📨 POST /api/carrusel - Subiendo imagen (Base64)');
+  
   try {
     const { nombre, imagen_base64, tipo_mime } = req.body;
+    
+    // Validación
     if (!nombre || !imagen_base64) {
-      return res.status(400).json({ success: false, message: 'Nombre e imagen_base64 son obligatorios' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Nombre e imagen_base64 son obligatorios' 
+      });
     }
+    
+    // Validar que sea Base64 de imagen
     if (!imagen_base64.startsWith('data:image/')) {
-      return res.status(400).json({ success: false, message: 'Formato Base64 inválido. Debe ser una imagen' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Formato Base64 inválido. Debe ser una imagen' 
+      });
     }
+    
+    // Calcular tamaño
     const tamano = imagen_base64.length;
+    
+    // Validar tamaño máximo (5MB para Base64)
     const MAX_SIZE = 5 * 1024 * 1024; // 5MB
     if (tamano > MAX_SIZE) {
-      return res.status(400).json({ success: false, message: 'Imagen demasiado grande. Máximo 5MB' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Imagen demasiado grande. Máximo 5MB' 
+      });
     }
+    
+    // Intentar inserción - CORREGIDO: Incluir imagen_url
     try {
       const query = `
         INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
         VALUES ($1, $2, $3, $4, $5) 
         RETURNING id, nombre, tipo_mime, tamano, fecha
       `;
-      const result = await pool.query(query, [nombre.trim(), imagen_base64, tipo_mime || 'image/jpeg', tamano, '']);
+      
+      const result = await pool.query(query, [
+        nombre.trim(), 
+        imagen_base64,
+        tipo_mime || 'image/jpeg',
+        tamano,
+        ''  // String vacío para imagen_url (NO NULL)
+      ]);
+      
       console.log(`✅ Imagen subida: ${result.rows[0].nombre} (${result.rows[0].tamano} bytes)`);
-      return res.json({ success: true, message: 'Imagen agregada al carrusel', imagen: result.rows[0] });
+      
+      return res.json({
+        success: true,
+        message: 'Imagen agregada al carrusel',
+        imagen: result.rows[0]
+      });
+      
     } catch (dbError) {
       console.error('❌ Error en INSERT:', dbError.message);
-      // Manejo de errores (existente)
+      
+      // Si hay error de NOT NULL en imagen_url, intentar con initDB primero
       if (dbError.message.includes('imagen_url') && dbError.message.includes('not-null')) {
-        // Intento de reparación...
+        console.log('🔄 Error NOT NULL en imagen_url, intentando reparar...');
+        
         try {
-          await pool.query(`ALTER TABLE carrusel_imagenes ALTER COLUMN imagen_url DROP NOT NULL`);
+          // Primero intentar quitar el NOT NULL constraint
+          await pool.query(`
+            ALTER TABLE carrusel_imagenes 
+            ALTER COLUMN imagen_url DROP NOT NULL
+          `);
+          console.log('✅ NOT NULL constraint removido, reintentando inserción...');
+          
+          // Reintentar inserción
           const retryQuery = `
             INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
             VALUES ($1, $2, $3, $4, $5) 
             RETURNING id, nombre, tipo_mime, tamano, fecha
           `;
-          const retryResult = await pool.query(retryQuery, [nombre.trim(), imagen_base64, tipo_mime || 'image/jpeg', tamano, '']);
-          return res.json({ success: true, message: 'Imagen agregada al carrusel', imagen: retryResult.rows[0] });
+          
+          const retryResult = await pool.query(retryQuery, [
+            nombre.trim(), 
+            imagen_base64,
+            tipo_mime || 'image/jpeg',
+            tamano,
+            ''
+          ]);
+          
+          console.log(`✅ Imagen subida (después de quitar NOT NULL): ${retryResult.rows[0].nombre}`);
+          
+          return res.json({
+            success: true,
+            message: 'Imagen agregada al carrusel',
+            imagen: retryResult.rows[0]
+          });
+          
         } catch (constraintError) {
-          // fallback...
+          console.error('❌ Error al quitar NOT NULL:', constraintError.message);
+          
+          // Si no se puede quitar NOT NULL, intentar con valor por defecto
           try {
             const fallbackQuery = `
               INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
               VALUES ($1, $2, $3, $4, $5) 
               RETURNING id, nombre, tipo_mime, tamano, fecha
             `;
-            const fallbackResult = await pool.query(fallbackQuery, [nombre.trim(), imagen_base64, tipo_mime || 'image/jpeg', tamano, 'no_url_provided']);
-            return res.json({ success: true, message: 'Imagen agregada al carrusel', imagen: fallbackResult.rows[0] });
+            
+            const fallbackResult = await pool.query(fallbackQuery, [
+              nombre.trim(), 
+              imagen_base64,
+              tipo_mime || 'image/jpeg',
+              tamano,
+              'no_url_provided'  // Valor por defecto diferente
+            ]);
+            
+            console.log(`✅ Imagen subida (con valor por defecto): ${fallbackResult.rows[0].nombre}`);
+            
+            return res.json({
+              success: true,
+              message: 'Imagen agregada al carrusel',
+              imagen: fallbackResult.rows[0]
+            });
+            
           } catch (fallbackError) {
             console.error('❌ Error en fallback:', fallbackError.message);
           }
         }
       }
+      
+      // Si hay error de columna faltante, reparar tabla
       if (dbError.message.includes('column') && dbError.message.includes('does not exist')) {
         console.log('🔄 Error de columna, reparando tabla...');
+        
         await initDB();
+        
+        // Reintentar inserción después de reparar
         const retryQuery = `
           INSERT INTO carrusel_imagenes (nombre, imagen_base64, tipo_mime, tamano, imagen_url) 
           VALUES ($1, $2, $3, $4, $5) 
           RETURNING id, nombre, tipo_mime, tamano, fecha
         `;
-        const retryResult = await pool.query(retryQuery, [nombre.trim(), imagen_base64, tipo_mime || 'image/jpeg', tamano, '']);
-        return res.json({ success: true, message: 'Imagen agregada (tabla reparada automáticamente)', imagen: retryResult.rows[0] });
+        
+        const retryResult = await pool.query(retryQuery, [
+          nombre.trim(), 
+          imagen_base64,
+          tipo_mime || 'image/jpeg',
+          tamano,
+          ''
+        ]);
+        
+        console.log(`✅ Imagen subida (después de reparar): ${retryResult.rows[0].nombre}`);
+        
+        return res.json({
+          success: true,
+          message: 'Imagen agregada (tabla reparada automáticamente)',
+          imagen: retryResult.rows[0]
+        });
       }
+      
+      // Si no es error conocido, propagar el error
       throw dbError;
     }
+    
   } catch (error) {
     console.error('❌ Error subiendo imagen:', error);
-    res.status(500).json({ success: false, error: error.message, help: 'Verifica que la tabla tenga las columnas correctas. Visita /health para diagnóstico' });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      help: 'Verifica que la tabla tenga las columnas correctas. Visita /health para diagnóstico'
+    });
   }
 });
 
+// 🖼️ GET /api/carrusel/:id - Obtener imagen completa (con Base64) - CORREGIDO
 app.get('/api/carrusel/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🖼️ GET /api/carrusel/${id}`);
+    
+    // CORREGIDO: Consulta sin created_at
     const result = await pool.query(`
       SELECT id, nombre, imagen_base64, tipo_mime, tamano, fecha 
       FROM carrusel_imagenes 
       WHERE id = $1
     `, [id]);
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Imagen no encontrada' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Imagen no encontrada' 
+      });
     }
-    res.json({ success: true, imagen: result.rows[0] });
+    
+    res.json({
+      success: true,
+      imagen: result.rows[0]
+    });
+    
   } catch (error) {
     console.error('❌ Error obteniendo imagen:', error);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
   }
 });
 
+// 🗑️ DELETE /api/carrusel/:id - Eliminar imagen
 app.delete('/api/carrusel/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ DELETE /api/carrusel/${id} - Eliminando imagen`);
-    const result = await pool.query('DELETE FROM carrusel_imagenes WHERE id = $1 RETURNING id', [id]);
+    
+    const result = await pool.query(
+      'DELETE FROM carrusel_imagenes WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
     if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Imagen no encontrada' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Imagen no encontrada' 
+      });
     }
+    
     console.log(`✅ Imagen ${id} eliminada`);
-    res.json({ success: true, message: 'Imagen eliminada del carrusel', id: result.rows[0].id });
+    
+    res.json({
+      success: true,
+      message: 'Imagen eliminada del carrusel',
+      id: result.rows[0].id
+    });
+    
   } catch (error) {
     console.error('❌ Error eliminando imagen:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// ============================================
-// NUEVAS RUTAS DE AUTENTICACIÓN
-// ============================================
-
-// Registro de usuario
-app.post('/api/register', async (req, res) => {
-  try {
-    const { email, password, nombre } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email y contraseña son obligatorios' });
-    }
-    // Validar formato de email simple
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ success: false, message: 'Email inválido' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'La contraseña debe tener al menos 6 caracteres' });
-    }
-    // Encriptar contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // Insertar usuario
-    const result = await pool.query(
-      'INSERT INTO usuarios (email, password, nombre) VALUES ($1, $2, $3) RETURNING id, email, nombre, created_at',
-      [email.toLowerCase(), hashedPassword, nombre || null]
-    );
-    const usuario = result.rows[0];
-    // Generar token JWT
-    const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({
-      success: true,
-      message: 'Usuario registrado correctamente',
-      token,
-      user: { id: usuario.id, email: usuario.email, nombre: usuario.nombre }
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
     });
-  } catch (error) {
-    console.error('Error en registro:', error);
-    if (error.code === '23505') { // unique violation
-      return res.status(400).json({ success: false, message: 'El email ya está registrado' });
-    }
-    res.status(500).json({ success: false, message: 'Error en el servidor' });
-  }
-});
-
-// Inicio de sesión
-app.post('/api/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email y contraseña son obligatorios' });
-    }
-    // Buscar usuario por email
-    const result = await pool.query('SELECT id, email, password, nombre FROM usuarios WHERE email = $1', [email.toLowerCase()]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
-    }
-    const usuario = result.rows[0];
-    // Comparar contraseñas
-    const passwordValida = await bcrypt.compare(password, usuario.password);
-    if (!passwordValida) {
-      return res.status(401).json({ success: false, message: 'Credenciales inválidas' });
-    }
-    // Generar token
-    const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({
-      success: true,
-      message: 'Login exitoso',
-      token,
-      user: { id: usuario.id, email: usuario.email, nombre: usuario.nombre }
-    });
-  } catch (error) {
-    console.error('Error en login:', error);
-    res.status(500).json({ success: false, message: 'Error en el servidor' });
-  }
-});
-
-// Obtener datos del usuario autenticado (protegido)
-app.get('/api/me', authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT id, email, nombre, created_at FROM usuarios WHERE id = $1', [req.user.id]);
-    if (result.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
-    }
-    res.json({ success: true, user: result.rows[0] });
-  } catch (error) {
-    console.error('Error en /me:', error);
-    res.status(500).json({ success: false, message: 'Error en el servidor' });
   }
 });
 
 // ============================================
-// RUTA RAIZ (actualizada)
+// RUTA RAIZ
 // ============================================
+
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -605,27 +767,40 @@ app.get('/', (req, res) => {
         .success { color: #10b981; }
         .info { color: #3b82f6; }
         .new { background: #f0f9ff; border-left: 4px solid #8b5cf6; }
+        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px; margin: 10px 0; }
+        .crud { background: #dcfce7; border-left: 4px solid #10b981; }
       </style>
     </head>
     <body>
       <h1>🚀 Backend PostgreSQL en Railway</h1>
       <p class="info">Servidor Express conectado a PostgreSQL</p>
+    
       <div class="card">
         <h3>📡 Endpoints disponibles:</h3>
         <div class="endpoint"><strong>GET</strong> <a href="/health">/health</a> - Estado del sistema</div>
         <div class="endpoint"><strong>POST</strong> /api/guardar - Guardar mensajes</div>
         <div class="endpoint"><strong>GET</strong> <a href="/api/mensajes">/api/mensajes</a> - Ver mensajes</div>
-        <div class="endpoint"><strong>GET</strong> <a href="/api/carrusel">/api/carrusel</a> - Ver imágenes</div>
-        <div class="endpoint new"><strong>POST</strong> /api/register - Registro de usuario</div>
-        <div class="endpoint new"><strong>POST</strong> /api/login - Inicio de sesión</div>
-        <div class="endpoint new"><strong>GET</strong> /api/me - Datos del usuario (token requerido)</div>
+        
+      
+        
+        <!-- NUEVOS ENDPOINTS PARA CARRUSEL -->
+        <div class="endpoint new">
+          <strong>🎨 CARRUSEL (Base64):</strong>
+          <div style="margin-left: 10px; margin-top: 5px;">
+            <div><strong>GET</strong> <a href="/api/carrusel">/api/carrusel</a> - Ver imágenes</div>
+
+          </div>
+        </div>
       </div>
+      
       <div class="card">
         <h3>🔗 Frontend conectado:</h3>
         <p><a href="https://czalbert6.github.io/violet-virgo" target="_blank">https://czalbert6.github.io/violet-virgo</a></p>
-        <p><a href="https://czalbert6.github.io/violet-virgo/login" target="_blank">🔐 Página de Login</a> (debes crearla)</p>
+        <p><a href="https://czalbert6.github.io/violet-virgo/carrusel" target="_blank">📸 Carrusel de Imágenes</a></p>
       </div>
+      
       <script>
+        // Verificar estado automáticamente
         fetch('/health')
           .then(r => r.json())
           .then(data => {
@@ -633,8 +808,14 @@ app.get('/', (req, res) => {
               <div class="card">
                 <h3>✅ Estado actual:</h3>
                 <p><strong>Base de datos:</strong> \${data.database || 'Conectado'}</p>
-                <p><strong>Tabla usuarios:</strong> \${data.tablas?.usuarios || 'No existe'}</p>
-                <p><strong>Total usuarios:</strong> \${data.total_usuarios || 0}</p>
+                <p><strong>Tabla mensajes:</strong> \${data.tablas?.mensajes || 'Existe'}</p>
+                <p><strong>Tabla imágenes:</strong> \${data.tablas?.imagenes || 'Existe'}</p>
+                <p><strong>Columnas imágenes:</strong> \${data.tablas?.columnas_imagenes || 'OK'}</p>
+                <p><strong>Mensajes:</strong> \${data.total_mensajes || 0}</p>
+                <p><strong>Imágenes:</strong> \${data.total_imagenes || 0}</p>
+                <p><strong>Servidor:</strong> Railway PostgreSQL</p>
+                <p><strong>CRUD activo:</strong> \${data.endpoints?.actualizar_mensaje ? '✅ Sí' : '❌ No'}</p>
+                <p><strong>Updated_at:</strong> \${data.tablas?.mensajes_updated_at || 'No verificada'}</p>
               </div>
             \`;
           })
@@ -642,7 +823,9 @@ app.get('/', (req, res) => {
             document.body.innerHTML += \`
               <div class="card" style="background: #fee2e2;">
                 <h3>❌ Error de conexión</h3>
+                <p>No se pudo conectar al servidor</p>
                 <p><small>\${e.message}</small></p>
+                <p>Intenta recargar la página o verifica que el servidor esté ejecutándose.</p>
               </div>
             \`;
           });
@@ -655,6 +838,7 @@ app.get('/', (req, res) => {
 // ============================================
 // INICIAR SERVIDOR
 // ============================================
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`
@@ -663,7 +847,14 @@ app.listen(PORT, '0.0.0.0', () => {
   📡  URL: https://violet-virgo-production.up.railway.app
   🗄️   PostgreSQL: Conectado
   🔧   Reparación automática: ACTIVADA
-  🔐   Autenticación con JWT agregada
+  📊   Tipos de datos compatibles con Railway:
+        - TEXT (para Base64)
+        - VARCHAR (para tipo_mime)
+        - INTEGER (para tamaño)
+        - DATE y TIMESTAMP
+  🔄   CRUD COMPLETO para mensajes: ACTIVADO
+        - PUT /api/mensajes/:id (mantiene created_at)
+        - DELETE /api/mensajes/:id
   ============================================
   `);
 });

@@ -1,0 +1,260 @@
+---
+// src/pages/login.astro
+// No necesitas código de backend aquí, solo HTML/JS para el frontend
+const title = "Iniciar Sesión / Registro";
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+    }
+    .tab.active {
+      color: #667eea;
+      border-bottom: 2px solid #667eea;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: 500;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #5a67d8;
+    }
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 5px;
+      display: none;
+    }
+    .message.success {
+      background: #c6f6d5;
+      color: #22543d;
+      display: block;
+    }
+    .message.error {
+      background: #fed7d7;
+      color: #742a2a;
+      display: block;
+    }
+    .info {
+      text-align: center;
+      margin-top: 1rem;
+      color: #666;
+    }
+    .info a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    .info a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔐 Bienvenido</h1>
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="showLogin()">Iniciar Sesión</div>
+      <div class="tab" id="tabRegister" onclick="showRegister()">Registrarse</div>
+    </div>
+
+    <!-- Formulario de Login -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" required />
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" required />
+      </div>
+      <button type="submit">Iniciar Sesión</button>
+    </form>
+
+    <!-- Formulario de Registro (oculto por defecto) -->
+    <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" required />
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="registerPassword" required />
+      </div>
+      <div class="form-group">
+        <label for="registerNombre">Nombre (opcional)</label>
+        <input type="text" id="registerNombre" />
+      </div>
+      <button type="submit">Registrarse</button>
+    </form>
+
+    <div id="message" class="message"></div>
+    <div class="info">
+      <span id="infoText">¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a></span>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://violet-virgo-production.up.railway.app'; // Cambia si es otra URL
+
+    function showLogin() {
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'none';
+      document.getElementById('tabLogin').classList.add('active');
+      document.getElementById('tabRegister').classList.remove('active');
+      document.getElementById('infoText').innerHTML = '¿No tienes cuenta? <a href="#" onclick="showRegister()">Regístrate</a>';
+      document.getElementById('message').style.display = 'none';
+    }
+
+    function showRegister() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('registerForm').style.display = 'block';
+      document.getElementById('tabLogin').classList.remove('active');
+      document.getElementById('tabRegister').classList.add('active');
+      document.getElementById('infoText').innerHTML = '¿Ya tienes cuenta? <a href="#" onclick="showLogin()">Inicia Sesión</a>';
+      document.getElementById('message').style.display = 'none';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = 'message';
+      messageDiv.style.display = 'none';
+
+      try {
+        const response = await fetch(`${API_URL}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (data.success) {
+          // Guardar token en localStorage
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          messageDiv.className = 'message success';
+          messageDiv.innerText = '✅ Login exitoso. Redirigiendo...';
+          messageDiv.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = '/'; // o a donde quieras
+          }, 1500);
+        } else {
+          messageDiv.className = 'message error';
+          messageDiv.innerText = data.message || 'Error en login';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        messageDiv.className = 'message error';
+        messageDiv.innerText = 'Error de conexión';
+        messageDiv.style.display = 'block';
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      const nombre = document.getElementById('registerNombre').value;
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = 'message';
+      messageDiv.style.display = 'none';
+
+      try {
+        const response = await fetch(`${API_URL}/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, nombre })
+        });
+        const data = await response.json();
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          messageDiv.className = 'message success';
+          messageDiv.innerText = '✅ Registro exitoso. Redirigiendo...';
+          messageDiv.style.display = 'block';
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1500);
+        } else {
+          messageDiv.className = 'message error';
+          messageDiv.innerText = data.message || 'Error en registro';
+          messageDiv.style.display = 'block';
+        }
+      } catch (error) {
+        messageDiv.className = 'message error';
+        messageDiv.innerText = 'Error de conexión';
+        messageDiv.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
